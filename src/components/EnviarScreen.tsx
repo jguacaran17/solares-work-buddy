@@ -228,6 +228,55 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
           ))}
         </div>
 
+        {/* DETALLE PRODUCCIÓN */}
+        {(() => {
+          const prodRows = assignments
+            .filter(a => {
+              const p = productionMap[a.activity];
+              return p && p.udsProd && parseFloat(p.udsProd) > 0;
+            })
+            .map(a => {
+              const p = productionMap[a.activity];
+              const uds = parseFloat(p.udsProd);
+              const actData = activityTipoCounts[a.activity];
+              const hh = actData ? actData.hh : 0;
+              const hhUd = uds > 0 ? (hh / uds).toFixed(2) : '—';
+              return { activity: a.activity, uds: p.udsProd, tipo: p.tipo, hhUd };
+            });
+
+          if (prodRows.length === 0) return null;
+
+          return (
+            <div>
+              <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
+                Detalle Producción
+              </div>
+              <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px', borderBottom: '1px solid hsl(var(--g2))' }}>
+                <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Actividad</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>UDS</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>TIPO</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH/Ud</div>
+              </div>
+              {prodRows.map((r, i) => (
+                <div
+                  key={r.activity}
+                  className="grid gap-0 items-center"
+                  style={{
+                    gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px',
+                    borderBottom: '1px solid hsl(var(--border))',
+                    background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
+                  }}
+                >
+                  <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{r.activity}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.uds}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center">{r.tipo || '—'}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhUd}</div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* COMENTARIOS GENERALES */}
         <div style={{ borderTop: '2px solid hsl(var(--g2))' }}>
           <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))' }}>
