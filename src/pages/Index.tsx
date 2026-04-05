@@ -17,6 +17,13 @@ interface Assignment {
   comment?: string;
 }
 
+interface TaskProduction {
+  horaInicio: string;
+  horaFin: string;
+  udsProd: string;
+  tipo: string;
+}
+
 const navLabels: Record<string, string> = {
   parte: 'Pepe Cabrerizo · Capataz',
   maquinaria: 'Maquinaria',
