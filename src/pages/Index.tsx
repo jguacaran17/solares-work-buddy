@@ -18,57 +18,66 @@ interface Assignment {
 
 const Index = () => {
   const [activeStep, setActiveStep] = useState(1);
-  const [bottomTab, setBottomTab] = useState('maquinaria');
+  const [bottomTab, setBottomTab] = useState('parte');
   const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
 
-  const renderStep = () => {
+  const renderParteStep = () => {
     switch (activeStep) {
       case 1:
-        return (
-          <FichajeScreen
-            workers={workers}
-            onUpdateWorkers={setWorkers}
-            onNext={() => setActiveStep(2)}
-          />
-        );
+        return <FichajeScreen workers={workers} onUpdateWorkers={setWorkers} onNext={() => setActiveStep(2)} />;
       case 2:
-        return (
-          <AsignacionesScreen
-            workers={workers}
-            assignments={assignments}
-            onUpdateAssignments={setAssignments}
-            onNext={() => setActiveStep(3)}
-          />
-        );
+        return <AsignacionesScreen workers={workers} assignments={assignments} onUpdateAssignments={setAssignments} onNext={() => setActiveStep(3)} />;
       case 3:
-        return (
-          <HoursScreen
-            workers={workers}
-            assignments={assignments}
-            onNext={() => setActiveStep(4)}
-          />
-        );
+        return <HoursScreen workers={workers} assignments={assignments} onNext={() => setActiveStep(4)} />;
       case 4:
-        return (
-          <EnviarScreen
-            workers={workers}
-            assignments={assignments}
-          />
-        );
+        return <EnviarScreen workers={workers} assignments={assignments} />;
       default:
         return null;
     }
   };
 
-  const renderBottomContent = () => {
+  const renderContent = () => {
     switch (bottomTab) {
+      case 'parte':
+        return (
+          <>
+            <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
+            {renderParteStep()}
+          </>
+        );
       case 'maquinaria':
         return <MaquinariaScreen />;
-      case 'flota':
-        return <FlotaScreen />;
-      case 'incidencias':
-        return <IncidenciasScreen />;
+      case 'tracking':
+        return (
+          <div className="pb-24 px-4 pt-6 max-w-lg mx-auto">
+            <div className="glass-card rounded-xl p-6 text-center">
+              <p className="text-2xl mb-2">📍</p>
+              <p className="text-sm font-bold mb-1">Tracking</p>
+              <p className="text-xs text-muted-foreground">Seguimiento de ubicación. Próximamente.</p>
+            </div>
+          </div>
+        );
+      case 'solicitudes':
+        return (
+          <div className="pb-24 px-4 pt-6 max-w-lg mx-auto">
+            <div className="glass-card rounded-xl p-6 text-center">
+              <p className="text-2xl mb-2">📋</p>
+              <p className="text-sm font-bold mb-1">Solicitudes</p>
+              <p className="text-xs text-muted-foreground">Gestión de solicitudes. Próximamente.</p>
+            </div>
+          </div>
+        );
+      case 'historial':
+        return (
+          <div className="pb-24 px-4 pt-6 max-w-lg mx-auto">
+            <div className="glass-card rounded-xl p-6 text-center">
+              <p className="text-2xl mb-2">🕐</p>
+              <p className="text-sm font-bold mb-1">Historial</p>
+              <p className="text-xs text-muted-foreground">Historial de partes enviados. Próximamente.</p>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -77,21 +86,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader notifications={1} />
-      <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
-
-      {/* Main step content */}
-      <div className="flex-1">
-        {renderStep()}
-      </div>
-
-      {/* Separator */}
-      <div className="border-t-4 border-border" />
-
-      {/* Bottom section */}
-      <div className="flex-1">
-        {renderBottomContent()}
-      </div>
-
+      {renderContent()}
       <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} />
     </div>
   );
