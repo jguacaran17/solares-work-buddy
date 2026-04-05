@@ -40,10 +40,13 @@ export interface ActivityWithSubtasks {
   subtasks: Subtask[];
 }
 
+export type MachineCategory = 'maquinaria' | 'flota';
+
 export interface Machine {
   id: string;
   name: string;
   type: string;
+  category: MachineCategory;
   operators: string[];
   task: string;
   status: 'activa' | 'averia' | 'parada';
