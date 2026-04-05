@@ -4,7 +4,15 @@ import { projectInfo } from "@/lib/mock-data";
 
 interface AppHeaderProps {
   notifications: number;
+  activeStep?: number;
 }
+
+const stepLabels: Record<number, string> = {
+  1: 'Paso 1 – Fichaje',
+  2: 'Paso 2 – Asignaciones',
+  3: 'Paso 3 – Horas',
+  4: 'Paso 4 – Enviar',
+};
 
 const AppHeader = ({ notifications }: AppHeaderProps) => {
   const [showNotif, setShowNotif] = useState(false);
