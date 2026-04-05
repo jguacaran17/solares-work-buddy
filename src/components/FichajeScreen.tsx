@@ -173,8 +173,20 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
           );
         })}
       </div>
+
+      {/* Fixed bottom CTA */}
+      <div className="fixed bottom-16 left-0 right-0 px-4 pb-3 z-40">
+        <div className="max-w-lg mx-auto">
+          <Button
+            className="w-full h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 disabled:opacity-40"
+            disabled={presentes === 0}
+            onClick={onNext}
+          >
+            Continuar → Asignar tareas
+          </Button>
+        </div>
+      </div>
     </div>
-  );
 };
 
 export default FichajeScreen;
