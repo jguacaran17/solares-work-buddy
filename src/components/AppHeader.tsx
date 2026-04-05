@@ -58,7 +58,7 @@ const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
         <div>
           <h1 className="text-base font-bold">{projectInfo.name}</h1>
           <p className="text-xs opacity-70">
-            Paso 1 – Fichaje
+            {stepLabels[activeStep] || 'Paso 1 – Fichaje'}
           </p>
         </div>
         <div className="text-right">
