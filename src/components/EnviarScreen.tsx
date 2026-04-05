@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Worker, Machine, projectInfo, WorkerTipo } from "@/lib/mock-data";
 import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 
 interface Assignment {
   activity: string;
@@ -26,13 +27,19 @@ interface EnviarScreenProps {
 const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 
+const TIPO_STYLES: Record<WorkerTipo, { bg: string; color: string; label: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e', label: 'DESP' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59', label: 'LOC' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f', label: 'FLD' },
+};
+
 const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
+  const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
 
   const getHours = (wId: string) => hoursMap[wId] ?? DEFAULT_HOURS;
 
-  // Stats from actual hoursMap
   const stats = useMemo(() => {
     let hh = 0;
     const uniqueWorkers = new Set(assignments.flatMap(a => a.workerIds));
@@ -43,16 +50,17 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
     return { hh, dv, eu };
   }, [assignments, hoursMap]);
 
-  // Activity rows with tipo counts from actual worker data and actual hours
   const activityTipoCounts = useMemo(() => {
-    const map: Record<string, { DESP: number; LOCAL: number; FIELD: number; hh: number; comment?: string }> = {};
+    const map: Record<string, { DESP: number; LOCAL: number; FIELD: number; hh: number; comment?: string; workers: { id: string; name: string; tipo: WorkerTipo; hours: number }[] }> = {};
     assignments.forEach(a => {
-      if (!map[a.activity]) map[a.activity] = { DESP: 0, LOCAL: 0, FIELD: 0, hh: 0, comment: a.comment };
+      if (!map[a.activity]) map[a.activity] = { DESP: 0, LOCAL: 0, FIELD: 0, hh: 0, comment: a.comment, workers: [] };
       a.workerIds.forEach(wId => {
         const w = workers.find(x => x.id === wId);
         if (w) {
           map[a.activity][w.tipo]++;
-          map[a.activity].hh += getHours(wId);
+          const hours = getHours(wId);
+          map[a.activity].hh += hours;
+          map[a.activity].workers.push({ id: w.id, name: w.name, tipo: w.tipo, hours });
         }
       });
     });
@@ -65,7 +73,6 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
 
   const today = new Date();
   const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
-
 
   return (
     <>
@@ -95,7 +102,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
         </div>
       </div>
 
-      {/* ═══ PARTE MARACOF-E ═══ */}
+      {/* PARTE MARACOF-E */}
       <div className="sec-title">Parte MARACOF-E</div>
 
       <div className="glass-card rounded-[10px] overflow-hidden mb-2.5" style={{ fontSize: '11px' }}>
@@ -126,25 +133,62 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
             <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
           </div>
 
-          {/* Table rows */}
-          {Object.entries(activityTipoCounts).map(([activity, data], i) => (
-            <div
-              key={activity}
-              className="grid gap-0 items-center"
-              style={{
-                gridTemplateColumns: 'minmax(0, 2fr) 36px 36px 36px minmax(0, 1.5fr) 45px',
-                borderBottom: '1px solid hsl(var(--border))',
-                background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
-              }}
-            >
-              <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{activity}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.DESP || '—'}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.LOCAL || '—'}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.FIELD || '—'}</div>
-              <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{data.comment || '—'}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.hh.toFixed(1)}</div>
-            </div>
-          ))}
+          {/* Table rows with expandable detail */}
+          {Object.entries(activityTipoCounts).map(([activity, data], i) => {
+            const isExpanded = expandedActivity === activity;
+            return (
+              <div key={activity}>
+                <div
+                  className="grid gap-0 items-center cursor-pointer"
+                  style={{
+                    gridTemplateColumns: 'minmax(0, 2fr) 36px 36px 36px minmax(0, 1.5fr) 45px',
+                    borderBottom: isExpanded ? 'none' : '1px solid hsl(var(--border))',
+                    background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
+                  }}
+                  onClick={() => setExpandedActivity(isExpanded ? null : activity)}
+                >
+                  <div className="px-2 py-1.5 text-[10px] font-semibold truncate flex items-center gap-1">
+                    <ChevronDown
+                      size={12}
+                      className="flex-shrink-0 text-muted-foreground transition-transform duration-200"
+                      style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                    />
+                    {activity}
+                  </div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.DESP || '—'}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.LOCAL || '—'}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.FIELD || '—'}</div>
+                  <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{data.comment || '—'}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.hh.toFixed(1)}</div>
+                </div>
+
+                {/* Expanded worker detail */}
+                {isExpanded && data.workers.length > 0 && (
+                  <div style={{ background: 'hsl(var(--g05))', borderBottom: '1px solid hsl(var(--border))' }}>
+                    {data.workers.map((w) => {
+                      const ts = TIPO_STYLES[w.tipo];
+                      return (
+                        <div
+                          key={w.id}
+                          className="flex items-center gap-2 px-4 py-1.5"
+                          style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}
+                        >
+                          <span className="text-[10px] font-medium flex-1 truncate">{w.name}</span>
+                          <span
+                            className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                            style={{ background: ts.bg, color: ts.color }}
+                          >
+                            {ts.label}
+                          </span>
+                          <span className="text-[10px] font-mono font-bold w-[36px] text-right">{w.hours.toFixed(1)}h</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {/* Totals row */}
           {Object.keys(activityTipoCounts).length > 0 && (
@@ -226,7 +270,6 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhUd}</div>
                 </div>
               ))}
-              {/* TOTAL ROW */}
               <div
                 className="grid gap-0 items-center"
                 style={{

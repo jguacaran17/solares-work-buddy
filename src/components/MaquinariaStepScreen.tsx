@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Machine, mockWorkers, mockActivities } from "@/lib/mock-data";
+import { Construction, Truck, Lock } from "lucide-react";
 
 interface MaquinariaStepScreenProps {
   machines: Machine[];
@@ -42,6 +43,29 @@ const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: Maquinaria
         <div className="stat-card text-center py-1.5">
           <div className="text-[15px] font-bold" style={{ color: 'hsl(var(--amber-text))' }}>{paradas}</div>
           <div className="text-[8px] text-muted-foreground uppercase">Parada</div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTotalsRow = (list: Machine[]) => {
+    const activas = list.filter(m => m.status === 'activa');
+    const totalHH = activas.reduce((sum, m) => sum + m.hoursToday, 0);
+    return (
+      <div
+        className="flex items-center justify-between px-3.5 py-2.5"
+        style={{ background: 'hsl(var(--g1))', borderTop: '2px solid hsl(var(--g2))' }}
+      >
+        <span className="text-[10px] font-bold uppercase text-muted-foreground">
+          Totales: {list.length} máquinas
+        </span>
+        <div className="flex gap-3 items-center">
+          <span className="text-[10px] font-bold" style={{ color: 'hsl(var(--g4))' }}>
+            {activas.length} activas
+          </span>
+          <span className="text-[11px] font-mono font-bold" style={{ color: 'hsl(var(--g6))' }}>
+            {totalHH.toFixed(1)}h HH
+          </span>
         </div>
       </div>
     );
@@ -92,7 +116,7 @@ const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: Maquinaria
                 <span className="text-[12px] text-muted-foreground" style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
               )}
               {isLocked && (
-                <span className="text-[12px] text-muted-foreground">🔒</span>
+                <Lock className="text-muted-foreground" size={14} />
               )}
             </div>
 
@@ -166,16 +190,23 @@ const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: Maquinaria
           </div>
         );
       })}
+      {renderTotalsRow(list)}
     </div>
   );
 
   return (
     <>
-      <div className="sec-title" style={{ marginTop: 4 }}>🏗️ Maquinaria</div>
+      <div className="sec-title flex items-center gap-2" style={{ marginTop: 4 }}>
+        <Construction size={18} className="text-muted-foreground" />
+        Maquinaria
+      </div>
       {renderKPIs(maquinaria)}
       {renderMachineList(maquinaria)}
 
-      <div className="sec-title" style={{ marginTop: 8 }}>🚗 Flota</div>
+      <div className="sec-title flex items-center gap-2" style={{ marginTop: 8 }}>
+        <Truck size={18} className="text-muted-foreground" />
+        Flota
+      </div>
       {renderKPIs(flota)}
       {renderMachineList(flota)}
 
