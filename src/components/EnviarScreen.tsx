@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Worker, mockMachines, projectInfo, WorkerTipo } from "@/lib/mock-data";
+import { Worker, Machine, projectInfo, WorkerTipo } from "@/lib/mock-data";
 import { toast } from "sonner";
 
 interface Assignment {
