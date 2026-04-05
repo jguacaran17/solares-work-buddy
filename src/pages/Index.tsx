@@ -160,7 +160,7 @@ const Index = () => {
     switch (bottomTab) {
       case 'parte':
         return renderParteStep();
-      case 'maquinaria':
+      case 'incidencias':
         return <MaquinariaScreen />;
       case 'tracking':
         return (
