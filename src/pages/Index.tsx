@@ -7,8 +7,6 @@ import AsignacionesScreen from "@/components/AsignacionesScreen";
 import HoursScreen from "@/components/HoursScreen";
 import EnviarScreen from "@/components/EnviarScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
-import FlotaScreen from "@/components/FlotaScreen";
-import IncidenciasScreen from "@/components/IncidenciasScreen";
 import BottomNav from "@/components/BottomNav";
 
 interface Assignment {
