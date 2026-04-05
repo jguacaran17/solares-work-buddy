@@ -4,9 +4,17 @@ import { projectInfo } from "@/lib/mock-data";
 
 interface AppHeaderProps {
   notifications: number;
+  activeStep?: number;
 }
 
-const AppHeader = ({ notifications }: AppHeaderProps) => {
+const stepLabels: Record<number, string> = {
+  1: 'Paso 1 – Fichaje',
+  2: 'Paso 2 – Asignaciones',
+  3: 'Paso 3 – Horas',
+  4: 'Paso 4 – Enviar',
+};
+
+const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
   const [showNotif, setShowNotif] = useState(false);
 
   return (
@@ -50,7 +58,7 @@ const AppHeader = ({ notifications }: AppHeaderProps) => {
         <div>
           <h1 className="text-base font-bold">{projectInfo.name}</h1>
           <p className="text-xs opacity-70">
-            Paso 1 – Fichaje
+            {stepLabels[activeStep] || 'Paso 1 – Fichaje'}
           </p>
         </div>
         <div className="text-right">

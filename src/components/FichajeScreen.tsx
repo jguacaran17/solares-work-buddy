@@ -98,17 +98,16 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
           Hora de entrada general
         </p>
-        <div className="flex items-center gap-3 mb-4 border border-input rounded-xl px-4 h-14 bg-background">
+        <label className="flex items-center gap-3 mb-4 border border-input rounded-xl px-4 h-14 bg-background cursor-pointer relative">
           <span className="text-2xl font-mono tracking-widest flex-1">{generalTime.replace(':', ' : ')}</span>
           <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
           <input
             type="time"
             value={generalTime}
             onChange={e => setGeneralTime(e.target.value)}
-            className="absolute opacity-0 w-0 h-0"
-            id="general-time-input"
+            className="absolute inset-0 opacity-0 cursor-pointer"
           />
-        </div>
+        </label>
         <div className="grid grid-cols-2 gap-3">
           <Button
             className="h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-xl"

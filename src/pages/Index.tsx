@@ -83,7 +83,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AppHeader notifications={1} />
+      <AppHeader notifications={1} activeStep={bottomTab === 'parte' ? activeStep : undefined} />
       {renderContent()}
       <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} />
     </div>
