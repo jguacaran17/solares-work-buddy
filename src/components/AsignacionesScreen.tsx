@@ -134,26 +134,61 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
                   )}
 
                   {/* Available workers */}
-                  <div className="text-[10px] text-muted-foreground font-bold uppercase mb-1.5">Toca para asignar:</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {presentWorkers.map(w => {
-                      const isInThis = assigned?.workerIds.includes(w.id);
-                      if (isInThis) return null;
-                      const isInOther = assignedIds.has(w.id) && !isInThis;
-                      const ci = parseInt(w.id) % avatarColors.length;
-                      return (
-                        <span
-                          key={w.id}
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] cursor-pointer border border-border"
-                          style={{ background: 'hsl(var(--card))', opacity: isInOther ? 0.4 : 1 }}
-                          onClick={() => toggleWorkerInActivity(activity, w.id)}
-                        >
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
-                          {w.name}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  {(() => {
+                    const availableForThis = presentWorkers.filter(w => {
+                      if (assigned?.workerIds.includes(w.id)) return false;
+                      return true;
+                    });
+                    return availableForThis.length > 0 ? (
+                      <>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase">Toca para asignar:</span>
+                          <button
+                            className="text-[10px] font-bold px-2.5 py-1 rounded-full border-none cursor-pointer"
+                            style={{ background: 'hsl(var(--g6))', color: '#fff' }}
+                            onClick={() => {
+                              const idsToAdd = availableForThis.map(w => w.id);
+                              let updated = [...assignments];
+                              // Remove these workers from other activities
+                              updated = updated.map(a =>
+                                a.activity !== activity ? { ...a, workerIds: a.workerIds.filter(id => !idsToAdd.includes(id)) } : a
+                              );
+                              const existing = updated.find(a => a.activity === activity);
+                              if (existing) {
+                                updated = updated.map(a =>
+                                  a.activity === activity ? { ...a, workerIds: [...new Set([...a.workerIds, ...idsToAdd])] } : a
+                                );
+                              } else {
+                                updated.push({ activity, workerIds: idsToAdd });
+                              }
+                              onUpdateAssignments(updated.filter(a => a.workerIds.length > 0));
+                            }}
+                          >
+                            + Asignar todos ({availableForThis.length})
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {availableForThis.map(w => {
+                            const isInOther = assignedIds.has(w.id);
+                            const ci = parseInt(w.id) % avatarColors.length;
+                            return (
+                              <span
+                                key={w.id}
+                                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] cursor-pointer border border-border"
+                                style={{ background: 'hsl(var(--card))', opacity: isInOther ? 0.4 : 1 }}
+                                onClick={() => toggleWorkerInActivity(activity, w.id)}
+                              >
+                                <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
+                                {w.name}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-[11px] py-1" style={{ color: 'hsl(var(--g6))' }}>No quedan operarios disponibles</div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
