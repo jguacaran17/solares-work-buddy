@@ -1,5 +1,20 @@
 import { useState } from "react";
-import { mockZones, Worker, FaltaMotivo } from "@/lib/mock-data";
+import { mockZones, Worker, FaltaMotivo, WorkerTipo } from "@/lib/mock-data";
+
+const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+};
+
+const TipoBadge = ({ tipo }: { tipo: WorkerTipo }) => (
+  <span
+    className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none"
+    style={{ background: tipoBadgeStyles[tipo].bg, color: tipoBadgeStyles[tipo].color }}
+  >
+    {tipo}
+  </span>
+);
 
 interface FichajeScreenProps {
   workers: Worker[];
