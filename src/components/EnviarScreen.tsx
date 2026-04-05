@@ -227,6 +227,20 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhUd}</div>
                 </div>
               ))}
+              {/* TOTAL ROW */}
+              <div
+                className="grid gap-0 items-center"
+                style={{
+                  gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px',
+                  borderTop: '2px solid hsl(var(--g2))',
+                  background: 'hsl(var(--g05))',
+                }}
+              >
+                <div className="px-2 py-1.5 text-[10px] font-bold uppercase">Total</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{totalUds}</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center">—</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{totalHHUd}</div>
+              </div>
             </div>
           );
         })()}
