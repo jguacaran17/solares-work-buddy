@@ -20,6 +20,7 @@ interface EnviarScreenProps {
   assignments: Assignment[];
   hoursMap: Record<string, number>;
   productionMap: Record<string, TaskProduction>;
+  machines: Machine[];
 }
 
 const COST_PER_HOUR = 28;
