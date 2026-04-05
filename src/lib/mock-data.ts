@@ -40,10 +40,13 @@ export interface ActivityWithSubtasks {
   subtasks: Subtask[];
 }
 
+export type MachineCategory = 'maquinaria' | 'flota';
+
 export interface Machine {
   id: string;
   name: string;
   type: string;
+  category: MachineCategory;
   operators: string[];
   task: string;
   status: 'activa' | 'averia' | 'parada';
@@ -154,18 +157,25 @@ export const defaultSubtasks: Subtask[] = [
 ];
 
 export const mockMachines: Machine[] = [
-  { id: 'm1', name: 'Manitou Telescopico 17M', type: 'telescopico', operators: ['1', '3'], task: 'Hincado principal', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm2', name: 'JCB 540-170 17M', type: 'telescopico', operators: ['2'], task: 'Lima y pintura', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm3', name: 'JCB 535-125 12M', type: 'telescopico', operators: ['4', '5'], task: 'Micropilotes emplantillado', status: 'averia', hoursToday: 0 },
-  { id: 'm4', name: 'Carretilla Elevadora JCB', type: 'carretilla', operators: [], task: 'Logistica', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm5', name: 'Bobcat TL 35.70 7M', type: 'telescopico', operators: ['6'], task: 'Modulos - Plantillas', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm6', name: 'Manitou 6M MT625H (1)', type: 'telescopico', operators: [], task: 'Estructura', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm7', name: 'Manitou 6M MT625H (2)', type: 'telescopico', operators: ['7'], task: 'Estructura', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm8', name: 'Grua Torre Liebherr 65K', type: 'grua', operators: ['8'], task: 'Montaje cabezales', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm9', name: 'Dumper Ausa 6T', type: 'dumper', operators: [], task: 'Repartos Piezeno', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm10', name: 'Mini Excavadora JCB', type: 'excavadora', operators: ['9'], task: 'Micropilotes hormigonado', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
-  { id: 'm11', name: 'Plataforma Elevadora Haulotte', type: 'plataforma', operators: [], task: 'Calidad estructura', status: 'parada', hoursToday: 0 },
-  { id: 'm12', name: 'Rodillo Compactador Bomag', type: 'rodillo', operators: [], task: 'Varios', status: 'parada', hoursToday: 0 },
+  // MAQUINARIA
+  { id: 'm1', name: 'Manipulador Telescopico Manitou 17M', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm2', name: 'Manipulador Telescopico JCB 540-170 17M', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm3', name: 'Manipulador Telescopico JCB 535-125 12M', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm4', name: 'Carretilla Elevadora JCB', type: 'carretilla', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm5', name: 'Manipulador Telescopico Bobcat TL 35.70 7M', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm6', name: 'Manipulador Telescopico Manitou 6M MT625H', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm7', name: 'Manipulador Telescopico Manitou 13M MT1335 (1)', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm8', name: 'Manipulador Telescopico Manitou 13M MT1335 (2)', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm9', name: 'Manipulador Telescopico Manitou 6M MT625H (2)', type: 'telescopico', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm10', name: 'Tractor Kubota M6-121', type: 'tractor', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm11', name: 'Plataforma Agrimeca', type: 'plataforma', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'm12', name: 'Hincadora Turchi', type: 'hincadora', category: 'maquinaria', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  // FLOTA
+  { id: 'f1', name: 'Renault Trafic', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'f2', name: 'Ford Transit', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'f3', name: 'Seat Ateca', type: 'turismo', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'f4', name: 'Iveco Daily', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
+  { id: 'f5', name: 'Citroen Jumper', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
 ];
 
 export const mockReport: DailyReport = {
