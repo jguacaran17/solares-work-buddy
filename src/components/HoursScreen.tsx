@@ -37,8 +37,8 @@ const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
 };
 
 const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, onNext }: HoursScreenProps) => {
-  // Initialize hours for workers that don't have a value yet
-  useMemo(() => {
+  // Initialize hours for workers that don't have a value yet (only once per new worker)
+  useEffect(() => {
     const missing: Record<string, number> = {};
     assignments.forEach(a => {
       const prev = previstasMap[a.activity] ?? DEFAULT_HOURS;
