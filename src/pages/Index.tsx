@@ -14,11 +14,21 @@ interface Assignment {
   workerIds: string[];
 }
 
+const navLabels: Record<string, string> = {
+  parte: 'Pepe Cabrerizo · Capataz',
+  maquinaria: 'Maquinaria',
+  tracking: 'Tracking GPS · PSFV San Pedro',
+  solicitudes: 'Solicitudes de operarios',
+  historial: 'Historial de partes',
+};
+
 const Index = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [bottomTab, setBottomTab] = useState('parte');
   const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+
+  const presentes = workers.filter(w => w.status === 'presente').length;
 
   const renderParteStep = () => {
     switch (activeStep) {
@@ -38,42 +48,31 @@ const Index = () => {
   const renderContent = () => {
     switch (bottomTab) {
       case 'parte':
-        return (
-          <>
-            <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
-            {renderParteStep()}
-          </>
-        );
+        return renderParteStep();
       case 'maquinaria':
         return <MaquinariaScreen />;
       case 'tracking':
         return (
-          <div className="pb-24 px-4 pt-6 max-w-lg mx-auto">
-            <div className="glass-card rounded-xl p-6 text-center">
-              <p className="text-2xl mb-2">📍</p>
-              <p className="text-sm font-bold mb-1">Tracking</p>
-              <p className="text-xs text-muted-foreground">Seguimiento de ubicación. Próximamente.</p>
-            </div>
+          <div className="glass-card rounded-[10px] p-6 text-center">
+            <p className="text-2xl mb-2">📍</p>
+            <p className="text-sm font-bold mb-1">Tracking GPS</p>
+            <p className="text-xs text-muted-foreground">Seguimiento de ubicación. Próximamente.</p>
           </div>
         );
       case 'solicitudes':
         return (
-          <div className="pb-24 px-4 pt-6 max-w-lg mx-auto">
-            <div className="glass-card rounded-xl p-6 text-center">
-              <p className="text-2xl mb-2">📋</p>
-              <p className="text-sm font-bold mb-1">Solicitudes</p>
-              <p className="text-xs text-muted-foreground">Gestión de solicitudes. Próximamente.</p>
-            </div>
+          <div className="glass-card rounded-[10px] p-6 text-center">
+            <p className="text-2xl mb-2">📋</p>
+            <p className="text-sm font-bold mb-1">Solicitudes</p>
+            <p className="text-xs text-muted-foreground">Gestión de solicitudes. Próximamente.</p>
           </div>
         );
       case 'historial':
         return (
-          <div className="pb-24 px-4 pt-6 max-w-lg mx-auto">
-            <div className="glass-card rounded-xl p-6 text-center">
-              <p className="text-2xl mb-2">🕐</p>
-              <p className="text-sm font-bold mb-1">Historial</p>
-              <p className="text-xs text-muted-foreground">Historial de partes enviados. Próximamente.</p>
-            </div>
+          <div className="glass-card rounded-[10px] p-6 text-center">
+            <p className="text-2xl mb-2">🕐</p>
+            <p className="text-sm font-bold mb-1">Historial</p>
+            <p className="text-xs text-muted-foreground">Historial de partes enviados. Próximamente.</p>
           </div>
         );
       default:
@@ -82,9 +81,52 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AppHeader notifications={1} activeStep={bottomTab === 'parte' ? activeStep : undefined} />
-      {renderContent()}
+    <div className="flex flex-col h-screen overflow-hidden">
+      <AppHeader
+        notifications={1}
+        activeStep={bottomTab === 'parte' ? activeStep : undefined}
+        headerSub={navLabels[bottomTab]}
+      />
+
+      {bottomTab === 'parte' && (
+        <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
+      )}
+
+      {/* Scrollable content area */}
+      <div className="flex-1 relative overflow-hidden">
+        <div
+          className="absolute inset-0 overflow-y-auto"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            padding: '12px 14px',
+            paddingBottom: 'calc(var(--nav-height, 60px) + 16px)',
+          }}
+        >
+          {renderContent()}
+        </div>
+      </div>
+
+      {/* Continue button for step 1 */}
+      {bottomTab === 'parte' && activeStep === 1 && (
+        <div className="flex-shrink-0 px-3.5 pt-2 pb-1" style={{ background: 'hsl(var(--background))' }}>
+          <button
+            onClick={() => setActiveStep(2)}
+            className="w-full py-3.5 rounded-xl border-none text-[14px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
+            style={{
+              background: 'hsl(var(--g8))',
+              color: '#fff',
+              opacity: presentes > 0 ? 1 : 0.6,
+            }}
+            disabled={presentes === 0}
+          >
+            Continuar → Asignar tareas
+            <span className="rounded-[20px] px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>
+              {presentes} pres.
+            </span>
+          </button>
+        </div>
+      )}
+
       <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} />
     </div>
   );
