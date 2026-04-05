@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Worker, mockActivitySubtasks, defaultSubtasks, mockMachines, projectInfo, WorkerTipo } from "@/lib/mock-data";
+import { Worker, mockMachines, projectInfo, WorkerTipo } from "@/lib/mock-data";
 import { toast } from "sonner";
 
 interface Assignment {
@@ -11,72 +11,44 @@ interface Assignment {
 interface EnviarScreenProps {
   workers: Worker[];
   assignments: Assignment[];
+  hoursMap: Record<string, number>;
 }
 
 const COST_PER_HOUR = 28;
+const DEFAULT_HOURS = 8;
 
-const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
-};
-
-const EnviarScreen = ({ workers, assignments }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
 
+  const getHours = (wId: string) => hoursMap[wId] ?? DEFAULT_HOURS;
+
+  // Stats from actual hoursMap
   const stats = useMemo(() => {
     let hh = 0;
-    let teo = 0;
-    const subs: { name: string; ops: number; hh: number }[] = [];
-
-    assignments.forEach(a => {
-      const subtasks = mockActivitySubtasks[a.activity] || defaultSubtasks;
-      const t = subtasks.reduce((s, st) => s + st.standardHours, 0);
-      const count = a.workerIds.length;
-      hh += t * count;
-      teo += t * count;
-      subs.push({ name: a.activity, ops: count, hh: t * count });
-    });
-
-    const dv = 0;
+    const uniqueWorkers = new Set(assignments.flatMap(a => a.workerIds));
+    uniqueWorkers.forEach(wId => { hh += getHours(wId); });
+    const teo = uniqueWorkers.size * DEFAULT_HOURS;
+    const dv = hh - teo;
     const eu = Math.round(dv * COST_PER_HOUR);
-    return { hh, dv, eu, subs };
-  }, [assignments]);
+    return { hh, dv, eu };
+  }, [assignments, hoursMap]);
 
-  // Build PERSONAL OPERARIO rows grouped by activity
-  const personalRows = useMemo(() => {
-    const rows: { activity: string; workerName: string; tipo: WorkerTipo; hh: number; comment?: string }[] = [];
-    assignments.forEach(a => {
-      const subtasks = mockActivitySubtasks[a.activity] || defaultSubtasks;
-      const teo = subtasks.reduce((s, st) => s + st.standardHours, 0);
-      a.workerIds.forEach(wId => {
-        const w = workers.find(x => x.id === wId);
-        if (w) {
-          rows.push({ activity: a.activity, workerName: w.name, tipo: w.tipo, hh: teo, comment: a.comment });
-        }
-      });
-    });
-    return rows;
-  }, [assignments, workers]);
-
-  // Count by tipo per activity
+  // Activity rows with tipo counts from actual worker data and actual hours
   const activityTipoCounts = useMemo(() => {
     const map: Record<string, { DESP: number; LOCAL: number; FIELD: number; hh: number; comment?: string }> = {};
     assignments.forEach(a => {
-      const subtasks = mockActivitySubtasks[a.activity] || defaultSubtasks;
-      const teo = subtasks.reduce((s, st) => s + st.standardHours, 0);
       if (!map[a.activity]) map[a.activity] = { DESP: 0, LOCAL: 0, FIELD: 0, hh: 0, comment: a.comment };
       a.workerIds.forEach(wId => {
         const w = workers.find(x => x.id === wId);
         if (w) {
           map[a.activity][w.tipo]++;
-          map[a.activity].hh += teo;
+          map[a.activity].hh += getHours(wId);
         }
       });
     });
     return map;
-  }, [assignments, workers]);
+  }, [assignments, workers, hoursMap]);
 
   const handleSend = () => {
     toast.success('Parte enviado. Jefe de obra notificado.');
@@ -105,7 +77,7 @@ const EnviarScreen = ({ workers, assignments }: EnviarScreenProps) => {
         </div>
         <div className="flex justify-between py-2 border-b border-border">
           <span className="text-[12px] text-muted-foreground">HH totales</span>
-          <span className="text-[13px] font-bold font-mono">{stats.hh > 0 ? `${stats.hh.toFixed(0)}h` : '—'}</span>
+          <span className="text-[13px] font-bold font-mono">{stats.hh > 0 ? `${stats.hh.toFixed(1)}h` : '—'}</span>
         </div>
         <div className="flex justify-between py-2 border-b border-border">
           <span className="text-[12px] text-muted-foreground">Desviación</span>
