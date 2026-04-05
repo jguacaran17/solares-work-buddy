@@ -141,36 +141,51 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
               </button>
 
               {isExpanded && (
-                <div className="px-3 pb-3 border-t border-border space-y-1.5">
+                <div className="px-3 pb-3 border-t border-border space-y-3 pt-2">
                   {zoneWorkers.map(worker => (
-                    <div key={worker.id} className="flex items-center gap-3 py-2">
-                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-[10px] font-bold shrink-0">
-                        {worker.avatar}
+                    <div key={worker.id} className="space-y-1.5">
+                      {/* Row: avatar + name + toggles */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-[10px] font-bold shrink-0">
+                          {worker.avatar}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate">{worker.name}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setWorkerStatus(worker.id, 'presente')}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                              worker.status === 'presente'
+                                ? 'border-primary text-primary bg-primary/5'
+                                : 'border-border text-muted-foreground bg-card hover:border-primary/40'
+                            }`}
+                          >
+                            <Check className="w-3.5 h-3.5" /> Presente
+                          </button>
+                          <button
+                            onClick={() => setWorkerStatus(worker.id, 'falta')}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                              worker.status === 'falta'
+                                ? 'border-[#e57373] text-[#e57373] bg-[#e57373]/5'
+                                : 'border-border text-muted-foreground bg-card hover:border-[#e57373]/40'
+                            }`}
+                          >
+                            <X className="w-3.5 h-3.5" /> Falta
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{worker.name}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setWorkerStatus(worker.id, 'presente')}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                            worker.status === 'presente'
-                              ? 'bg-success text-success-foreground'
-                              : 'bg-muted text-muted-foreground hover:bg-success/20'
-                          }`}
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setWorkerStatus(worker.id, 'falta')}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                            worker.status === 'falta'
-                              ? 'bg-destructive text-destructive-foreground'
-                              : 'bg-muted text-muted-foreground hover:bg-destructive/20'
-                          }`}
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                      {/* Time input row */}
+                      <div className="ml-12">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground font-medium">Entrada:</span>
+                          <input
+                            type="time"
+                            value={worker.clockIn || generalTime}
+                            onChange={e => setWorkerTime(worker.id, e.target.value)}
+                            className="h-7 rounded-md border border-input bg-background px-2 text-xs font-mono w-24"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
