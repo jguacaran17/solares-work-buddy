@@ -89,17 +89,9 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
     return { totalHH, dv, eu, efficiency, totalWorkers: uniqueWorkers.size };
   }, [hoursMap, assignments]);
 
-  const collapsedTasks = useMemo(() => new Set<string>(), []);
-  const [, forceUpdate] = useMemo(() => {
-    let val = 0;
-    return [val, () => {}];
-  }, []);
-
-  // Use state for collapsed
-  const { useState } = require("react");
   const [collapsedSet, setCollapsedSet] = useState<Set<string>>(new Set());
   const toggleTask = (t: string) => {
-    setCollapsedSet((prev: Set<string>) => {
+    setCollapsedSet(prev => {
       const next = new Set(prev);
       if (next.has(t)) next.delete(t); else next.add(t);
       return next;
