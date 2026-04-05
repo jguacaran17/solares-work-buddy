@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { Check, X } from "lucide-react";
 import { mockWorkers, mockZones, Worker } from "@/lib/mock-data";
-import { ChevronRight, Check, X, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { ChevronRight } from "lucide-react";
 
 interface FichajeScreenProps {
   workers: Worker[];
@@ -81,10 +82,19 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
             onChange={e => setGeneralTime(e.target.value)}
             className="flex-1 h-9 rounded-lg border border-input bg-background px-3 text-sm font-mono"
           />
-          <Button size="sm" variant="default" className="h-9 text-xs" onClick={() => setAllStatus('presente')}>
+          <Button
+            size="sm"
+            className="h-9 text-xs bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            onClick={() => setAllStatus('presente')}
+          >
             <Check className="w-3.5 h-3.5 mr-1" /> Todos presentes
           </Button>
-          <Button size="sm" variant="destructive" className="h-9 text-xs" onClick={() => setAllStatus('falta')}>
+          <Button
+            size="sm"
+            variant="destructive"
+            className="h-9 text-xs"
+            onClick={() => setAllStatus('falta')}
+          >
             <X className="w-3.5 h-3.5 mr-1" /> Todos falta
           </Button>
         </div>
@@ -126,10 +136,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
               {isExpanded && (
                 <div className="px-3 pb-3 border-t border-border space-y-1.5">
                   {zoneWorkers.map(worker => (
-                    <div
-                      key={worker.id}
-                      className="flex items-center gap-3 py-2"
-                    >
+                    <div key={worker.id} className="flex items-center gap-3 py-2">
                       <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-[10px] font-bold shrink-0">
                         {worker.avatar}
                       </div>
