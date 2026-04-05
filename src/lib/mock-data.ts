@@ -1,69 +1,125 @@
+// ── Types ──
+
 export interface Worker {
   id: string;
   name: string;
   role: string;
   avatar: string;
+  zone: string;
+  status: 'sin-fichar' | 'presente' | 'falta';
+  clockIn?: string;
+}
+
+export interface Zone {
+  id: string;
+  name: string;
+  activity: string;
+  workers: string[]; // worker IDs
+}
+
+export interface Activity {
+  id: string;
+  name: string;
+  zone: string;
+  assignedWorkers: string[];
+}
+
+export interface Machine {
+  id: string;
+  name: string;
+  type: string;
+  operators: string[];
+  task: string;
+  status: 'activa' | 'averia' | 'parada';
   hoursToday: number;
-  status: 'working' | 'break' | 'off';
+  startTime?: string;
+  endTime?: string;
 }
 
-export interface Task {
-  id: string;
-  title: string;
-  zone: string;
-  assignedTo: string[];
-  status: 'pending' | 'in-progress' | 'done';
-  priority: 'high' | 'medium' | 'low';
-}
-
-export interface TimeEntry {
-  id: string;
-  workerId: string;
+export interface DailyReport {
   date: string;
-  clockIn: string;
-  clockOut: string | null;
-  breakMinutes: number;
-  zone: string;
+  foreman: string;
+  project: string;
+  presentWorkers: number;
+  totalHH: number;
+  deviation: number;
+  extraCost: number;
+  comments: string;
 }
 
-export interface ZoneCost {
-  zone: string;
-  workers: number;
-  hoursTotal: number;
-  costPerHour: number;
-  totalCost: number;
-  progress: number;
-}
+// ── Data ──
+
+export const projectInfo = {
+  name: 'PSFV San Pedro',
+  foreman: 'Pepe Cabrerizo',
+  role: 'Capataz',
+  date: '31/03/26',
+  dayOfWeek: 'Martes',
+};
 
 export const mockWorkers: Worker[] = [
-  { id: '1', name: 'Carlos Ruiz', role: 'Electricista', avatar: 'CR', hoursToday: 6.5, status: 'working' },
-  { id: '2', name: 'María López', role: 'Técnico solar', avatar: 'ML', hoursToday: 7, status: 'working' },
-  { id: '3', name: 'Pedro Gómez', role: 'Peón', avatar: 'PG', hoursToday: 4, status: 'break' },
-  { id: '4', name: 'Ana Torres', role: 'Soldador', avatar: 'AT', hoursToday: 8, status: 'off' },
-  { id: '5', name: 'Luis Fernández', role: 'Electricista', avatar: 'LF', hoursToday: 5.5, status: 'working' },
-  { id: '6', name: 'Elena Martín', role: 'Técnico solar', avatar: 'EM', hoursToday: 3, status: 'working' },
+  { id: '1', name: 'Juan Martinez', role: 'Operario', avatar: 'JM', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '2', name: 'Andres Lopez', role: 'Operario', avatar: 'AL', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '3', name: 'Carlos Soto', role: 'Operario', avatar: 'CS', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '4', name: 'Diego Vargas', role: 'Operario', avatar: 'DV', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '5', name: 'Pedro Ruiz', role: 'Operario', avatar: 'PR', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '6', name: 'Miguel Garcia', role: 'Operario', avatar: 'MG', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '7', name: 'Ernesto Blanco', role: 'Operario', avatar: 'EB', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '8', name: 'Fernando Torres', role: 'Operario', avatar: 'FT', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '9', name: 'Roberto Mora', role: 'Operario', avatar: 'RM', zone: 'Zona A', status: 'sin-fichar' },
 ];
 
-export const mockTasks: Task[] = [
-  { id: '1', title: 'Instalación módulos Zona A', zone: 'Zona A', assignedTo: ['1', '2'], status: 'in-progress', priority: 'high' },
-  { id: '2', title: 'Cableado DC strings', zone: 'Zona B', assignedTo: ['5'], status: 'pending', priority: 'high' },
-  { id: '3', title: 'Montaje estructura', zone: 'Zona A', assignedTo: ['3', '6'], status: 'in-progress', priority: 'medium' },
-  { id: '4', title: 'Soldadura soportes', zone: 'Zona C', assignedTo: ['4'], status: 'done', priority: 'low' },
-  { id: '5', title: 'Revisión inversores', zone: 'Zona B', assignedTo: ['2', '5'], status: 'pending', priority: 'medium' },
+export const mockZones: Zone[] = [
+  { id: 'z1', name: 'Zona A', activity: 'Hincado', workers: ['1', '2', '3', '4', '5', '6'] },
+  { id: 'z2', name: 'Zona A', activity: 'Micropilotes', workers: ['7', '8', '9'] },
 ];
 
-export const mockTimeEntries: TimeEntry[] = [
-  { id: '1', workerId: '1', date: '2026-04-05', clockIn: '07:00', clockOut: null, breakMinutes: 30, zone: 'Zona A' },
-  { id: '2', workerId: '2', date: '2026-04-05', clockIn: '06:30', clockOut: null, breakMinutes: 30, zone: 'Zona A' },
-  { id: '3', workerId: '3', date: '2026-04-05', clockIn: '07:00', clockOut: null, breakMinutes: 60, zone: 'Zona A' },
-  { id: '4', workerId: '4', date: '2026-04-05', clockIn: '06:00', clockOut: '14:00', breakMinutes: 30, zone: 'Zona C' },
-  { id: '5', workerId: '5', date: '2026-04-05', clockIn: '07:30', clockOut: null, breakMinutes: 0, zone: 'Zona B' },
-  { id: '6', workerId: '6', date: '2026-04-05', clockIn: '08:00', clockOut: null, breakMinutes: 0, zone: 'Zona A' },
+export const mockActivities: string[] = [
+  'Hincado principal',
+  'Lima y pintura',
+  'Micropilotes emplantillado',
+  'Micropilotes hormigonado',
+  'Reparto de hincas',
+  'Corte y mecanizado',
+  'POT',
+  'Cableado Motora',
+  'Laser',
+  'Repartos Piezeno',
+  'Montaje cabezales',
+  'Montaje motora',
+  'Montaje tubo torque',
+  'Calidad estructura',
+  'Limpieza estructura',
+  'Soldado montaje',
+  'Almacenero',
+  'Logistica',
+  'Estructura',
+  'Modulos',
+  'Varios',
 ];
 
-export const mockZoneCosts: ZoneCost[] = [
-  { zone: 'Zona A - Norte', workers: 8, hoursTotal: 245, costPerHour: 22, totalCost: 5390, progress: 72 },
-  { zone: 'Zona B - Central', workers: 5, hoursTotal: 180, costPerHour: 22, totalCost: 3960, progress: 45 },
-  { zone: 'Zona C - Sur', workers: 4, hoursTotal: 120, costPerHour: 22, totalCost: 2640, progress: 88 },
-  { zone: 'Zona D - Este', workers: 3, hoursTotal: 60, costPerHour: 22, totalCost: 1320, progress: 15 },
+export const mockMachines: Machine[] = [
+  { id: 'm1', name: 'Manitou Telescopico 17M', type: 'telescopico', operators: ['1', '3'], task: 'Hincado principal', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm2', name: 'JCB 540-170 17M', type: 'telescopico', operators: ['2'], task: 'Lima y pintura', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm3', name: 'JCB 535-125 12M', type: 'telescopico', operators: ['4', '5'], task: 'Micropilotes emplantillado', status: 'averia', hoursToday: 0 },
+  { id: 'm4', name: 'Carretilla Elevadora JCB', type: 'carretilla', operators: [], task: 'Logistica', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm5', name: 'Bobcat TL 35.70 7M', type: 'telescopico', operators: ['6'], task: 'Modulos - Plantillas', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm6', name: 'Manitou 6M MT625H (1)', type: 'telescopico', operators: [], task: 'Estructura', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm7', name: 'Manitou 6M MT625H (2)', type: 'telescopico', operators: ['7'], task: 'Estructura', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm8', name: 'Grua Torre Liebherr 65K', type: 'grua', operators: ['8'], task: 'Montaje cabezales', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm9', name: 'Dumper Ausa 6T', type: 'dumper', operators: [], task: 'Repartos Piezeno', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm10', name: 'Mini Excavadora JCB', type: 'excavadora', operators: ['9'], task: 'Micropilotes hormigonado', status: 'activa', hoursToday: 8.75, startTime: '07:00', endTime: '15:45' },
+  { id: 'm11', name: 'Plataforma Elevadora Haulotte', type: 'plataforma', operators: [], task: 'Calidad estructura', status: 'parada', hoursToday: 0 },
+  { id: 'm12', name: 'Rodillo Compactador Bomag', type: 'rodillo', operators: [], task: 'Varios', status: 'parada', hoursToday: 0 },
 ];
+
+export const mockReport: DailyReport = {
+  date: '31/03/2026',
+  foreman: 'Pepe Cabrerizo',
+  project: 'PSFV San Pedro',
+  presentWorkers: 0,
+  totalHH: 0,
+  deviation: 0,
+  extraCost: 0,
+  comments: 'Hormigón: 10m³ = 39 ud. Hay que recevar.',
+};
