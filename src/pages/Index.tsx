@@ -47,6 +47,9 @@ const Index = () => {
   const [bottomTab, setBottomTab] = useState('parte');
   const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [hoursMap, setHoursMap] = useState<Record<string, number>>({});
+  const [previstasMap, setPrevistasMap] = useState<Record<string, number>>({});
+  const [productionMap, setProductionMap] = useState<Record<string, TaskProduction>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
 
