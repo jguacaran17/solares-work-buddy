@@ -1,105 +1,85 @@
-import { useState } from "react";
-import { mockWorkers, mockTimeEntries } from "@/lib/mock-data";
-import { Clock, Play, Pause, Square, Coffee } from "lucide-react";
+import { Worker } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
-const HoursScreen = () => {
-  const [selectedWorker, setSelectedWorker] = useState<string | null>(null);
+interface Assignment {
+  activity: string;
+  workerIds: string[];
+}
 
-  const getEntry = (workerId: string) =>
-    mockTimeEntries.find((e) => e.workerId === workerId);
+interface HoursScreenProps {
+  workers: Worker[];
+  assignments: Assignment[];
+  onNext: () => void;
+}
+
+const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
+  const presentWorkers = workers.filter(w => w.status === 'presente');
+  const totalHH = presentWorkers.length * 8.75;
 
   return (
     <div className="pb-24 px-4 pt-4 max-w-lg mx-auto">
-      <div className="mb-5">
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-          Fichaje de horas
-        </p>
-        <h2 className="text-xl font-bold mt-1">Control horario</h2>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="stat-card">
+          <p className="text-lg font-bold">{totalHH > 0 ? `${totalHH.toFixed(1)}` : '—'}</p>
+          <p className="text-[10px] text-muted-foreground font-medium">HH total</p>
+        </div>
+        <div className="stat-card">
+          <p className="text-lg font-bold">—</p>
+          <p className="text-[10px] text-muted-foreground font-medium">Desviación</p>
+        </div>
+        <div className="stat-card">
+          <p className="text-lg font-bold">—</p>
+          <p className="text-[10px] text-muted-foreground font-medium">€ extra</p>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        {mockWorkers.map((worker) => {
-          const entry = getEntry(worker.id);
-          const isExpanded = selectedWorker === worker.id;
-          const isWorking = worker.status === 'working';
-          const isOnBreak = worker.status === 'break';
-
-          return (
-            <div key={worker.id} className="glass-card rounded-xl overflow-hidden">
-              <button
-                onClick={() => setSelectedWorker(isExpanded ? null : worker.id)}
-                className="w-full p-3 flex items-center gap-3 text-left"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
-                  {worker.avatar}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{worker.name}</p>
-                  <p className="text-xs text-muted-foreground">{worker.role}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-sm font-bold">{worker.hoursToday}h</span>
-                  </div>
-                  {entry && (
-                    <p className="text-[10px] text-muted-foreground">
-                      Entrada: {entry.clockIn}
-                    </p>
-                  )}
-                </div>
-              </button>
-
-              {isExpanded && entry && (
-                <div className="px-3 pb-3 pt-1 border-t border-border">
-                  <div className="grid grid-cols-3 gap-2 text-center mb-3">
-                    <div className="bg-background rounded-lg p-2">
-                      <p className="text-[10px] text-muted-foreground">Entrada</p>
-                      <p className="text-sm font-bold">{entry.clockIn}</p>
-                    </div>
-                    <div className="bg-background rounded-lg p-2">
-                      <p className="text-[10px] text-muted-foreground">Salida</p>
-                      <p className="text-sm font-bold">{entry.clockOut || '--:--'}</p>
-                    </div>
-                    <div className="bg-background rounded-lg p-2">
-                      <p className="text-[10px] text-muted-foreground">Descanso</p>
-                      <p className="text-sm font-bold">{entry.breakMinutes}m</p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Zona: <span className="font-medium text-foreground">{entry.zone}</span>
-                  </p>
-
-                  <div className="flex gap-2">
-                    {isWorking && (
-                      <>
-                        <Button size="sm" variant="secondary" className="flex-1 h-9 text-xs">
-                          <Coffee className="w-3.5 h-3.5 mr-1" /> Descanso
-                        </Button>
-                        <Button size="sm" variant="destructive" className="flex-1 h-9 text-xs">
-                          <Square className="w-3.5 h-3.5 mr-1" /> Fin jornada
-                        </Button>
-                      </>
-                    )}
-                    {isOnBreak && (
-                      <Button size="sm" className="flex-1 h-9 text-xs">
-                        <Play className="w-3.5 h-3.5 mr-1" /> Reanudar
-                      </Button>
-                    )}
-                    {worker.status === 'off' && (
-                      <p className="text-xs text-muted-foreground text-center w-full py-1">
-                        Jornada finalizada a las {entry.clockOut}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      {/* Progress */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between text-xs mb-1.5">
+          <span className="text-muted-foreground font-medium">Eficiencia del día</span>
+          <span className="font-bold">—</span>
+        </div>
+        <Progress value={0} className="h-2" />
       </div>
+
+      <p className="text-xs text-muted-foreground mb-4">Revisa y ajusta horas si hace falta</p>
+
+      {/* Hours by assignment */}
+      {assignments.length > 0 ? (
+        <div className="space-y-2 mb-4">
+          {assignments.map(assignment => {
+            const assignedWorkers = workers.filter(w => assignment.workerIds.includes(w.id));
+            return (
+              <div key={assignment.activity} className="glass-card rounded-xl p-3">
+                <p className="text-sm font-bold mb-2">{assignment.activity}</p>
+                <div className="space-y-1.5">
+                  {assignedWorkers.map(w => (
+                    <div key={w.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-secondary text-secondary-foreground text-[9px] font-bold flex items-center justify-center">
+                          {w.avatar}
+                        </div>
+                        <span>{w.name}</span>
+                      </div>
+                      <span className="font-mono font-bold">8.75h</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="glass-card rounded-xl p-6 text-center mb-4">
+          <p className="text-sm text-muted-foreground">No hay asignaciones aún</p>
+        </div>
+      )}
+
+      <Button className="w-full" onClick={onNext}>
+        Revisar resumen → Enviar
+      </Button>
     </div>
   );
 };

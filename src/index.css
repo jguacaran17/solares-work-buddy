@@ -2,27 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 @layer base {
   :root {
     --background: 40 14% 94%;
-    --foreground: 216 42% 15%;
+    --foreground: 220 18% 18%;
 
-    --card: 40 14% 97%;
-    --card-foreground: 216 42% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 18% 18%;
 
-    --popover: 40 14% 97%;
-    --popover-foreground: 216 42% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 18% 18%;
 
     --primary: 170 55% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 50% 16%;
+    --secondary: 220 57% 15%;
     --secondary-foreground: 0 0% 95%;
 
     --muted: 40 10% 90%;
-    --muted-foreground: 220 8% 45%;
+    --muted-foreground: 220 8% 50%;
 
     --accent: 220 10% 18%;
     --accent-foreground: 0 0% 95%;
@@ -30,20 +28,22 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 10% 86%;
-    --input: 40 10% 86%;
+    --border: 220 10% 88%;
+    --input: 220 10% 88%;
     --ring: 170 55% 45%;
 
     --radius: 0.75rem;
 
-    --success: 170 55% 45%;
+    --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --info: 220 50% 16%;
+    --info: 220 57% 15%;
     --info-foreground: 0 0% 95%;
+    --danger: 0 72% 51%;
+    --danger-foreground: 0 0% 100%;
 
-    --sidebar-background: 220 50% 16%;
+    --sidebar-background: 220 57% 15%;
     --sidebar-foreground: 40 14% 94%;
     --sidebar-primary: 170 55% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -60,17 +60,37 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 }
 
 @layer utilities {
+  .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
   .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50 shadow-sm;
+    @apply bg-card border border-border/60 shadow-sm;
   }
 
   .bottom-nav-safe {
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .step-badge {
+    @apply w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold;
+  }
+
+  .step-badge-active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .step-badge-inactive {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  .stat-card {
+    @apply bg-card rounded-xl p-3 text-center border border-border/60;
   }
 }

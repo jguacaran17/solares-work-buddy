@@ -1,36 +1,98 @@
 import { useState } from "react";
-import LoginScreen from "@/components/LoginScreen";
-import DashboardScreen from "@/components/DashboardScreen";
+import { mockWorkers as initialWorkers, Worker } from "@/lib/mock-data";
+import AppHeader from "@/components/AppHeader";
+import StepNav from "@/components/StepNav";
+import FichajeScreen from "@/components/FichajeScreen";
+import AsignacionesScreen from "@/components/AsignacionesScreen";
 import HoursScreen from "@/components/HoursScreen";
-import CostsScreen from "@/components/CostsScreen";
+import EnviarScreen from "@/components/EnviarScreen";
+import MaquinariaScreen from "@/components/MaquinariaScreen";
+import FlotaScreen from "@/components/FlotaScreen";
+import IncidenciasScreen from "@/components/IncidenciasScreen";
 import BottomNav from "@/components/BottomNav";
 
+interface Assignment {
+  activity: string;
+  workerIds: string[];
+}
+
 const Index = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState<'foreman' | 'boss'>('foreman');
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeStep, setActiveStep] = useState(1);
+  const [bottomTab, setBottomTab] = useState('maquinaria');
+  const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
 
-  const handleLogin = (userRole: 'foreman' | 'boss') => {
-    setRole(userRole);
-    setActiveTab(userRole === 'boss' ? 'costs' : 'dashboard');
-    setIsLoggedIn(true);
+  const renderStep = () => {
+    switch (activeStep) {
+      case 1:
+        return (
+          <FichajeScreen
+            workers={workers}
+            onUpdateWorkers={setWorkers}
+            onNext={() => setActiveStep(2)}
+          />
+        );
+      case 2:
+        return (
+          <AsignacionesScreen
+            workers={workers}
+            assignments={assignments}
+            onUpdateAssignments={setAssignments}
+            onNext={() => setActiveStep(3)}
+          />
+        );
+      case 3:
+        return (
+          <HoursScreen
+            workers={workers}
+            assignments={assignments}
+            onNext={() => setActiveStep(4)}
+          />
+        );
+      case 4:
+        return (
+          <EnviarScreen
+            workers={workers}
+            assignments={assignments}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setActiveTab('dashboard');
+  const renderBottomContent = () => {
+    switch (bottomTab) {
+      case 'maquinaria':
+        return <MaquinariaScreen />;
+      case 'flota':
+        return <FlotaScreen />;
+      case 'incidencias':
+        return <IncidenciasScreen />;
+      default:
+        return null;
+    }
   };
-
-  if (!isLoggedIn) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
 
   return (
-    <div className="min-h-screen">
-      {activeTab === 'dashboard' && <DashboardScreen />}
-      {activeTab === 'hours' && <HoursScreen />}
-      {activeTab === 'costs' && <CostsScreen />}
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} />
+    <div className="min-h-screen flex flex-col">
+      <AppHeader notifications={1} />
+      <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
+
+      {/* Main step content */}
+      <div className="flex-1">
+        {renderStep()}
+      </div>
+
+      {/* Separator */}
+      <div className="border-t-4 border-border" />
+
+      {/* Bottom section */}
+      <div className="flex-1">
+        {renderBottomContent()}
+      </div>
+
+      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} />
     </div>
   );
 };
