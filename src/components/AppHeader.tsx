@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, User } from "lucide-react";
+import { Bell } from "lucide-react";
 import { projectInfo } from "@/lib/mock-data";
 
 interface AppHeaderProps {
@@ -23,8 +23,9 @@ const AppHeader = ({ notifications }: AppHeaderProps) => {
 
       {/* Top row */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight">ParteDigital</span>
+        <div className="flex items-center">
+          <span className="text-lg font-bold tracking-tight text-white">Adapta</span>
+          <span className="text-lg font-bold tracking-tight text-primary">Build</span>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -38,25 +39,24 @@ const AppHeader = ({ notifications }: AppHeaderProps) => {
               </span>
             )}
           </button>
-          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold">
+          <div className="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center text-[10px] font-bold bg-secondary">
             PC
           </div>
         </div>
       </div>
 
-      {/* Project info */}
-      <div className="mb-1">
-        <h1 className="text-base font-bold">{projectInfo.name}</h1>
-        <p className="text-xs opacity-70">
-          {projectInfo.foreman} · {projectInfo.role}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-mono bg-accent/50 px-2 py-0.5 rounded">
-          {projectInfo.date}
-        </span>
-        <span className="text-xs opacity-60">{projectInfo.dayOfWeek}</span>
+      {/* Project info card */}
+      <div className="bg-accent/30 rounded-xl px-4 py-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-base font-bold">{projectInfo.name}</h1>
+          <p className="text-xs opacity-70">
+            Paso 1 – Fichaje
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-medium text-primary">{projectInfo.date}</p>
+          <p className="text-xs opacity-60">{projectInfo.dayOfWeek}</p>
+        </div>
       </div>
 
       {/* Notification panel */}
