@@ -91,8 +91,8 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
           </Button>
           <Button
             size="sm"
-            variant="destructive"
-            className="h-9 text-xs"
+            variant="outline"
+            className="h-9 text-xs border-[#e57373] text-[#e57373] bg-card hover:bg-[#e57373]/10"
             onClick={() => setAllStatus('falta')}
           >
             <X className="w-3.5 h-3.5 mr-1" /> Todos falta
@@ -172,6 +172,19 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
             </div>
           );
         })}
+      </div>
+
+      {/* Fixed bottom CTA */}
+      <div className="fixed bottom-16 left-0 right-0 px-4 pb-3 z-40">
+        <div className="max-w-lg mx-auto">
+          <Button
+            className="w-full h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 disabled:opacity-40"
+            disabled={presentes === 0}
+            onClick={onNext}
+          >
+            Continuar → Asignar tareas
+          </Button>
+        </div>
       </div>
     </div>
   );
