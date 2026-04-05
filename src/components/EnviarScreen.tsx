@@ -66,9 +66,6 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
   const today = new Date();
   const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
-  const activeMachines = machines.filter(m => m.status === 'activa');
-  const brokenMachines = machines.filter(m => m.status === 'averia');
-  const stoppedMachines = machines.filter(m => m.status === 'parada');
 
   return (
     <>
