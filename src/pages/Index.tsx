@@ -161,7 +161,7 @@ const Index = () => {
       case 'parte':
         return renderParteStep();
       case 'incidencias':
-        return <MaquinariaScreen />;
+        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} />;
       case 'tracking':
         return (
           <div className="glass-card rounded-[10px] p-6 text-center">
