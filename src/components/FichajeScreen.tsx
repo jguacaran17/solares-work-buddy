@@ -91,8 +91,8 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
           </Button>
           <Button
             size="sm"
-            variant="destructive"
-            className="h-9 text-xs"
+            variant="outline"
+            className="h-9 text-xs border-[#e57373] text-[#e57373] bg-card hover:bg-[#e57373]/10"
             onClick={() => setAllStatus('falta')}
           >
             <X className="w-3.5 h-3.5 mr-1" /> Todos falta
