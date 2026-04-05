@@ -16,13 +16,16 @@ const stepLabels: Record<number, string> = {
   4: 'Paso 4 – Enviar',
 };
 
-const historyData = Array.from({ length: 7 }, (_, i) => {
+const zones = ['Zona A', 'Zona B', 'Zona C', 'Zona A', 'Zona B', 'Zona A', 'Zona C', 'Zona A', 'Zona B', 'Zona A', 'Zona C', 'Zona B', 'Zona A', 'Zona A', 'Zona B'];
+
+const historyData = Array.from({ length: 15 }, (_, i) => {
   const d = subDays(new Date(), i + 1);
   return {
     date: format(d, "dd/MM/yy"),
     dayOfWeek: format(d, "EEEE", { locale: es }),
-    zone: i % 2 === 0 ? 'Zona A' : 'Zona B',
+    zone: zones[i],
     operarios: Math.floor(Math.random() * 5) + 5,
+    horasTotales: parseFloat((Math.random() * 20 + 50).toFixed(1)),
     estado: 'Enviado' as const,
   };
 });
@@ -115,7 +118,7 @@ const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold">Historial – Últimos 7 días</h2>
+              <h2 className="text-base font-bold">Historial – Últimos 15 días</h2>
               <button onClick={() => setShowHistory(false)} className="p-1 rounded-full hover:bg-muted">
                 <X className="w-5 h-5" />
               </button>
@@ -128,8 +131,10 @@ const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
                     <p className="text-xs text-muted-foreground capitalize">{entry.dayOfWeek}</p>
                   </div>
                   <div className="text-right text-xs">
-                    <p>{entry.zone} · {entry.operarios} op.</p>
-                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-semibold">
+                    <p>{entry.zone} · {entry.operarios} op. · {entry.horasTotales}h</p>
+                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                      style={{ backgroundColor: 'hsl(168 50% 47% / 0.15)', color: 'hsl(168 50% 30%)' }}
+                    >
                       {entry.estado}
                     </span>
                   </div>

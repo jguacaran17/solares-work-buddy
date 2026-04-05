@@ -173,7 +173,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
                         <button
                           key={worker.id}
                           onClick={() => toggleWorkerInActivity(activity, worker.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 ${
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-200 ${
                             isAssigned
                               ? 'bg-primary/10 border border-primary/30'
                               : isInOther
