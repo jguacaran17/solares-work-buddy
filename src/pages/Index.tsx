@@ -51,6 +51,7 @@ const Index = () => {
   const [hoursMap, setHoursMap] = useState<Record<string, number>>({});
   const [previstasMap, setPrevistasMap] = useState<Record<string, number>>({});
   const [productionMap, setProductionMap] = useState<Record<string, TaskProduction>>({});
+  const [machines, setMachines] = useState<Machine[]>(initialMachines);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
 
