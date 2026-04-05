@@ -26,7 +26,7 @@ interface EnviarScreenProps {
 const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 
-const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
 
