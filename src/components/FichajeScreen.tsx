@@ -32,7 +32,12 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
   const setWorkerStatus = (workerId: string, status: 'presente' | 'falta') => {
     const updated = workers.map(w =>
       w.id === workerId
-        ? { ...w, status, clockIn: status === 'presente' ? (w.clockIn || generalTime) : undefined }
+        ? {
+            ...w,
+            status,
+            clockIn: status === 'presente' ? (w.clockIn || generalTime) : undefined,
+            faltaMotivo: status === 'falta' ? (w.faltaMotivo || 'Sin avisar') : undefined,
+          }
         : w
     );
     onUpdateWorkers(updated);
@@ -41,6 +46,13 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
   const setWorkerTime = (workerId: string, time: string) => {
     const updated = workers.map(w =>
       w.id === workerId ? { ...w, clockIn: time } : w
+    );
+    onUpdateWorkers(updated);
+  };
+
+  const setWorkerMotivo = (workerId: string, motivo: FaltaMotivo) => {
+    const updated = workers.map(w =>
+      w.id === workerId ? { ...w, faltaMotivo: motivo } : w
     );
     onUpdateWorkers(updated);
   };
