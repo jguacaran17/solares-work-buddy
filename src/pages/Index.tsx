@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { isToday as isTodayFn, format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { mockWorkers as initialWorkers, Worker } from "@/lib/mock-data";
+import { mockWorkers as initialWorkers, mockMachines as initialMachines, Worker, Machine } from "@/lib/mock-data";
 import AppHeader from "@/components/AppHeader";
 import StepNav from "@/components/StepNav";
 import FichajeScreen from "@/components/FichajeScreen";
