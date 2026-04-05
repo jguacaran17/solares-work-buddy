@@ -1,36 +1,25 @@
 import { useState } from "react";
-import { Bell, Calendar, X } from "lucide-react";
-import { projectInfo } from "@/lib/mock-data";
 import { format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
 
 interface AppHeaderProps {
   notifications: number;
   activeStep?: number;
+  headerSub?: string;
 }
-
-const stepLabels: Record<number, string> = {
-  1: 'Paso 1 – Fichaje',
-  2: 'Paso 2 – Asignaciones',
-  3: 'Paso 3 – Horas',
-  4: 'Paso 4 – Enviar',
-};
-
-const zones = ['Zona A', 'Zona B', 'Zona C', 'Zona A', 'Zona B', 'Zona A', 'Zona C', 'Zona A', 'Zona B', 'Zona A', 'Zona C', 'Zona B', 'Zona A', 'Zona A', 'Zona B'];
 
 const historyData = Array.from({ length: 15 }, (_, i) => {
   const d = subDays(new Date(), i + 1);
   return {
     date: format(d, "dd/MM/yy"),
     dayOfWeek: format(d, "EEEE", { locale: es }),
-    zone: zones[i],
     operarios: Math.floor(Math.random() * 5) + 5,
     horasTotales: parseFloat((Math.random() * 20 + 50).toFixed(1)),
     estado: 'Enviado' as const,
   };
 });
 
-const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
+const AppHeader = ({ notifications, activeStep, headerSub }: AppHeaderProps) => {
   const [showNotif, setShowNotif] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
@@ -38,105 +27,100 @@ const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
   const todayFormatted = format(today, "dd/MM/yy");
   const todayDayOfWeek = format(today, "EEEE", { locale: es });
 
+  const sub = headerSub || 'Pepe Cabrerizo · Capataz';
+
   return (
-    <header className="bg-secondary text-secondary-foreground px-4 pt-3 pb-4">
-      {/* Status bar mock */}
-      <div className="flex justify-between items-center text-[10px] font-mono opacity-60 mb-3">
-        <span>{format(today, "HH:mm")}</span>
-        <div className="flex items-center gap-1">
-          <span>●●●</span>
-          <span>WiFi</span>
-          <span>🔋87%</span>
-        </div>
+    <>
+      {/* Status bar */}
+      <div className="flex justify-between items-center px-[18px] py-2 pb-1 flex-shrink-0" style={{ background: 'hsl(var(--g8))' }}>
+        <span className="text-[13px] font-semibold text-white font-mono">{format(today, "HH:mm")}</span>
+        <span className="text-[11px] text-white/70">●●● WiFi 🔋87%</span>
       </div>
 
-      {/* Top row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center">
-          <span className="text-lg font-bold tracking-tight text-white">Adapta</span>
-          <span className="text-lg font-bold tracking-tight text-primary">Build</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowNotif(!showNotif)}
-            className="relative p-1.5"
-          >
-            <Bell className="w-5 h-5" />
-            {notifications > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
-                {notifications}
-              </span>
-            )}
-          </button>
-          <div className="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center text-[10px] font-bold bg-secondary">
-            PC
+      {/* Header */}
+      <div className="px-4 pb-3 flex-shrink-0" style={{ background: 'hsl(var(--g8))' }}>
+        {/* Top row */}
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="text-[16px] font-bold text-white tracking-tight">
+            Parte<span style={{ color: 'hsl(var(--g4))' }}>Digital</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            {/* Bell */}
+            <button className="relative cursor-pointer" onClick={() => setShowNotif(!showNotif)}>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-white" style={{ background: 'rgba(255,255,255,.15)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </div>
+              {notifications > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center text-white border-2" style={{ background: '#e53e3e', borderColor: 'hsl(var(--g8))' }}>
+                  {notifications}
+                </span>
+              )}
+            </button>
+            {/* Avatar */}
+            <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[12px] font-bold text-white" style={{ background: 'hsl(var(--g7))', border: '2px solid hsl(var(--g4))' }}>
+              PC
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Project info card */}
-      <div className="bg-accent/30 rounded-xl px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-bold">{projectInfo.name}</h1>
-          <p className="text-xs opacity-70">
-            {stepLabels[activeStep] || 'Paso 1 – Fichaje'}
-          </p>
-        </div>
-        <button
-          onClick={() => setShowHistory(true)}
-          className="text-right flex items-center gap-1.5 active:opacity-70 transition-opacity"
-        >
+        {/* Project box */}
+        <div className="rounded-lg px-3 py-2 flex items-center justify-between" style={{ background: 'rgba(255,255,255,.1)' }}>
           <div>
-            <p className="text-sm font-medium text-primary">{todayFormatted}</p>
-            <p className="text-xs opacity-60 capitalize">{todayDayOfWeek}</p>
+            <div className="text-[13px] font-semibold text-white">PSFV San Pedro</div>
+            <div className="text-[11px] mt-px" style={{ color: 'hsl(var(--g2))' }}>{sub}</div>
           </div>
-          <Calendar className="w-4 h-4 text-primary opacity-70" />
-        </button>
+          <button onClick={() => setShowHistory(true)} className="text-right active:opacity-70 transition-opacity">
+            <div className="text-[11px] font-mono" style={{ color: 'hsl(var(--g2))' }}>
+              {todayFormatted}<br />
+              <span className="capitalize">{todayDayOfWeek}</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Notification panel */}
       {showNotif && (
-        <div className="mt-3 bg-accent rounded-lg p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold">Notificaciones</span>
-            <button
-              onClick={() => setShowNotif(false)}
-              className="text-xs opacity-60 hover:opacity-100"
-            >
-              Cerrar
-            </button>
+        <div className="fixed inset-0 z-[999]" onClick={() => setShowNotif(false)}>
+          <div
+            className="absolute top-[110px] right-2.5 left-2.5 max-w-[410px] mx-auto rounded-[14px] overflow-hidden max-h-[70vh] flex flex-col"
+            style={{ background: 'hsl(var(--card))', boxShadow: '0 8px 32px rgba(0,0,0,.22)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-border" style={{ background: 'hsl(var(--g8))' }}>
+              <div className="text-[14px] font-bold text-white">Notificaciones</div>
+              <button onClick={() => setShowNotif(false)} className="text-white text-[12px] font-bold px-3 py-1 rounded-[20px]" style={{ background: 'rgba(255,255,255,.2)' }}>Cerrar</button>
+            </div>
+            <div className="p-3 text-center text-[13px] text-muted-foreground">Sin notificaciones nuevas</div>
           </div>
-          <p className="text-xs opacity-70">Sin notificaciones nuevas</p>
         </div>
       )}
 
       {/* History modal */}
       {showHistory && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowHistory(false)}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,.5)' }} onClick={() => setShowHistory(false)}>
           <div
-            className="bg-card text-card-foreground w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom-4"
+            className="w-full max-w-[430px] rounded-t-[18px] p-5 pb-9 max-h-[88vh] overflow-y-auto"
+            style={{ background: 'hsl(var(--card))' }}
             onClick={e => e.stopPropagation()}
           >
+            <div className="w-10 h-1 rounded-sm mx-auto mb-4" style={{ background: 'hsl(var(--border))' }} />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold">Historial – Últimos 15 días</h2>
-              <button onClick={() => setShowHistory(false)} className="p-1 rounded-full hover:bg-muted">
-                <X className="w-5 h-5" />
-              </button>
+              <h2 className="text-[16px] font-bold">Historial – Últimos 15 días</h2>
+              <button onClick={() => setShowHistory(false)} className="text-[12px] font-bold px-3.5 py-1.5 rounded-[20px]" style={{ background: 'hsl(var(--g05))', color: 'hsl(var(--g7))' }}>✕ Cerrar</button>
             </div>
             <div className="space-y-2">
               {historyData.map((entry, i) => (
-                <div key={i} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
+                <div key={i} className="flex items-center justify-between rounded-[10px] px-3.5 py-3 border border-border" style={{ background: 'hsl(var(--card))' }}>
                   <div>
-                    <p className="text-sm font-semibold">{entry.date}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{entry.dayOfWeek}</p>
+                    <p className="text-[12px] font-bold">{entry.date}</p>
+                    <p className="text-[10px] text-muted-foreground capitalize">{entry.dayOfWeek}</p>
                   </div>
-                  <div className="text-right text-xs">
-                    <p>{entry.zone} · {entry.operarios} op. · {entry.horasTotales}h</p>
-                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                      style={{ backgroundColor: 'hsl(168 50% 47% / 0.15)', color: 'hsl(168 50% 30%)' }}
-                    >
-                      {entry.estado}
-                    </span>
+                  <div className="text-right">
+                    <p className="text-[11px] text-muted-foreground">{entry.operarios} op. · {entry.horasTotales}h</p>
+                    <span className="pill pill-ok mt-0.5 inline-block">{entry.estado}</span>
                   </div>
                 </div>
               ))}
@@ -144,7 +128,7 @@ const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 };
 
