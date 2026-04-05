@@ -230,14 +230,19 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
                     </div>
                     <div>
                       <label className="text-[9px] text-muted-foreground">Tipo</label>
-                      <input
-                        type="text"
+                      <select
                         value={prod.tipo}
                         onChange={e => updateProduction(a.activity, 'tipo', e.target.value)}
                         className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono"
                         style={{ background: 'hsl(var(--background))' }}
-                        placeholder="ud/m²"
-                      />
+                      >
+                        <option value="">—</option>
+                        <option value="Vd">Vd</option>
+                        <option value="Ud">Ud</option>
+                        <option value="ml">ml</option>
+                        <option value="m2">m²</option>
+                        <option value="kg">kg</option>
+                      </select>
                     </div>
                     <div>
                       <label className="text-[9px] text-muted-foreground">HH/Ud</label>
