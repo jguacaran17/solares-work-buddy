@@ -178,47 +178,6 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
           )}
         </div>
 
-        {/* MAQUINARIA TABLE */}
-        <div>
-          <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
-            Maquinaria
-          </div>
-
-          <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px', borderBottom: '1px solid hsl(var(--g2))' }}>
-            <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Máquina</div>
-            <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Tarea</div>
-            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Estado</div>
-            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
-          </div>
-
-          {[...activeMachines, ...brokenMachines, ...stoppedMachines].map((m, i) => (
-            <div
-              key={m.id}
-              className="grid gap-0 items-center"
-              style={{
-                gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px',
-                borderBottom: '1px solid hsl(var(--border))',
-                background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
-              }}
-            >
-              <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{m.name}</div>
-              <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{m.task}</div>
-              <div className="px-1 py-1.5 text-center">
-                <span
-                  className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
-                  style={{
-                    background: m.status === 'activa' ? '#dcfce7' : m.status === 'averia' ? '#fee2e2' : '#fef9c3',
-                    color: m.status === 'activa' ? '#166534' : m.status === 'averia' ? '#991b1b' : '#854d0e',
-                  }}
-                >
-                  {m.status === 'activa' ? 'OK' : m.status === 'averia' ? 'AVR' : 'STOP'}
-                </span>
-              </div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{m.hoursToday > 0 ? m.hoursToday.toFixed(1) : '—'}</div>
-            </div>
-          ))}
-        </div>
-
         {/* DETALLE PRODUCCIÓN */}
         {(() => {
           const prodRows = assignments
@@ -267,6 +226,47 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
             </div>
           );
         })()}
+
+        {/* MAQUINARIA TABLE */}
+        <div>
+          <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
+            Maquinaria
+          </div>
+
+          <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px', borderBottom: '1px solid hsl(var(--g2))' }}>
+            <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Máquina</div>
+            <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Tarea</div>
+            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Estado</div>
+            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
+          </div>
+
+          {[...activeMachines, ...brokenMachines, ...stoppedMachines].map((m, i) => (
+            <div
+              key={m.id}
+              className="grid gap-0 items-center"
+              style={{
+                gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px',
+                borderBottom: '1px solid hsl(var(--border))',
+                background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
+              }}
+            >
+              <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{m.name}</div>
+              <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{m.task}</div>
+              <div className="px-1 py-1.5 text-center">
+                <span
+                  className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                  style={{
+                    background: m.status === 'activa' ? '#dcfce7' : m.status === 'averia' ? '#fee2e2' : '#fef9c3',
+                    color: m.status === 'activa' ? '#166534' : m.status === 'averia' ? '#991b1b' : '#854d0e',
+                  }}
+                >
+                  {m.status === 'activa' ? 'OK' : m.status === 'averia' ? 'AVR' : 'STOP'}
+                </span>
+              </div>
+              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{m.hoursToday > 0 ? m.hoursToday.toFixed(1) : '—'}</div>
+            </div>
+          ))}
+        </div>
 
         {/* COMENTARIOS GENERALES */}
         <div style={{ borderTop: '2px solid hsl(var(--g2))' }}>
