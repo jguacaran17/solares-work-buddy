@@ -15,7 +15,6 @@ interface EnviarScreenProps {
 const COST_PER_HOUR = 28;
 
 const EnviarScreen = ({ workers, assignments }: EnviarScreenProps) => {
-  const [comments, setComments] = useState('Hormigón: 10m³ = 39 ud. Hay que recevar.');
 
   const presentWorkers = workers.filter(w => w.status === 'presente');
 
