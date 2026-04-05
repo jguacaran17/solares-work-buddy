@@ -27,6 +27,17 @@ export interface Activity {
   assignedWorkers: string[];
 }
 
+export interface Subtask {
+  id: string;
+  name: string;
+  standardHours: number; // hours per worker for this subtask
+}
+
+export interface ActivityWithSubtasks {
+  name: string;
+  subtasks: Subtask[];
+}
+
 export interface Machine {
   id: string;
   name: string;
@@ -99,6 +110,45 @@ export const mockActivities: string[] = [
   'Estructura',
   'Modulos',
   'Varios',
+];
+
+export const mockActivitySubtasks: Record<string, Subtask[]> = {
+  'Hincado principal': [
+    { id: 'hp1', name: 'Preparación terreno', standardHours: 2 },
+    { id: 'hp2', name: 'Hincado micropilotes', standardHours: 4 },
+    { id: 'hp3', name: 'Revisión', standardHours: 2.75 },
+  ],
+  'Lima y pintura': [
+    { id: 'lp1', name: 'Lijado superficies', standardHours: 3 },
+    { id: 'lp2', name: 'Aplicación pintura', standardHours: 4 },
+    { id: 'lp3', name: 'Secado y revisión', standardHours: 1.75 },
+  ],
+  'Micropilotes emplantillado': [
+    { id: 'me1', name: 'Colocación plantillas', standardHours: 3 },
+    { id: 'me2', name: 'Nivelación', standardHours: 2.5 },
+    { id: 'me3', name: 'Fijación', standardHours: 3.25 },
+  ],
+  'Micropilotes hormigonado': [
+    { id: 'mh1', name: 'Preparación encofrado', standardHours: 2.5 },
+    { id: 'mh2', name: 'Vertido hormigón', standardHours: 3 },
+    { id: 'mh3', name: 'Vibrado y curado', standardHours: 3.25 },
+  ],
+  'Estructura': [
+    { id: 'es1', name: 'Montaje perfiles', standardHours: 4 },
+    { id: 'es2', name: 'Soldadura', standardHours: 3 },
+    { id: 'es3', name: 'Revisión calidad', standardHours: 1.75 },
+  ],
+  'Montaje cabezales': [
+    { id: 'mc1', name: 'Preparación piezas', standardHours: 2 },
+    { id: 'mc2', name: 'Montaje', standardHours: 4.5 },
+    { id: 'mc3', name: 'Apriete y verificación', standardHours: 2.25 },
+  ],
+};
+
+// Default subtasks for activities not explicitly listed
+export const defaultSubtasks: Subtask[] = [
+  { id: 'def1', name: 'Trabajo general', standardHours: 6 },
+  { id: 'def2', name: 'Limpieza y recogida', standardHours: 2.75 },
 ];
 
 export const mockMachines: Machine[] = [
