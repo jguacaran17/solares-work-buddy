@@ -187,6 +187,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
         </div>
       </div>
     </div>
+  );
 };
 
 export default FichajeScreen;
