@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { Worker, projectInfo } from "@/lib/mock-data";
-import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Worker, mockActivitySubtasks, defaultSubtasks } from "@/lib/mock-data";
 import { toast } from "sonner";
 
 interface Assignment {
@@ -14,76 +12,95 @@ interface EnviarScreenProps {
   assignments: Assignment[];
 }
 
+const COST_PER_HOUR = 28;
+
 const EnviarScreen = ({ workers, assignments }: EnviarScreenProps) => {
   const [comments, setComments] = useState('Hormigón: 10m³ = 39 ud. Hay que recevar.');
+
   const presentWorkers = workers.filter(w => w.status === 'presente');
-  const totalHH = presentWorkers.length * 8.75;
+
+  const stats = useMemo(() => {
+    let hh = 0;
+    let teo = 0;
+    const subs: { name: string; ops: number; hh: number }[] = [];
+
+    assignments.forEach(a => {
+      const subtasks = mockActivitySubtasks[a.activity] || defaultSubtasks;
+      const t = subtasks.reduce((s, st) => s + st.standardHours, 0);
+      const count = a.workerIds.length;
+      hh += t * count;
+      teo += t * count;
+      subs.push({ name: a.activity, ops: count, hh: t * count });
+    });
+
+    const dv = 0; // since hours == theoretical
+    const eu = Math.round(dv * COST_PER_HOUR);
+    return { hh, dv, eu, subs };
+  }, [assignments]);
 
   const handleSend = () => {
-    toast.success('Parte enviado correctamente al jefe de obra');
+    toast.success('Parte enviado. Jefe de obra notificado.');
   };
 
-  return (
-    <div className="pb-24 px-4 pt-4 max-w-lg mx-auto">
-      <h2 className="text-base font-bold mb-4">Resumen parte — {projectInfo.date}/2026</h2>
+  const today = new Date();
+  const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
-      {/* Summary card */}
-      <div className="glass-card rounded-xl p-4 mb-4 space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Capataz</span>
-          <span className="font-semibold">{projectInfo.foreman}</span>
+  return (
+    <>
+      <div className="sec-title" style={{ marginTop: 4 }}>Resumen parte — {dateStr}</div>
+
+      <div className="glass-card rounded-[10px] p-3.5 mb-2.5">
+        <div className="flex justify-between py-2 border-b border-border">
+          <span className="text-[12px] text-muted-foreground">Capataz</span>
+          <span className="text-[13px] font-bold font-mono">Pepe Cabrerizo</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Operarios presentes</span>
-          <span className="font-semibold">{presentWorkers.length || '—'}</span>
+        <div className="flex justify-between py-2 border-b border-border">
+          <span className="text-[12px] text-muted-foreground">Operarios presentes</span>
+          <span className="text-[13px] font-bold font-mono text-success">{presentWorkers.length || '—'} operarios</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">HH totales</span>
-          <span className="font-semibold">{totalHH > 0 ? totalHH.toFixed(1) : '—'}</span>
+        <div className="flex justify-between py-2 border-b border-border">
+          <span className="text-[12px] text-muted-foreground">HH totales</span>
+          <span className="text-[13px] font-bold font-mono">{stats.hh > 0 ? `${stats.hh.toFixed(0)}h` : '—'}</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Desviación</span>
-          <span className="font-semibold">—</span>
+        <div className="flex justify-between py-2 border-b border-border">
+          <span className="text-[12px] text-muted-foreground">Desviación</span>
+          <span className="text-[13px] font-bold font-mono">{stats.dv >= 0 ? '+' : ''}{stats.dv.toFixed(1)}h</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Coste extra</span>
-          <span className="font-semibold">—</span>
+        <div className="flex justify-between py-2">
+          <span className="text-[12px] text-muted-foreground">Coste extra</span>
+          <span className="text-[13px] font-bold font-mono">{stats.eu > 0 ? `-EUR${stats.eu}` : `+EUR${Math.abs(stats.eu)}`}</span>
         </div>
       </div>
 
-      {/* By subtask */}
-      <p className="text-xs font-bold mb-2">Por subtarea</p>
-      <div className="glass-card rounded-xl overflow-hidden mb-4">
-        {assignments.length > 0 ? (
-          <div className="divide-y divide-border">
-            {assignments.map(a => (
-              <div key={a.activity} className="px-3 py-2 flex items-center justify-between text-sm">
-                <span>{a.activity}</span>
-                <span className="font-mono font-bold text-xs">
-                  {a.workerIds.length} op · {(a.workerIds.length * 8.75).toFixed(1)}h
-                </span>
-              </div>
-            ))}
+      <div className="sec-title">Por subtarea</div>
+      <div className="glass-card rounded-[10px] mb-2.5" style={{ padding: '0 14px' }}>
+        {stats.subs.length > 0 ? stats.subs.map((s, i) => (
+          <div key={s.name} className="flex justify-between py-2" style={{ borderBottom: i < stats.subs.length - 1 ? '1px solid hsl(var(--border))' : 'none' }}>
+            <span className="text-[12px] text-muted-foreground">{s.name}</span>
+            <span className="text-[13px] font-bold font-mono">{s.ops} op · {s.hh.toFixed(1)}h</span>
           </div>
-        ) : (
-          <p className="text-xs text-muted-foreground text-center py-4">Sin asignaciones</p>
+        )) : (
+          <div className="text-[12px] text-muted-foreground text-center py-4">Sin asignaciones</div>
         )}
       </div>
 
-      {/* Comments */}
-      <p className="text-xs font-bold mb-2">Comentarios</p>
+      <div className="sec-title mt-2.5">Comentarios</div>
       <textarea
         value={comments}
         onChange={e => setComments(e.target.value)}
-        className="w-full h-20 rounded-xl border border-input bg-card px-3 py-2 text-sm resize-none mb-4"
-        placeholder="Añade comentarios..."
+        className="w-full min-h-[65px] border border-border rounded-lg p-2.5 text-[13px] resize-none mb-3"
+        style={{ background: 'hsl(var(--card))' }}
+        placeholder="Notas del día..."
       />
 
-      <Button className="w-full h-12" onClick={handleSend}>
-        <Send className="w-4 h-4 mr-2" />
+      <button className="sbtn" onClick={handleSend}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
         Enviar parte al jefe de obra
-      </Button>
-    </div>
+      </button>
+    </>
   );
 };
 

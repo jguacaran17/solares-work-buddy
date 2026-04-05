@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { Check, X, Clock, ChevronDown } from "lucide-react";
 import { mockZones, Worker, FaltaMotivo } from "@/lib/mock-data";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 
 interface FichajeScreenProps {
   workers: Worker[];
@@ -11,8 +8,8 @@ interface FichajeScreenProps {
 }
 
 const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps) => {
-  const [generalTime, setGeneralTime] = useState("07:00");
-  const [expandedZone, setExpandedZone] = useState<string | null>(null);
+  const [generalTime, setGeneralTime] = useState("07:52");
+  const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set());
   const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
 
   const presentes = workers.filter(w => w.status === 'presente').length;
@@ -46,13 +43,6 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
     onUpdateWorkers(updated);
   };
 
-  const setWorkerTime = (workerId: string, time: string) => {
-    const updated = workers.map(w =>
-      w.id === workerId ? { ...w, clockIn: time } : w
-    );
-    onUpdateWorkers(updated);
-  };
-
   const setWorkerMotivo = (workerId: string, motivo: FaltaMotivo) => {
     const updated = workers.map(w =>
       w.id === workerId ? { ...w, faltaMotivo: motivo } : w
@@ -66,251 +56,171 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
   const getZoneFichados = (zone: typeof mockZones[0]) =>
     getZoneWorkers(zone).filter(w => w.status !== 'sin-fichar').length;
 
+  const toggleZone = (zoneId: string) => {
+    setCollapsedZones(prev => {
+      const next = new Set(prev);
+      if (next.has(zoneId)) next.delete(zoneId);
+      else next.add(zoneId);
+      return next;
+    });
+  };
+
+  const progressClass = progress >= 100 ? 'prog-fill-ok' : progress >= 50 ? 'prog-fill-warn' : 'prog-fill-warn';
+
   return (
-    <div className="pb-28 px-4 pt-4 max-w-lg mx-auto">
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
+    <>
+      {/* KPIs */}
+      <div className="grid grid-cols-3 gap-2 mb-3" style={{ marginTop: 4 }}>
         <div className="stat-card">
-          <p className="text-lg font-bold text-success">{presentes}</p>
-          <p className="text-[10px] text-muted-foreground font-medium">Presentes</p>
+          <div className="kmi-label">Presentes</div>
+          <div className="kmi-value text-success">{presentes}</div>
         </div>
         <div className="stat-card">
-          <p className="text-lg font-bold text-destructive">{faltas}</p>
-          <p className="text-[10px] text-muted-foreground font-medium">Faltas</p>
+          <div className="kmi-label">Faltas</div>
+          <div className="kmi-value text-destructive">{faltas}</div>
         </div>
         <div className="stat-card">
-          <p className="text-lg font-bold text-warning">{sinFichar}</p>
-          <p className="text-[10px] text-muted-foreground font-medium">Sin fichar</p>
+          <div className="kmi-label">Sin fichar</div>
+          <div className="kmi-value text-warning">{sinFichar}</div>
         </div>
       </div>
 
       {/* Progress */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between text-xs mb-1.5">
-          <span className="text-muted-foreground font-medium">Progreso fichaje</span>
-          <span className="font-bold">{fichados} de {total} fichados</span>
+      <div className="mb-3.5">
+        <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
+          <span>Progreso fichaje</span>
+          <span>{fichados} de {total}</span>
         </div>
-        <Progress value={progress} className="h-2" />
+        <div className="prog-track">
+          <div className={`prog-fill ${progressClass}`} style={{ width: `${progress}%` }} />
+        </div>
       </div>
 
-      {/* General time card */}
-      <div className="glass-card rounded-xl p-5 mb-4">
-        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
-          Hora de entrada general
-        </p>
-        <label className="flex items-center gap-3 mb-4 border border-input rounded-xl px-4 h-14 bg-background cursor-pointer relative">
-          <span className="text-2xl font-mono tracking-widest flex-1">{generalTime.replace(':', ' : ')}</span>
-          <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
-          <input
-            type="time"
-            value={generalTime}
-            onChange={e => setGeneralTime(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            className="h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-xl"
+      {/* Global time + mark all */}
+      <div className="glass-card rounded-[10px] p-3.5 mb-2.5">
+        <div className="sec-title mb-2">Hora de entrada general</div>
+        <input
+          type="time"
+          value={generalTime}
+          onChange={e => setGeneralTime(e.target.value)}
+          className="w-full border border-border rounded-lg px-3 py-2.5 font-mono text-[20px] font-bold mb-2.5 outline-none"
+          style={{ background: 'hsl(var(--background))' }}
+        />
+        <div className="flex gap-2">
+          <button
             onClick={() => setAllStatus('presente')}
+            className="flex-1 py-2.5 px-1.5 rounded-lg border-none text-[13px] font-bold cursor-pointer flex items-center justify-center gap-1"
+            style={{ background: 'hsl(var(--g8))', color: '#fff' }}
           >
-            <Check className="w-4 h-4 mr-1.5" /> Todos presentes
-          </Button>
-          <Button
-            variant="outline"
-            className="h-12 text-sm font-bold border-destructive/30 text-destructive bg-destructive/5 hover:bg-destructive/10 rounded-xl"
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Todos presentes
+          </button>
+          <button
             onClick={() => setAllStatus('falta')}
+            className="flex-1 py-2.5 px-1.5 rounded-lg text-[13px] font-bold cursor-pointer flex items-center justify-center gap-1"
+            style={{ background: 'hsl(var(--red-bg))', color: 'hsl(var(--destructive))', border: '1px solid #f5c6c6' }}
           >
-            <X className="w-4 h-4 mr-1.5" /> Todos falta
-          </Button>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Todos falta
+          </button>
         </div>
       </div>
 
       {/* Zones */}
-      <div className="space-y-3">
-        {mockZones.map(zone => {
-          const zoneWorkers = getZoneWorkers(zone);
-          const zoneFichados = getZoneFichados(zone);
-          const isExpanded = expandedZone === zone.id;
+      {mockZones.map(zone => {
+        const zoneWorkers = getZoneWorkers(zone);
+        const zoneFichados = getZoneFichados(zone);
+        const isCollapsed = collapsedZones.has(zone.id);
+        const pillClass = zoneFichados === zoneWorkers.length ? 'pill-ok' : 'pill-gray';
 
-          return (
-            <div key={zone.id} className="glass-card rounded-xl overflow-hidden">
-              {/* Zone header */}
-              <button
-                onClick={() => setExpandedZone(isExpanded ? null : zone.id)}
-                className="w-full px-4 py-3.5 flex items-center justify-between text-left active:bg-muted/50 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-bold">
-                    {zone.name} · {zone.activity}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {zoneFichados} / {zoneWorkers.length} fichados
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
-                    {zoneFichados}/{zoneWorkers.length}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
-                      isExpanded ? 'rotate-180' : ''
-                    }`}
-                  />
-                </div>
-              </button>
-
-              {/* Workers list - smooth expand */}
-              <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-                }`}
-              >
-                <div className="border-t-2 border-primary">
-                  {zoneWorkers.map((worker, idx) => {
-                    const isPresente = worker.status === 'presente';
-                    const isFalta = worker.status === 'falta';
-                    const isWorkerExpanded = expandedWorker === worker.id;
-
-                    return (
-                      <div
-                        key={worker.id}
-                        className={`transition-colors duration-200 ${
-                          isFalta ? 'bg-[#fff0f0]' : 'bg-card'
-                        } ${idx > 0 ? 'border-t border-border/40' : ''}`}
-                      >
-                        {/* Worker summary row */}
-                        <button
-                          onClick={() => setExpandedWorker(isWorkerExpanded ? null : worker.id)}
-                          className="w-full px-4 py-3 flex items-center gap-3 active:bg-muted/30 transition-colors"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-xs font-bold shrink-0">
-                            {worker.avatar}
-                          </div>
-                          <div className="flex-1 min-w-0 text-left">
-                            <p className="text-sm font-semibold truncate">{worker.name}</p>
-                            {isPresente && (
-                              <p className="text-xs text-primary font-medium">
-                                Entrada {worker.clockIn || generalTime}
-                              </p>
-                            )}
-                            {isFalta && (
-                              <p className="text-xs font-medium text-destructive">
-                                Falta: {worker.faltaMotivo || 'Sin avisar'}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {isPresente && (
-                              <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                                {worker.clockIn || generalTime}
-                              </span>
-                            )}
-                            {isFalta && (
-                              <span className="text-xs font-bold text-destructive">
-                                Falta
-                              </span>
-                            )}
-                            <ChevronDown
-                              className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
-                                isWorkerExpanded ? 'rotate-180' : ''
-                              }`}
-                            />
-                          </div>
-                        </button>
-
-                        {/* Worker expanded details */}
-                        <div
-                          className={`transition-all duration-200 ease-in-out overflow-hidden ${
-                            isWorkerExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
-                          }`}
-                        >
-                          <div className="px-4 pb-4 space-y-3">
-                            {/* Toggle buttons */}
-                            <div className="grid grid-cols-2 gap-2">
-                              <button
-                                onClick={() => setWorkerStatus(worker.id, 'presente')}
-                                className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
-                                  isPresente
-                                    ? 'border-primary text-primary bg-primary/5'
-                                    : 'border-border text-muted-foreground bg-card hover:border-primary/40'
-                                }`}
-                              >
-                                <Check className="w-4 h-4" /> Presente
-                              </button>
-                              <button
-                                onClick={() => setWorkerStatus(worker.id, 'falta')}
-                                className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
-                                  isFalta
-                                    ? 'bg-[#c0392b] text-white border-[#c0392b]'
-                                    : 'border-border text-muted-foreground bg-card hover:border-destructive/40'
-                                }`}
-                              >
-                                <X className="w-4 h-4" /> Falta
-                              </button>
-                            </div>
-
-                            {/* Presente: time input */}
-                            {isPresente && (
-                              <div className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2">
-                                <Clock className="w-4 h-4 text-primary shrink-0" />
-                                <span className="text-xs text-muted-foreground font-medium">Entrada:</span>
-                                <input
-                                  type="time"
-                                  value={worker.clockIn || generalTime}
-                                  onChange={e => setWorkerTime(worker.id, e.target.value)}
-                                  className="h-8 rounded-lg border border-input bg-background px-3 text-sm font-mono flex-1 min-w-0"
-                                />
-                              </div>
-                            )}
-
-                            {/* Falta: motivo dropdown */}
-                            {isFalta && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                                  Motivo
-                                </p>
-                                <select
-                                  value={worker.faltaMotivo || 'Sin avisar'}
-                                  onChange={e => setWorkerMotivo(worker.id, e.target.value as FaltaMotivo)}
-                                  className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm"
-                                >
-                                  <option>Sin avisar</option>
-                                  <option>Enfermedad</option>
-                                  <option>Permiso</option>
-                                  <option>Retraso</option>
-                                </select>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+        return (
+          <div key={zone.id} className="glass-card rounded-[10px] overflow-hidden mb-2.5">
+            {/* Zone header */}
+            <div
+              className="flex items-center justify-between px-3.5 py-2.5 cursor-pointer active:opacity-80"
+              style={{ background: '#f5f5f2', borderBottom: '1px solid hsl(var(--border))' }}
+              onClick={() => toggleZone(zone.id)}
+            >
+              <div>
+                <div className="text-[12px] font-bold" style={{ color: 'hsl(var(--g8))' }}>{zone.name} · {zone.activity}</div>
+                <div className="text-[10px] text-muted-foreground">{zoneFichados} / {zoneWorkers.length} fichados</div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={`pill ${pillClass}`}>{zoneFichados}/{zoneWorkers.length}</span>
+                <span className="text-[14px] text-muted-foreground transition-transform inline-block" style={{ transform: isCollapsed ? '' : 'rotate(90deg)' }}>›</span>
               </div>
             </div>
-          );
-        })}
-      </div>
 
-      {/* Fixed bottom CTA */}
-      {presentes > 0 && (
-        <div className="fixed bottom-16 left-0 right-0 px-4 pb-3 z-40">
-          <div className="max-w-lg mx-auto">
-            <Button
-              className="w-full h-12 text-sm font-bold rounded-xl text-white hover:opacity-90"
-              style={{ backgroundColor: '#0f1f3a' }}
-              onClick={onNext}
-            >
-              Continuar → Asignar tareas
-              <span className="ml-2 bg-white/15 text-white text-xs px-2 py-0.5 rounded-full">
-                {presentes} presentes
-              </span>
-            </Button>
+            {/* Workers */}
+            {!isCollapsed && zoneWorkers.map((worker) => {
+              const isPresente = worker.status === 'presente';
+              const isFalta = worker.status === 'falta';
+              const isExpanded = expandedWorker === worker.id;
+              const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
+              const colorIdx = parseInt(worker.id) % avatarColors.length;
+
+              return (
+                <div key={worker.id} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+                    <div
+                      className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                      style={{ background: avatarColors[colorIdx] }}
+                    >
+                      {worker.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] font-semibold">{worker.name}</div>
+                      {isPresente && <div className="text-[10px] text-muted-foreground">Entrada {worker.clockIn || generalTime}</div>}
+                      {isFalta && <div className="text-[10px] text-destructive">Falta: {worker.faltaMotivo || 'Sin avisar'}</div>}
+                    </div>
+                    {/* Toggle buttons */}
+                    <div className="flex border border-border rounded-md overflow-hidden flex-shrink-0">
+                      <button
+                        onClick={() => setWorkerStatus(worker.id, 'presente')}
+                        className="px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
+                        style={{
+                          background: isPresente ? 'hsl(var(--g8))' : 'hsl(var(--background))',
+                          color: isPresente ? '#fff' : 'hsl(var(--muted-foreground))',
+                        }}
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={() => setWorkerStatus(worker.id, 'falta')}
+                        className="px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
+                        style={{
+                          background: isFalta ? 'hsl(var(--destructive))' : 'hsl(var(--background))',
+                          color: isFalta ? '#fff' : 'hsl(var(--muted-foreground))',
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Falta motivo select */}
+                  {isFalta && (
+                    <div className="px-3.5 pb-2">
+                      <select
+                        value={worker.faltaMotivo || 'Sin avisar'}
+                        onChange={e => setWorkerMotivo(worker.id, e.target.value as FaltaMotivo)}
+                        className="w-full border border-border rounded-md px-2 py-1 text-[11px]"
+                        style={{ background: 'hsl(var(--background))' }}
+                      >
+                        <option>Sin avisar</option>
+                        <option>Enfermedad</option>
+                        <option>Permiso</option>
+                        <option>Retraso</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        </div>
-      )}
-    </div>
+        );
+      })}
+    </>
   );
 };
 
