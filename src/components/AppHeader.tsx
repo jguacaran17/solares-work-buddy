@@ -14,7 +14,7 @@ const stepLabels: Record<number, string> = {
   4: 'Paso 4 – Enviar',
 };
 
-const AppHeader = ({ notifications }: AppHeaderProps) => {
+const AppHeader = ({ notifications, activeStep = 1 }: AppHeaderProps) => {
   const [showNotif, setShowNotif] = useState(false);
 
   return (
