@@ -19,7 +19,8 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
   const faltas = workers.filter(w => w.status === 'falta').length;
   const sinFichar = workers.filter(w => w.status === 'sin-fichar').length;
   const total = workers.length;
-  const progress = total > 0 ? Math.round(((presentes + faltas) / total) * 100) : 0;
+  const fichados = presentes + faltas;
+  const progress = total > 0 ? Math.round((fichados / total) * 100) : 0;
 
   const setAllStatus = (status: 'presente' | 'falta') => {
     const updated = workers.map(w => ({
@@ -66,7 +67,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
     getZoneWorkers(zone).filter(w => w.status !== 'sin-fichar').length;
 
   return (
-    <div className="pb-24 px-4 pt-4 max-w-lg mx-auto">
+    <div className="pb-28 px-4 pt-4 max-w-lg mx-auto">
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className="stat-card">
@@ -87,7 +88,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
       <div className="mb-4">
         <div className="flex items-center justify-between text-xs mb-1.5">
           <span className="text-muted-foreground font-medium">Progreso fichaje</span>
-          <span className="font-bold">{presentes + faltas} de {total} fichados</span>
+          <span className="font-bold">{fichados} de {total} fichados</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
@@ -97,14 +98,16 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
           Hora de entrada general
         </p>
-        <div className="relative mb-4">
+        <div className="flex items-center gap-3 mb-4 border border-input rounded-xl px-4 h-14 bg-background">
+          <span className="text-2xl font-mono tracking-widest flex-1">{generalTime.replace(':', ' : ')}</span>
+          <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
           <input
             type="time"
             value={generalTime}
             onChange={e => setGeneralTime(e.target.value)}
-            className="w-full h-14 rounded-xl border border-input bg-background px-4 text-2xl font-mono tracking-widest"
+            className="absolute opacity-0 w-0 h-0"
+            id="general-time-input"
           />
-          <Clock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Button
@@ -127,7 +130,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
       <div className="space-y-3">
         {mockZones.map(zone => {
           const zoneWorkers = getZoneWorkers(zone);
-          const fichados = getZoneFichados(zone);
+          const zoneFichados = getZoneFichados(zone);
           const isExpanded = expandedZone === zone.id;
 
           return (
@@ -135,19 +138,19 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
               {/* Zone header */}
               <button
                 onClick={() => setExpandedZone(isExpanded ? null : zone.id)}
-                className="w-full px-4 py-3 flex items-center justify-between text-left"
+                className="w-full px-4 py-3.5 flex items-center justify-between text-left active:bg-muted/50 transition-colors"
               >
                 <div>
                   <p className="text-sm font-bold">
                     {zone.name} · {zone.activity}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {fichados} / {zoneWorkers.length} fichados
+                    {zoneFichados} / {zoneWorkers.length} fichados
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
-                    {fichados}/{zoneWorkers.length}
+                    {zoneFichados}/{zoneWorkers.length}
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
@@ -157,9 +160,13 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                 </div>
               </button>
 
-              {/* Workers list */}
-              {isExpanded && (
-                <div className="border-t border-border">
+              {/* Workers list - smooth expand */}
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="border-t-2 border-primary">
                   {zoneWorkers.map((worker, idx) => {
                     const isPresente = worker.status === 'presente';
                     const isFalta = worker.status === 'falta';
@@ -168,14 +175,14 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                     return (
                       <div
                         key={worker.id}
-                        className={`transition-colors ${
+                        className={`transition-colors duration-200 ${
                           isFalta ? 'bg-[#fff0f0]' : 'bg-card'
-                        } ${idx > 0 ? 'border-t border-border/50' : ''}`}
+                        } ${idx > 0 ? 'border-t border-border/40' : ''}`}
                       >
                         {/* Worker summary row */}
                         <button
                           onClick={() => setExpandedWorker(isWorkerExpanded ? null : worker.id)}
-                          className="w-full px-4 py-3 flex items-center gap-3"
+                          className="w-full px-4 py-3 flex items-center gap-3 active:bg-muted/30 transition-colors"
                         >
                           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-xs font-bold shrink-0">
                             {worker.avatar}
@@ -213,13 +220,17 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                         </button>
 
                         {/* Worker expanded details */}
-                        {isWorkerExpanded && (
+                        <div
+                          className={`transition-all duration-200 ease-in-out overflow-hidden ${
+                            isWorkerExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
+                          }`}
+                        >
                           <div className="px-4 pb-4 space-y-3">
                             {/* Toggle buttons */}
                             <div className="grid grid-cols-2 gap-2">
                               <button
                                 onClick={() => setWorkerStatus(worker.id, 'presente')}
-                                className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-sm font-semibold border-2 transition-colors ${
+                                className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
                                   isPresente
                                     ? 'border-primary text-primary bg-primary/5'
                                     : 'border-border text-muted-foreground bg-card hover:border-primary/40'
@@ -229,7 +240,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                               </button>
                               <button
                                 onClick={() => setWorkerStatus(worker.id, 'falta')}
-                                className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-sm font-semibold border-2 transition-colors ${
+                                className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
                                   isFalta
                                     ? 'bg-[#c0392b] text-white border-[#c0392b]'
                                     : 'border-border text-muted-foreground bg-card hover:border-destructive/40'
@@ -241,14 +252,14 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
 
                             {/* Presente: time input */}
                             {isPresente && (
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
+                              <div className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2">
+                                <Clock className="w-4 h-4 text-primary shrink-0" />
                                 <span className="text-xs text-muted-foreground font-medium">Entrada:</span>
                                 <input
                                   type="time"
                                   value={worker.clockIn || generalTime}
                                   onChange={e => setWorkerTime(worker.id, e.target.value)}
-                                  className="h-8 rounded-lg border border-input bg-background px-3 text-sm font-mono flex-1"
+                                  className="h-8 rounded-lg border border-input bg-background px-3 text-sm font-mono flex-1 min-w-0"
                                 />
                               </div>
                             )}
@@ -262,7 +273,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                                 <select
                                   value={worker.faltaMotivo || 'Sin avisar'}
                                   onChange={e => setWorkerMotivo(worker.id, e.target.value as FaltaMotivo)}
-                                  className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm appearance-none"
+                                  className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm"
                                 >
                                   <option>Sin avisar</option>
                                   <option>Enfermedad</option>
@@ -272,12 +283,12 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                               </div>
                             )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
@@ -287,8 +298,8 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
       <div className="fixed bottom-16 left-0 right-0 px-4 pb-3 z-40">
         <div className="max-w-lg mx-auto">
           <Button
-            className="w-full h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-xl"
-            disabled={presentes === 0}
+            className="w-full h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-xl disabled:opacity-40"
+            disabled={fichados === 0}
             onClick={onNext}
           >
             Continuar → Asignar tareas
