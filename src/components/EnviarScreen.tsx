@@ -191,10 +191,14 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
               const actData = activityTipoCounts[a.activity];
               const hh = actData ? actData.hh : 0;
               const hhUd = uds > 0 ? (hh / uds).toFixed(2) : '—';
-              return { activity: a.activity, uds: p.udsProd, tipo: p.tipo, hhUd };
+              return { activity: a.activity, uds: p.udsProd, tipo: p.tipo, hhUd, hhNum: hh, udsNum: uds };
             });
 
           if (prodRows.length === 0) return null;
+
+          const totalUds = prodRows.reduce((s, r) => s + r.udsNum, 0);
+          const totalHH = prodRows.reduce((s, r) => s + r.hhNum, 0);
+          const totalHHUd = totalUds > 0 ? (totalHH / totalUds).toFixed(2) : '—';
 
           return (
             <div>
@@ -223,6 +227,20 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhUd}</div>
                 </div>
               ))}
+              {/* TOTAL ROW */}
+              <div
+                className="grid gap-0 items-center"
+                style={{
+                  gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px',
+                  borderTop: '2px solid hsl(var(--g2))',
+                  background: 'hsl(var(--g05))',
+                }}
+              >
+                <div className="px-2 py-1.5 text-[10px] font-bold uppercase">Total</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{totalUds}</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center">—</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{totalHHUd}</div>
+              </div>
             </div>
           );
         })()}
