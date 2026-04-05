@@ -144,7 +144,7 @@ const Index = () => {
       case 2:
         return <AsignacionesScreen workers={workers} assignments={assignments} onUpdateAssignments={setAssignments} onNext={() => setActiveStep(3)} />;
       case 3:
-        return <HoursScreen workers={workers} assignments={assignments} onNext={() => setActiveStep(4)} />;
+        return <HoursScreen workers={workers} assignments={assignments} hoursMap={hoursMap} onUpdateHoursMap={setHoursMap} previstasMap={previstasMap} onUpdatePrevistasMap={setPrevistasMap} productionMap={productionMap} onUpdateProductionMap={setProductionMap} onNext={() => setActiveStep(4)} />;
       case 4:
         return <EnviarScreen workers={workers} assignments={assignments} />;
       default:
