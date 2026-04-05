@@ -33,8 +33,15 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
   const setWorkerStatus = (workerId: string, status: 'presente' | 'falta') => {
     const updated = workers.map(w =>
       w.id === workerId
-        ? { ...w, status, clockIn: status === 'presente' ? generalTime : undefined }
+        ? { ...w, status, clockIn: status === 'presente' ? (w.clockIn || generalTime) : undefined }
         : w
+    );
+    onUpdateWorkers(updated);
+  };
+
+  const setWorkerTime = (workerId: string, time: string) => {
+    const updated = workers.map(w =>
+      w.id === workerId ? { ...w, clockIn: time } : w
     );
     onUpdateWorkers(updated);
   };
