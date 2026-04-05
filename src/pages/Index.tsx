@@ -27,7 +27,7 @@ interface TaskProduction {
 
 const navLabels: Record<string, string> = {
   parte: 'Pepe Cabrerizo · Capataz',
-  maquinaria: 'Maquinaria',
+  incidencias: 'Incidencias de maquinaria',
   tracking: 'Tracking GPS · PSFV San Pedro',
   solicitudes: 'Solicitudes de operarios',
   historial: 'Historial de partes',
