@@ -244,7 +244,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
               </div>
               <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px', borderBottom: '1px solid hsl(var(--g2))' }}>
                 <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Actividad</div>
-                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>UDS</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>UDS. PROD</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>TIPO</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH/Ud</div>
               </div>
