@@ -152,54 +152,87 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
               </button>
 
               {isExpanded && (
-                <div className="px-3 pb-3 border-t border-border space-y-3 pt-2">
-                  {zoneWorkers.map(worker => (
-                    <div key={worker.id} className="space-y-1.5">
-                      {/* Row: avatar + name + toggles */}
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-[10px] font-bold shrink-0">
-                          {worker.avatar}
+                <div className="px-3 pb-3 border-t border-border space-y-0 pt-1">
+                  {zoneWorkers.map(worker => {
+                    const isPresente = worker.status === 'presente';
+                    const isFalta = worker.status === 'falta';
+
+                    return (
+                      <div
+                        key={worker.id}
+                        className={`rounded-xl p-3 transition-colors ${
+                          isFalta ? 'bg-[#fff0f0]' : 'bg-card'
+                        } ${worker.id !== zoneWorkers[0]?.id ? 'mt-2' : ''}`}
+                      >
+                        {/* Row: avatar + name + status label + toggles */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-[10px] font-bold shrink-0">
+                            {worker.avatar}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate">{worker.name}</p>
+                            {isFalta && (
+                              <p className="text-[11px] font-medium text-[#c0392b]">
+                                Falta · {worker.faltaMotivo || 'Sin avisar'}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              onClick={() => setWorkerStatus(worker.id, 'presente')}
+                              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                isPresente
+                                  ? 'border-primary text-primary bg-primary/5'
+                                  : 'border-border text-muted-foreground bg-card hover:border-primary/40'
+                              }`}
+                            >
+                              <Check className="w-3.5 h-3.5" /> Presente
+                            </button>
+                            <button
+                              onClick={() => setWorkerStatus(worker.id, 'falta')}
+                              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                isFalta
+                                  ? 'bg-[#c0392b] text-white border-[#c0392b]'
+                                  : 'border-border text-muted-foreground bg-card hover:border-[#e57373]/40'
+                              }`}
+                            >
+                              <X className="w-3.5 h-3.5" /> Falta
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate">{worker.name}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => setWorkerStatus(worker.id, 'presente')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                              worker.status === 'presente'
-                                ? 'border-primary text-primary bg-primary/5'
-                                : 'border-border text-muted-foreground bg-card hover:border-primary/40'
-                            }`}
-                          >
-                            <Check className="w-3.5 h-3.5" /> Presente
-                          </button>
-                          <button
-                            onClick={() => setWorkerStatus(worker.id, 'falta')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                              worker.status === 'falta'
-                                ? 'border-[#e57373] text-[#e57373] bg-[#e57373]/5'
-                                : 'border-border text-muted-foreground bg-card hover:border-[#e57373]/40'
-                            }`}
-                          >
-                            <X className="w-3.5 h-3.5" /> Falta
-                          </button>
-                        </div>
+
+                        {/* Conditional details below */}
+                        {isPresente && (
+                          <div className="ml-12 mt-2 flex items-center gap-2">
+                            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="text-[10px] text-muted-foreground font-medium">Entrada:</span>
+                            <input
+                              type="time"
+                              value={worker.clockIn || generalTime}
+                              onChange={e => setWorkerTime(worker.id, e.target.value)}
+                              className="h-7 rounded-md border border-input bg-background px-2 text-xs font-mono w-24"
+                            />
+                          </div>
+                        )}
+
+                        {isFalta && (
+                          <div className="ml-12 mt-2 flex items-center gap-2">
+                            <span className="text-[10px] text-[#c0392b] font-bold uppercase">Motivo</span>
+                            <select
+                              value={worker.faltaMotivo || 'Sin avisar'}
+                              onChange={e => setWorkerMotivo(worker.id, e.target.value as FaltaMotivo)}
+                              className="h-7 rounded-md border border-[#e57373]/40 bg-card px-2 text-xs text-[#c0392b] font-medium"
+                            >
+                              <option>Sin avisar</option>
+                              <option>Enfermedad</option>
+                              <option>Permiso</option>
+                              <option>Retraso</option>
+                            </select>
+                          </div>
+                        )}
                       </div>
-                      {/* Time input row */}
-                      <div className="ml-12">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-muted-foreground font-medium">Entrada:</span>
-                          <input
-                            type="time"
-                            value={worker.clockIn || generalTime}
-                            onChange={e => setWorkerTime(worker.id, e.target.value)}
-                            className="h-7 rounded-md border border-input bg-background px-2 text-xs font-mono w-24"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
