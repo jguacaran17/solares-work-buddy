@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Check, X } from "lucide-react";
-import { mockWorkers, mockZones, Worker } from "@/lib/mock-data";
+import { Check, X, Clock, ChevronRight } from "lucide-react";
+import { mockZones, Worker, FaltaMotivo } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRight } from "lucide-react";
 
 interface FichajeScreenProps {
   workers: Worker[];
