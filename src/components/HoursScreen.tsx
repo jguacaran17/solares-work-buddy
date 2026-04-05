@@ -9,7 +9,6 @@ interface Assignment {
   workerIds: string[];
 }
 
-// hours per subtask per worker
 interface SubtaskHours {
   [activityWorkerSubtask: string]: number;
 }
@@ -21,7 +20,7 @@ interface HoursScreenProps {
 }
 
 const STANDARD_HOURS = 8;
-const EXTRA_COST_PER_HOUR = 25; // €/h extra
+const EXTRA_COST_PER_HOUR = 25;
 
 function getSubtasks(activity: string): Subtask[] {
   return mockActivitySubtasks[activity] || defaultSubtasks;
@@ -35,7 +34,6 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
 
-  // Initialize hours state from subtask standard hours
   const [hoursMap, setHoursMap] = useState<SubtaskHours>(() => {
     const map: SubtaskHours = {};
     assignments.forEach(a => {
@@ -54,30 +52,37 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
     setHoursMap(prev => ({ ...prev, [key]: isNaN(num) ? 0 : num }));
   };
 
-  // Calculations
-  const stats = useMemo(() => {
-    let totalReal = 0;
-    let totalStandard = 0;
-
+  // Per-worker total hours across all assignments
+  const workerTotalHours = useMemo(() => {
+    const totals: Record<string, number> = {};
     assignments.forEach(a => {
       const subtasks = getSubtasks(a.activity);
       a.workerIds.forEach(wId => {
-        let workerReal = 0;
+        if (!totals[wId]) totals[wId] = 0;
         subtasks.forEach(st => {
-          workerReal += hoursMap[makeKey(a.activity, wId, st.id)] || 0;
+          totals[wId] += hoursMap[makeKey(a.activity, wId, st.id)] || 0;
         });
-        totalReal += workerReal;
-        totalStandard += STANDARD_HOURS;
       });
     });
+    return totals;
+  }, [hoursMap, assignments]);
 
-    const totalAssignedWorkers = new Set(assignments.flatMap(a => a.workerIds)).size;
+  const stats = useMemo(() => {
+    let totalReal = 0;
+    let totalStandard = 0;
+    const uniqueWorkers = new Set(assignments.flatMap(a => a.workerIds));
+
+    uniqueWorkers.forEach(wId => {
+      totalReal += workerTotalHours[wId] || 0;
+      totalStandard += STANDARD_HOURS;
+    });
+
     const deviation = totalReal - totalStandard;
     const extraCost = deviation > 0 ? deviation * EXTRA_COST_PER_HOUR : 0;
     const efficiency = totalStandard > 0 ? Math.round((totalStandard / Math.max(totalReal, 0.01)) * 100) : 0;
 
-    return { totalReal, totalStandard, deviation, extraCost, efficiency, totalAssignedWorkers };
-  }, [hoursMap, assignments]);
+    return { totalReal, totalStandard, deviation, extraCost, efficiency, totalAssignedWorkers: uniqueWorkers.size };
+  }, [workerTotalHours, assignments]);
 
   return (
     <div className="pb-24 px-4 pt-4 max-w-lg mx-auto">
@@ -88,7 +93,7 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
           <p className="text-[11px] text-muted-foreground font-medium">HH total</p>
         </div>
         <div className="stat-card">
-          <p className={`text-lg font-bold ${stats.deviation > 0 ? 'text-destructive' : stats.deviation < 0 ? 'text-success' : ''}`}>
+          <p className={`text-lg font-bold ${stats.deviation > 0 ? 'text-destructive' : stats.deviation < 0 ? 'text-[hsl(152,60%,42%)]' : ''}`}>
             {stats.totalAssignedWorkers > 0 ? `${stats.deviation > 0 ? '+' : ''}${stats.deviation.toFixed(1)}` : '—'}
           </p>
           <p className="text-[11px] text-muted-foreground font-medium">Desviación</p>
@@ -120,7 +125,6 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
             const subtasks = getSubtasks(assignment.activity);
             const isExpanded = expandedActivity === assignment.activity;
 
-            // Total hours for this activity
             let activityTotal = 0;
             assignedWorkers.forEach(w => {
               subtasks.forEach(st => {
@@ -146,7 +150,7 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
                   </div>
                 </button>
 
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                   <div className="px-4 pb-4 space-y-4">
                     {subtasks.map(subtask => {
                       let subtaskTotal = 0;
@@ -160,30 +164,42 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
                             <span className="text-xs font-semibold text-muted-foreground">{subtask.name}</span>
                             <span className="text-xs font-mono font-bold">{subtaskTotal.toFixed(1)}h</span>
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             {assignedWorkers.map(w => {
                               const key = makeKey(assignment.activity, w.id, subtask.id);
                               const val = hoursMap[key] ?? subtask.standardHours;
+                              const totalForWorker = workerTotalHours[w.id] || 0;
+                              const deviation = totalForWorker - STANDARD_HOURS;
+
                               return (
-                                <div key={w.id} className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-full bg-secondary text-secondary-foreground text-[9px] font-bold flex items-center justify-center shrink-0">
-                                      {w.avatar}
-                                    </div>
-                                    <span className="text-sm">{w.name}</span>
+                                <div key={w.id} className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
+                                    {w.avatar}
                                   </div>
-                                  <div className="flex items-center gap-1">
-                                    <input
-                                      type="number"
-                                      step="0.25"
-                                      min="0"
-                                      max="24"
-                                      value={val}
-                                      onChange={e => updateHours(key, e.target.value)}
-                                      className="w-16 h-8 text-sm font-mono font-bold text-right bg-muted/50 border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                                    />
-                                    <span className="text-xs text-muted-foreground">h</span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{w.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      Entrada {w.clockIn || '07:00'}
+                                    </p>
                                   </div>
+                                  <input
+                                    type="number"
+                                    step="0.25"
+                                    min="0"
+                                    max="24"
+                                    value={val}
+                                    onChange={e => updateHours(key, e.target.value)}
+                                    className="w-16 h-8 text-sm font-mono font-bold text-right bg-muted/50 border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                  />
+                                  <span
+                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                                      deviation > 0
+                                        ? 'bg-destructive/10 text-destructive'
+                                        : 'bg-[hsl(152,60%,42%,0.1)] text-[hsl(152,60%,30%)]'
+                                    }`}
+                                  >
+                                    {deviation > 0 ? '+' : ''}{deviation.toFixed(1)}h
+                                  </span>
                                 </div>
                               );
                             })}

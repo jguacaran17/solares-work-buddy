@@ -294,20 +294,22 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
       </div>
 
       {/* Fixed bottom CTA */}
-      <div className="fixed bottom-16 left-0 right-0 px-4 pb-3 z-40">
-        <div className="max-w-lg mx-auto">
-          <Button
-            className="w-full h-12 text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-xl disabled:opacity-40"
-            disabled={fichados === 0}
-            onClick={onNext}
-          >
-            Continuar → Asignar tareas
-            <span className="ml-2 bg-secondary-foreground/20 text-secondary-foreground text-xs px-2 py-0.5 rounded-full">
-              {presentes} pres. · {faltas} faltas
-            </span>
-          </Button>
+      {presentes > 0 && (
+        <div className="fixed bottom-16 left-0 right-0 px-4 pb-3 z-40">
+          <div className="max-w-lg mx-auto">
+            <Button
+              className="w-full h-12 text-sm font-bold rounded-xl text-white hover:opacity-90"
+              style={{ backgroundColor: '#0f1f3a' }}
+              onClick={onNext}
+            >
+              Continuar → Asignar tareas
+              <span className="ml-2 bg-white/15 text-white text-xs px-2 py-0.5 rounded-full">
+                {presentes} presentes
+              </span>
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
