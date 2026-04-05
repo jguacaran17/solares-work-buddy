@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
-import { Worker, mockActivitySubtasks, defaultSubtasks, Subtask } from "@/lib/mock-data";
+import { Worker, mockActivitySubtasks, defaultSubtasks, Subtask, WorkerTipo } from "@/lib/mock-data";
 
 interface Assignment {
   activity: string;
   workerIds: string[];
+  comment?: string;
 }
 
 interface HoursScreenProps {
@@ -15,14 +16,26 @@ interface HoursScreenProps {
 const COST_PER_HOUR = 28;
 const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
 
+const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+};
+
 function getSubtasks(activity: string): Subtask[] {
   return mockActivitySubtasks[activity] || defaultSubtasks;
+}
+
+interface SubtaskProduction {
+  horaInicio: string;
+  horaFin: string;
+  udsProd: string;
+  tipo: string;
 }
 
 const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
 
-  // Hours per worker (total across all assignments)
   const [hoursMap, setHoursMap] = useState<Record<string, number>>(() => {
     const map: Record<string, number> = {};
     assignments.forEach(a => {
@@ -32,6 +45,16 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
     });
     return map;
   });
+
+  // Production data per subtask (keyed by "activity::subtaskId")
+  const [productionMap, setProductionMap] = useState<Record<string, SubtaskProduction>>({});
+
+  const updateProduction = (key: string, field: keyof SubtaskProduction, value: string) => {
+    setProductionMap(prev => ({
+      ...prev,
+      [key]: { ...(prev[key] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' }), [field]: value },
+    }));
+  };
 
   const updateHours = (workerId: string, value: string) => {
     const num = parseFloat(value);
@@ -44,7 +67,6 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
     const uniqueWorkers = new Set(assignments.flatMap(a => a.workerIds));
     uniqueWorkers.forEach(wId => {
       totalHH += hoursMap[wId] || 0;
-      // Find theoretical hours for this worker's assignment
       const assignment = assignments.find(a => a.workerIds.includes(wId));
       if (assignment) {
         const subtasks = getSubtasks(assignment.activity);
@@ -57,7 +79,7 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
     return { totalHH, dv, eu, efficiency, totalWorkers: uniqueWorkers.size };
   }, [hoursMap, assignments]);
 
-  // Group by activity (tarea) -> subtask -> workers
+  // Group by tarea -> subtask -> workers, then expand subtasks inside each activity
   const grouped = useMemo(() => {
     const tMap: Record<string, string> = {
       'Hincado principal': 'Hincado', 'Lima y pintura': 'Acabados',
@@ -72,7 +94,7 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
       'Logistica': 'Logistica',
     };
 
-    const groups: Record<string, { activity: string; workers: { id: string; name: string; avatar: string; clockIn?: string }[]; teo: number }[]> = {};
+    const groups: Record<string, { activity: string; subtasks: Subtask[]; workers: { id: string; name: string; avatar: string; clockIn?: string; tipo: WorkerTipo }[]; teo: number; comment?: string }[]> = {};
 
     assignments.forEach(a => {
       const tarea = tMap[a.activity] || a.activity;
@@ -81,9 +103,9 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
       const teo = subtasks.reduce((s, st) => s + st.standardHours, 0);
       const ws = a.workerIds.map(wId => {
         const w = workers.find(x => x.id === wId);
-        return w ? { id: w.id, name: w.name, avatar: w.avatar, clockIn: w.clockIn } : null;
-      }).filter(Boolean) as { id: string; name: string; avatar: string; clockIn?: string }[];
-      groups[tarea].push({ activity: a.activity, workers: ws, teo });
+        return w ? { id: w.id, name: w.name, avatar: w.avatar, clockIn: w.clockIn, tipo: w.tipo } : null;
+      }).filter(Boolean) as { id: string; name: string; avatar: string; clockIn?: string; tipo: WorkerTipo }[];
+      groups[tarea].push({ activity: a.activity, subtasks, workers: ws, teo, comment: a.comment });
     });
 
     return groups;
@@ -94,6 +116,15 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
     setCollapsedTareas(prev => {
       const next = new Set(prev);
       if (next.has(t)) next.delete(t); else next.add(t);
+      return next;
+    });
+  };
+
+  const [collapsedSubtasks, setCollapsedSubtasks] = useState<Set<string>>(new Set());
+  const toggleSubtask = (key: string) => {
+    setCollapsedSubtasks(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
   };
@@ -156,59 +187,157 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
               </div>
             </div>
 
-            {!isCollapsed && subs.map(sub => (
-              <div key={sub.activity} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-                {/* Subtask header */}
-                <div className="flex items-center justify-between px-3.5 py-2" style={{ background: '#fafaf8', borderBottom: '1px solid hsl(var(--border))' }}>
-                  <span className="text-[12px] font-semibold text-muted-foreground">{sub.activity}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono">{sub.workers.length} op</span>
-                </div>
+            {!isCollapsed && subs.map(sub => {
+              return (
+                <div key={sub.activity} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
+                  {/* Activity header */}
+                  <div className="flex items-center justify-between px-3.5 py-2" style={{ background: '#fafaf8', borderBottom: '1px solid hsl(var(--border))' }}>
+                    <span className="text-[12px] font-semibold text-muted-foreground">{sub.activity}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{sub.workers.length} op</span>
+                  </div>
 
-                {/* Workers */}
-                {sub.workers.map(w => {
-                  const val = hoursMap[w.id] ?? sub.teo;
-                  const dev = val - sub.teo;
-                  const ci = parseInt(w.id) % avatarColors.length;
-                  const inputClass = Math.abs(dev) < 0.1 ? 'ok' : dev > 0 ? 'over' : 'ok';
+                  {/* Subtasks inside this activity */}
+                  {sub.subtasks.map(st => {
+                    const stKey = `${sub.activity}::${st.id}`;
+                    const isStCollapsed = collapsedSubtasks.has(stKey);
+                    const prod = productionMap[stKey] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' };
+                    const hhUd = prod.udsProd && parseFloat(prod.udsProd) > 0
+                      ? (st.standardHours / parseFloat(prod.udsProd)).toFixed(2)
+                      : '—';
 
-                  return (
-                    <div key={w.id} className="flex items-center gap-2 px-3.5 py-2" style={{ borderBottom: '1px solid #f0f0ec' }}>
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style={{ background: avatarColors[ci] }}>
-                        {w.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-[12px] font-semibold">{w.name}</div>
-                        <div className="text-[10px] text-muted-foreground font-mono">Entrada {w.clockIn || '07:00'} · Pres. {sub.teo}h</div>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="number"
-                          value={val}
-                          step="0.25"
-                          min="0"
-                          onChange={e => updateHours(w.id, e.target.value)}
-                          className="w-[52px] border border-border rounded-md px-1 py-1 text-[13px] font-mono font-semibold text-center outline-none"
-                          style={{
-                            background: inputClass === 'over' ? 'hsl(var(--red-bg))' : 'hsl(var(--g05))',
-                            borderColor: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g4))',
-                            color: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
-                          }}
-                        />
-                        <span
-                          className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded min-w-[34px] text-center"
-                          style={{
-                            background: dev > 0 ? 'hsl(var(--red-bg))' : 'hsl(var(--g1))',
-                            color: dev > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
-                          }}
+                    return (
+                      <div key={st.id} style={{ borderBottom: '1px solid #f0f0ec' }}>
+                        {/* Subtask header */}
+                        <div
+                          className="flex items-center justify-between px-4 py-2 cursor-pointer"
+                          style={{ background: '#f5f5f2' }}
+                          onClick={() => toggleSubtask(stKey)}
                         >
-                          {dev > 0 ? '+' : ''}{dev.toFixed(1)}h
-                        </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] text-muted-foreground" style={{ transform: isStCollapsed ? '' : 'rotate(90deg)', display: 'inline-block', transition: 'transform .2s' }}>›</span>
+                            <span className="text-[11px] font-semibold">{st.name}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-muted-foreground">{st.standardHours}h std</span>
+                        </div>
+
+                        {!isStCollapsed && (
+                          <div className="px-4 pb-2">
+                            {/* Workers for this subtask */}
+                            {sub.workers.map(w => {
+                              const val = hoursMap[w.id] ?? sub.teo;
+                              const dev = val - sub.teo;
+                              const ci = parseInt(w.id) % avatarColors.length;
+                              const inputClass = Math.abs(dev) < 0.1 ? 'ok' : dev > 0 ? 'over' : 'ok';
+
+                              return (
+                                <div key={w.id} className="flex items-center gap-2 py-1.5" style={{ borderBottom: '1px solid #f0f0ec' }}>
+                                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold text-white flex-shrink-0" style={{ background: avatarColors[ci] }}>
+                                    {w.avatar}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[11px] font-semibold truncate">{w.name}</span>
+                                      <span
+                                        className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none flex-shrink-0"
+                                        style={{ background: tipoBadgeStyles[w.tipo].bg, color: tipoBadgeStyles[w.tipo].color }}
+                                      >
+                                        {w.tipo}
+                                      </span>
+                                    </div>
+                                    <div className="text-[9px] text-muted-foreground font-mono">Entrada {w.clockIn || '07:00'}</div>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="number"
+                                      value={val}
+                                      step="0.25"
+                                      min="0"
+                                      onChange={e => updateHours(w.id, e.target.value)}
+                                      className="w-[48px] border border-border rounded-md px-1 py-0.5 text-[12px] font-mono font-semibold text-center outline-none"
+                                      style={{
+                                        background: inputClass === 'over' ? 'hsl(var(--red-bg))' : 'hsl(var(--g05))',
+                                        borderColor: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g4))',
+                                        color: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
+                                      }}
+                                    />
+                                    <span
+                                      className="text-[9px] font-bold font-mono px-1 py-0.5 rounded min-w-[30px] text-center"
+                                      style={{
+                                        background: dev > 0 ? 'hsl(var(--red-bg))' : 'hsl(var(--g1))',
+                                        color: dev > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
+                                      }}
+                                    >
+                                      {dev > 0 ? '+' : ''}{dev.toFixed(1)}h
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+
+                            {/* PRODUCCION fields per subtask */}
+                            <div className="mt-2 p-2 rounded-lg" style={{ background: 'hsl(var(--g05))', border: '1px solid hsl(var(--g1))' }}>
+                              <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1.5">Producción</div>
+                              <div className="grid grid-cols-2 gap-1.5 mb-1.5">
+                                <div>
+                                  <label className="text-[9px] text-muted-foreground">Hora inicio</label>
+                                  <input
+                                    type="time"
+                                    value={prod.horaInicio}
+                                    onChange={e => updateProduction(stKey, 'horaInicio', e.target.value)}
+                                    className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono"
+                                    style={{ background: 'hsl(var(--background))' }}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] text-muted-foreground">Hora fin</label>
+                                  <input
+                                    type="time"
+                                    value={prod.horaFin}
+                                    onChange={e => updateProduction(stKey, 'horaFin', e.target.value)}
+                                    className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono"
+                                    style={{ background: 'hsl(var(--background))' }}
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-3 gap-1.5">
+                                <div>
+                                  <label className="text-[9px] text-muted-foreground">Uds prod.</label>
+                                  <input
+                                    type="number"
+                                    value={prod.udsProd}
+                                    onChange={e => updateProduction(stKey, 'udsProd', e.target.value)}
+                                    className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono"
+                                    style={{ background: 'hsl(var(--background))' }}
+                                    placeholder="0"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] text-muted-foreground">Tipo</label>
+                                  <input
+                                    type="text"
+                                    value={prod.tipo}
+                                    onChange={e => updateProduction(stKey, 'tipo', e.target.value)}
+                                    className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono"
+                                    style={{ background: 'hsl(var(--background))' }}
+                                    placeholder="ud/m²"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] text-muted-foreground">HH/Ud</label>
+                                  <div className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono font-bold text-center" style={{ background: 'hsl(var(--g1))' }}>
+                                    {hhUd}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+                    );
+                  })}
+                </div>
+              );
+            })}
           </div>
         );
       }) : (
