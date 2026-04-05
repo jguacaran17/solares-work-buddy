@@ -204,10 +204,11 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
               <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
                 Detalle Producción
               </div>
-              <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px', borderBottom: '1px solid hsl(var(--g2))' }}>
+              <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 50px 55px', borderBottom: '1px solid hsl(var(--g2))' }}>
                 <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Actividad</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>UDS. PROD</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>TIPO</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH/Ud</div>
               </div>
               {prodRows.map((r, i) => (
@@ -215,7 +216,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
                   key={r.activity}
                   className="grid gap-0 items-center"
                   style={{
-                    gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px',
+                    gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 50px 55px',
                     borderBottom: '1px solid hsl(var(--border))',
                     background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
                   }}
@@ -223,6 +224,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
                   <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{r.activity}</div>
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.uds}</div>
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center">{r.tipo || '—'}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhNum.toFixed(1)}</div>
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhUd}</div>
                 </div>
               ))}
@@ -230,7 +232,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
               <div
                 className="grid gap-0 items-center"
                 style={{
-                  gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px',
+                  gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 50px 55px',
                   borderTop: '2px solid hsl(var(--g2))',
                   background: 'hsl(var(--g05))',
                 }}
@@ -238,6 +240,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
                 <div className="px-2 py-1.5 text-[10px] font-bold uppercase">Total</div>
                 <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{totalUds}</div>
                 <div className="px-1 py-1.5 text-[10px] font-mono text-center">—</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{stats.hh.toFixed(1)}</div>
                 <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{totalHHUd}</div>
               </div>
             </div>
