@@ -17,6 +17,13 @@ interface Assignment {
   comment?: string;
 }
 
+interface TaskProduction {
+  horaInicio: string;
+  horaFin: string;
+  udsProd: string;
+  tipo: string;
+}
+
 const navLabels: Record<string, string> = {
   parte: 'Pepe Cabrerizo · Capataz',
   maquinaria: 'Maquinaria',
@@ -40,6 +47,9 @@ const Index = () => {
   const [bottomTab, setBottomTab] = useState('parte');
   const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [hoursMap, setHoursMap] = useState<Record<string, number>>({});
+  const [previstasMap, setPrevistasMap] = useState<Record<string, number>>({});
+  const [productionMap, setProductionMap] = useState<Record<string, TaskProduction>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
 
@@ -134,7 +144,7 @@ const Index = () => {
       case 2:
         return <AsignacionesScreen workers={workers} assignments={assignments} onUpdateAssignments={setAssignments} onNext={() => setActiveStep(3)} />;
       case 3:
-        return <HoursScreen workers={workers} assignments={assignments} onNext={() => setActiveStep(4)} />;
+        return <HoursScreen workers={workers} assignments={assignments} hoursMap={hoursMap} onUpdateHoursMap={setHoursMap} previstasMap={previstasMap} onUpdatePrevistasMap={setPrevistasMap} productionMap={productionMap} onUpdateProductionMap={setProductionMap} onNext={() => setActiveStep(4)} />;
       case 4:
         return <EnviarScreen workers={workers} assignments={assignments} />;
       default:
