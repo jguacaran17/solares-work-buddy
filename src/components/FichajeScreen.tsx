@@ -184,9 +184,10 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                       {worker.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[12px] font-semibold">{worker.name}</div>
-                      {isPresente && <div className="text-[10px] text-muted-foreground">Entrada {worker.clockIn || generalTime}</div>}
-                      {isFalta && <div className="text-[10px] text-destructive">Falta: {worker.faltaMotivo || 'Sin avisar'}</div>}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-semibold">{worker.name}</span>
+                        <TipoBadge tipo={worker.tipo} />
+                      </div>
                     </div>
                     {/* Toggle buttons */}
                     <div className="flex border border-border rounded-md overflow-hidden flex-shrink-0">
