@@ -8,16 +8,24 @@ interface Assignment {
   comment?: string;
 }
 
+interface TaskProduction {
+  horaInicio: string;
+  horaFin: string;
+  udsProd: string;
+  tipo: string;
+}
+
 interface EnviarScreenProps {
   workers: Worker[];
   assignments: Assignment[];
   hoursMap: Record<string, number>;
+  productionMap: Record<string, TaskProduction>;
 }
 
 const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 
-const EnviarScreen = ({ workers, assignments, hoursMap }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
 
@@ -111,41 +119,49 @@ const EnviarScreen = ({ workers, assignments, hoursMap }: EnviarScreenProps) => 
           </div>
 
           {/* Table header */}
-          <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 40px 40px 40px minmax(0, 1.5fr) 45px', borderBottom: '1px solid hsl(var(--g2))' }}>
+          <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 32px 32px 32px minmax(0, 1.2fr) 50px 42px', borderBottom: '1px solid hsl(var(--g2))' }}>
             <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Actividad</div>
             <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center" style={{ background: '#fef3c7', color: '#92400e' }}>DESP</div>
             <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center" style={{ background: '#ccfbf1', color: '#115e59' }}>LOC</div>
             <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center" style={{ background: '#dbeafe', color: '#1e3a5f' }}>FLD</div>
             <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Comentarios</div>
+            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>PROD</div>
             <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
           </div>
 
           {/* Table rows */}
-          {Object.entries(activityTipoCounts).map(([activity, data], i) => (
-            <div
-              key={activity}
-              className="grid gap-0 items-center"
-              style={{
-                gridTemplateColumns: 'minmax(0, 2fr) 40px 40px 40px minmax(0, 1.5fr) 45px',
-                borderBottom: '1px solid hsl(var(--border))',
-                background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
-              }}
-            >
-              <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{activity}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.DESP || '—'}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.LOCAL || '—'}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.FIELD || '—'}</div>
-              <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{data.comment || '—'}</div>
-              <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.hh.toFixed(1)}</div>
-            </div>
-          ))}
+          {Object.entries(activityTipoCounts).map(([activity, data], i) => {
+            const prod = productionMap[activity];
+            const prodLabel = prod && prod.udsProd && parseFloat(prod.udsProd) > 0
+              ? `${prod.udsProd} ${prod.tipo || ''}`
+              : '—';
+            return (
+              <div
+                key={activity}
+                className="grid gap-0 items-center"
+                style={{
+                  gridTemplateColumns: 'minmax(0, 2fr) 32px 32px 32px minmax(0, 1.2fr) 50px 42px',
+                  borderBottom: '1px solid hsl(var(--border))',
+                  background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
+                }}
+              >
+                <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{activity}</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.DESP || '—'}</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.LOCAL || '—'}</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.FIELD || '—'}</div>
+                <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{data.comment || '—'}</div>
+                <div className="px-1 py-1.5 text-[9px] font-mono text-center font-semibold">{prodLabel}</div>
+                <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.hh.toFixed(1)}</div>
+              </div>
+            );
+          })}
 
           {/* Totals row */}
           {Object.keys(activityTipoCounts).length > 0 && (
             <div
               className="grid gap-0 items-center"
               style={{
-                gridTemplateColumns: 'minmax(0, 2fr) 40px 40px 40px minmax(0, 1.5fr) 45px',
+                gridTemplateColumns: 'minmax(0, 2fr) 32px 32px 32px minmax(0, 1.2fr) 50px 42px',
                 borderTop: '2px solid hsl(var(--g2))',
                 background: 'hsl(var(--g05))',
               }}
@@ -161,6 +177,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap }: EnviarScreenProps) => 
                 {Object.values(activityTipoCounts).reduce((s, d) => s + d.FIELD, 0) || '—'}
               </div>
               <div className="px-2 py-2"></div>
+              <div className="px-1 py-2"></div>
               <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">{stats.hh.toFixed(1)}</div>
             </div>
           )}
@@ -210,6 +227,55 @@ const EnviarScreen = ({ workers, assignments, hoursMap }: EnviarScreenProps) => 
             </div>
           ))}
         </div>
+
+        {/* DETALLE PRODUCCIÓN */}
+        {(() => {
+          const prodRows = assignments
+            .filter(a => {
+              const p = productionMap[a.activity];
+              return p && p.udsProd && parseFloat(p.udsProd) > 0;
+            })
+            .map(a => {
+              const p = productionMap[a.activity];
+              const uds = parseFloat(p.udsProd);
+              const actData = activityTipoCounts[a.activity];
+              const hh = actData ? actData.hh : 0;
+              const hhUd = uds > 0 ? (hh / uds).toFixed(2) : '—';
+              return { activity: a.activity, uds: p.udsProd, tipo: p.tipo, hhUd };
+            });
+
+          if (prodRows.length === 0) return null;
+
+          return (
+            <div>
+              <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
+                Detalle Producción
+              </div>
+              <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px', borderBottom: '1px solid hsl(var(--g2))' }}>
+                <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Actividad</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>UDS</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>TIPO</div>
+                <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH/Ud</div>
+              </div>
+              {prodRows.map((r, i) => (
+                <div
+                  key={r.activity}
+                  className="grid gap-0 items-center"
+                  style={{
+                    gridTemplateColumns: 'minmax(0, 2fr) 55px 50px 55px',
+                    borderBottom: '1px solid hsl(var(--border))',
+                    background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
+                  }}
+                >
+                  <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{r.activity}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.uds}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center">{r.tipo || '—'}</div>
+                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{r.hhUd}</div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* COMENTARIOS GENERALES */}
         <div style={{ borderTop: '2px solid hsl(var(--g2))' }}>
