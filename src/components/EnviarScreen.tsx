@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Worker, mockMachines, projectInfo, WorkerTipo } from "@/lib/mock-data";
+import { Worker, Machine, projectInfo, WorkerTipo } from "@/lib/mock-data";
 import { toast } from "sonner";
 
 interface Assignment {
@@ -20,12 +20,13 @@ interface EnviarScreenProps {
   assignments: Assignment[];
   hoursMap: Record<string, number>;
   productionMap: Record<string, TaskProduction>;
+  machines: Machine[];
 }
 
 const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 
-const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
 
@@ -65,9 +66,9 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
   const today = new Date();
   const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
-  const activeMachines = mockMachines.filter(m => m.status === 'activa');
-  const brokenMachines = mockMachines.filter(m => m.status === 'averia');
-  const stoppedMachines = mockMachines.filter(m => m.status === 'parada');
+  const activeMachines = machines.filter(m => m.status === 'activa');
+  const brokenMachines = machines.filter(m => m.status === 'averia');
+  const stoppedMachines = machines.filter(m => m.status === 'parada');
 
   return (
     <>

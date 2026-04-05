@@ -7,7 +7,8 @@ const steps = [
   { id: 1, label: 'Fichaje' },
   { id: 2, label: 'Asign.' },
   { id: 3, label: 'Horas' },
-  { id: 4, label: 'Enviar' },
+  { id: 4, label: 'Maquin.' },
+  { id: 5, label: 'Enviar' },
 ];
 
 const StepNav = ({ activeStep, onStepChange }: StepNavProps) => {

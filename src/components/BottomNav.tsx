@@ -9,8 +9,8 @@ const tabs = [
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>,
   },
   {
-    id: 'maquinaria', label: 'Maquinaria',
-    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19.5 8.5l-1.5-4.5H6L4.5 8.5H2V10h1l1 11h16l1-11h1V8.5h-2.5zm-10 9H8v-6h1.5v6zm3.5 0h-1.5v-6H13v6zm3.5 0H15v-6h1.5v6zM5.25 8.5L6.5 5.5h11l1.25 3H5.25z"/></svg>,
+    id: 'incidencias', label: 'Incidencias',
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>,
   },
   {
     id: 'tracking', label: 'Tracking',

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { isToday as isTodayFn, format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { mockWorkers as initialWorkers, Worker } from "@/lib/mock-data";
+import { mockWorkers as initialWorkers, mockMachines as initialMachines, Worker, Machine } from "@/lib/mock-data";
 import AppHeader from "@/components/AppHeader";
 import StepNav from "@/components/StepNav";
 import FichajeScreen from "@/components/FichajeScreen";
 import AsignacionesScreen from "@/components/AsignacionesScreen";
 import HoursScreen from "@/components/HoursScreen";
 import EnviarScreen from "@/components/EnviarScreen";
+import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
 import BottomNav from "@/components/BottomNav";
 
@@ -26,7 +27,7 @@ interface TaskProduction {
 
 const navLabels: Record<string, string> = {
   parte: 'Pepe Cabrerizo · Capataz',
-  maquinaria: 'Maquinaria',
+  incidencias: 'Incidencias de maquinaria',
   tracking: 'Tracking GPS · PSFV San Pedro',
   solicitudes: 'Solicitudes de operarios',
   historial: 'Historial de partes',
@@ -50,6 +51,7 @@ const Index = () => {
   const [hoursMap, setHoursMap] = useState<Record<string, number>>({});
   const [previstasMap, setPrevistasMap] = useState<Record<string, number>>({});
   const [productionMap, setProductionMap] = useState<Record<string, TaskProduction>>({});
+  const [machines, setMachines] = useState<Machine[]>(initialMachines);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
 
@@ -146,7 +148,9 @@ const Index = () => {
       case 3:
         return <HoursScreen workers={workers} assignments={assignments} hoursMap={hoursMap} onUpdateHoursMap={setHoursMap} previstasMap={previstasMap} onUpdatePrevistasMap={setPrevistasMap} productionMap={productionMap} onUpdateProductionMap={setProductionMap} onNext={() => setActiveStep(4)} />;
       case 4:
-        return <EnviarScreen workers={workers} assignments={assignments} hoursMap={hoursMap} productionMap={productionMap} />;
+        return <MaquinariaStepScreen machines={machines} onUpdateMachines={setMachines} onNext={() => setActiveStep(5)} />;
+      case 5:
+        return <EnviarScreen workers={workers} assignments={assignments} hoursMap={hoursMap} productionMap={productionMap} machines={machines} />;
       default:
         return null;
     }
@@ -156,7 +160,7 @@ const Index = () => {
     switch (bottomTab) {
       case 'parte':
         return renderParteStep();
-      case 'maquinaria':
+      case 'incidencias':
         return <MaquinariaScreen />;
       case 'tracking':
         return (
