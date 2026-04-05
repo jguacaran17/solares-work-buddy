@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Worker, WorkerTipo } from "@/lib/mock-data";
 
 interface Assignment {
@@ -7,9 +7,22 @@ interface Assignment {
   comment?: string;
 }
 
+interface TaskProduction {
+  horaInicio: string;
+  horaFin: string;
+  udsProd: string;
+  tipo: string;
+}
+
 interface HoursScreenProps {
   workers: Worker[];
   assignments: Assignment[];
+  hoursMap: Record<string, number>;
+  onUpdateHoursMap: (fn: (prev: Record<string, number>) => Record<string, number>) => void;
+  previstasMap: Record<string, number>;
+  onUpdatePrevistasMap: (fn: (prev: Record<string, number>) => Record<string, number>) => void;
+  productionMap: Record<string, TaskProduction>;
+  onUpdateProductionMap: (fn: (prev: Record<string, TaskProduction>) => Record<string, TaskProduction>) => void;
   onNext: () => void;
 }
 
@@ -23,26 +36,27 @@ const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
   FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
 };
 
-interface TaskProduction {
-  horaInicio: string;
-  horaFin: string;
-  udsProd: string;
-  tipo: string;
-}
-
-const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
-  const [hoursMap, setHoursMap] = useState<Record<string, number>>(() => {
-    const map: Record<string, number> = {};
+const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, onNext }: HoursScreenProps) => {
+  // Initialize hours for workers that don't have a value yet
+  useMemo(() => {
+    const missing: Record<string, number> = {};
     assignments.forEach(a => {
-      a.workerIds.forEach(wId => { map[wId] = map[wId] || DEFAULT_HOURS; });
+      const prev = previstasMap[a.activity] ?? DEFAULT_HOURS;
+      a.workerIds.forEach(wId => {
+        if (hoursMap[wId] === undefined && missing[wId] === undefined) {
+          missing[wId] = prev;
+        }
+      });
     });
-    return map;
-  });
+    if (Object.keys(missing).length > 0) {
+      onUpdateHoursMap(prev => ({ ...prev, ...missing }));
+    }
+  }, [assignments]);
 
-  const [productionMap, setProductionMap] = useState<Record<string, TaskProduction>>({});
+  const getHours = (wId: string) => hoursMap[wId] ?? DEFAULT_HOURS;
 
   const updateProduction = (activity: string, field: keyof TaskProduction, value: string) => {
-    setProductionMap(prev => ({
+    onUpdateProductionMap(prev => ({
       ...prev,
       [activity]: { ...(prev[activity] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' }), [field]: value },
     }));
@@ -50,13 +64,24 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
 
   const updateHours = (workerId: string, value: string) => {
     const num = parseFloat(value);
-    setHoursMap(prev => ({ ...prev, [workerId]: isNaN(num) ? 0 : num }));
+    onUpdateHoursMap(prev => ({ ...prev, [workerId]: isNaN(num) ? 0 : num }));
+  };
+
+  const updatePrevistas = (activity: string, value: string, workerIds: string[]) => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return;
+    onUpdatePrevistasMap(prev => ({ ...prev, [activity]: num }));
+    onUpdateHoursMap(prev => {
+      const next = { ...prev };
+      workerIds.forEach(wId => { next[wId] = num; });
+      return next;
+    });
   };
 
   const stats = useMemo(() => {
     let totalHH = 0;
     const uniqueWorkers = new Set(assignments.flatMap(a => a.workerIds));
-    uniqueWorkers.forEach(wId => { totalHH += hoursMap[wId] || 0; });
+    uniqueWorkers.forEach(wId => { totalHH += getHours(wId); });
     const totalTeo = uniqueWorkers.size * DEFAULT_HOURS;
     const dv = totalHH - totalTeo;
     const eu = Math.round(dv * COST_PER_HOUR);
@@ -64,9 +89,17 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
     return { totalHH, dv, eu, efficiency, totalWorkers: uniqueWorkers.size };
   }, [hoursMap, assignments]);
 
-  const [collapsedTasks, setCollapsedTasks] = useState<Set<string>>(new Set());
+  const collapsedTasks = useMemo(() => new Set<string>(), []);
+  const [, forceUpdate] = useMemo(() => {
+    let val = 0;
+    return [val, () => {}];
+  }, []);
+
+  // Use state for collapsed
+  const { useState } = require("react");
+  const [collapsedSet, setCollapsedSet] = useState<Set<string>>(new Set());
   const toggleTask = (t: string) => {
-    setCollapsedTasks(prev => {
+    setCollapsedSet((prev: Set<string>) => {
       const next = new Set(prev);
       if (next.has(t)) next.delete(t); else next.add(t);
       return next;
@@ -109,15 +142,16 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
       <div className="sec-title">Revisa y ajusta horas si hace falta</div>
 
       {assignments.length > 0 ? assignments.map(a => {
-        const isCollapsed = collapsedTasks.has(a.activity);
+        const isCollapsed = collapsedSet.has(a.activity);
         const taskWorkers = a.workerIds
           .map(wId => workers.find(x => x.id === wId))
           .filter(Boolean) as Worker[];
         const prod = productionMap[a.activity] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' };
-        const totalTaskHH = taskWorkers.reduce((s, w) => s + (hoursMap[w.id] || DEFAULT_HOURS), 0);
+        const totalTaskHH = taskWorkers.reduce((s, w) => s + getHours(w.id), 0);
         const hhUd = prod.udsProd && parseFloat(prod.udsProd) > 0
           ? (totalTaskHH / parseFloat(prod.udsProd)).toFixed(2)
           : '—';
+        const previstas = previstasMap[a.activity] ?? DEFAULT_HOURS;
 
         return (
           <div key={a.activity} className="glass-card rounded-[10px] overflow-hidden mb-2.5">
@@ -139,9 +173,24 @@ const HoursScreen = ({ workers, assignments, onNext }: HoursScreenProps) => {
 
             {!isCollapsed && (
               <div className="px-3.5 pb-3">
+                {/* Horas previstas */}
+                <div className="flex items-center gap-2 py-2 mb-1" style={{ borderBottom: '1px solid hsl(var(--g1))' }}>
+                  <label className="text-[11px] font-semibold" style={{ color: 'hsl(var(--g6))' }}>Horas previstas</label>
+                  <input
+                    type="number"
+                    value={previstas}
+                    step="0.25"
+                    min="0"
+                    onChange={e => updatePrevistas(a.activity, e.target.value, a.workerIds)}
+                    className="w-[56px] border border-border rounded-md px-1.5 py-0.5 text-[12px] font-mono font-bold text-center outline-none"
+                    style={{ background: 'hsl(var(--g05))', borderColor: 'hsl(var(--g4))', color: 'hsl(var(--g8))' }}
+                  />
+                  <span className="text-[9px] text-muted-foreground">→ aplica a todos</span>
+                </div>
+
                 {/* Workers */}
                 {taskWorkers.map(w => {
-                  const val = hoursMap[w.id] ?? DEFAULT_HOURS;
+                  const val = getHours(w.id);
                   const dev = val - DEFAULT_HOURS;
                   const ci = parseInt(w.id) % avatarColors.length;
                   const inputClass = dev > 0 ? 'over' : 'ok';
