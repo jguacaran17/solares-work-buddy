@@ -8,16 +8,24 @@ interface Assignment {
   comment?: string;
 }
 
+interface TaskProduction {
+  horaInicio: string;
+  horaFin: string;
+  udsProd: string;
+  tipo: string;
+}
+
 interface EnviarScreenProps {
   workers: Worker[];
   assignments: Assignment[];
   hoursMap: Record<string, number>;
+  productionMap: Record<string, TaskProduction>;
 }
 
 const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 
-const EnviarScreen = ({ workers, assignments, hoursMap }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
 
