@@ -8,6 +8,7 @@ import FichajeScreen from "@/components/FichajeScreen";
 import AsignacionesScreen from "@/components/AsignacionesScreen";
 import HoursScreen from "@/components/HoursScreen";
 import EnviarScreen from "@/components/EnviarScreen";
+import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
 import BottomNav from "@/components/BottomNav";
 
