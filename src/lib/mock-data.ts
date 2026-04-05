@@ -1,6 +1,7 @@
 // ── Types ──
 
 export type FaltaMotivo = 'Sin avisar' | 'Enfermedad' | 'Permiso' | 'Retraso';
+export type WorkerTipo = 'DESP' | 'LOCAL' | 'FIELD';
 
 export interface Worker {
   id: string;
@@ -8,6 +9,7 @@ export interface Worker {
   role: string;
   avatar: string;
   zone: string;
+  tipo: WorkerTipo;
   status: 'sin-fichar' | 'presente' | 'falta';
   clockIn?: string;
   faltaMotivo?: FaltaMotivo;
