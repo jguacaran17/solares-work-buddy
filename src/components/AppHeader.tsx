@@ -1,33 +1,60 @@
 import { useState } from "react";
-import { format, subDays } from "date-fns";
+import { format, subDays, isToday as isTodayFn } from "date-fns";
 import { es } from "date-fns/locale";
+
+interface HistoryEntry {
+  date: Date;
+  dateStr: string;
+  dayOfWeek: string;
+  operarios: number;
+  horasTotales: number;
+  estado: string;
+  isToday: boolean;
+}
+
+// Generate 15 days of data (today + 14 past days)
+const generateHistory = (): HistoryEntry[] => {
+  return Array.from({ length: 15 }, (_, i) => {
+    const d = subDays(new Date(), i);
+    const today = isTodayFn(d);
+    return {
+      date: d,
+      dateStr: format(d, "dd/MM/yy"),
+      dayOfWeek: format(d, "EEEE", { locale: es }),
+      operarios: today ? 0 : Math.floor(Math.random() * 5) + 5,
+      horasTotales: today ? 0 : parseFloat((Math.random() * 20 + 50).toFixed(1)),
+      estado: today ? 'En curso' : 'Enviado',
+      isToday: today,
+    };
+  });
+};
+
+const historyData = generateHistory();
 
 interface AppHeaderProps {
   notifications: number;
   activeStep?: number;
   headerSub?: string;
+  selectedDate?: Date;
+  onSelectDate?: (date: Date, isToday: boolean) => void;
 }
 
-const historyData = Array.from({ length: 15 }, (_, i) => {
-  const d = subDays(new Date(), i + 1);
-  return {
-    date: format(d, "dd/MM/yy"),
-    dayOfWeek: format(d, "EEEE", { locale: es }),
-    operarios: Math.floor(Math.random() * 5) + 5,
-    horasTotales: parseFloat((Math.random() * 20 + 50).toFixed(1)),
-    estado: 'Enviado' as const,
-  };
-});
-
-const AppHeader = ({ notifications, activeStep, headerSub }: AppHeaderProps) => {
+const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelectDate }: AppHeaderProps) => {
   const [showNotif, setShowNotif] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
   const today = new Date();
-  const todayFormatted = format(today, "dd/MM/yy");
-  const todayDayOfWeek = format(today, "EEEE", { locale: es });
+  const current = selectedDate || today;
+  const currentFormatted = format(current, "dd/MM/yy");
+  const currentDayOfWeek = format(current, "EEEE", { locale: es });
+  const viewingToday = isTodayFn(current);
 
   const sub = headerSub || 'Pepe Cabrerizo · Capataz';
+
+  const handleSelectDate = (entry: HistoryEntry) => {
+    onSelectDate?.(entry.date, entry.isToday);
+    setShowHistory(false);
+  };
 
   return (
     <>
@@ -41,8 +68,9 @@ const AppHeader = ({ notifications, activeStep, headerSub }: AppHeaderProps) => 
       <div className="px-4 pb-3 flex-shrink-0" style={{ background: 'hsl(var(--g8))' }}>
         {/* Top row */}
         <div className="flex items-center justify-between mb-2.5">
-          <div className="text-[16px] font-bold text-white tracking-tight">
-            Parte<span style={{ color: 'hsl(var(--g4))' }}>Digital</span>
+          <div className="text-[16px] font-bold tracking-tight">
+            <span className="text-white">Adapta</span>
+            <span style={{ color: 'hsl(var(--g4))' }}> Build</span>
           </div>
           <div className="flex items-center gap-2.5">
             {/* Bell */}
@@ -74,9 +102,12 @@ const AppHeader = ({ notifications, activeStep, headerSub }: AppHeaderProps) => 
           </div>
           <button onClick={() => setShowHistory(true)} className="text-right active:opacity-70 transition-opacity">
             <div className="text-[11px] font-mono" style={{ color: 'hsl(var(--g2))' }}>
-              {todayFormatted}<br />
-              <span className="capitalize">{todayDayOfWeek}</span>
+              {currentFormatted}<br />
+              <span className="capitalize">{currentDayOfWeek}</span>
             </div>
+            {!viewingToday && (
+              <div className="text-[9px] mt-0.5 font-semibold" style={{ color: '#f6ad55' }}>🔒 Solo lectura</div>
+            )}
           </button>
         </div>
       </div>
@@ -113,16 +144,30 @@ const AppHeader = ({ notifications, activeStep, headerSub }: AppHeaderProps) => 
             </div>
             <div className="space-y-2">
               {historyData.map((entry, i) => (
-                <div key={i} className="flex items-center justify-between rounded-[10px] px-3.5 py-3 border border-border" style={{ background: 'hsl(var(--card))' }}>
+                <button
+                  key={i}
+                  onClick={() => handleSelectDate(entry)}
+                  className="w-full flex items-center justify-between rounded-[10px] px-3.5 py-3 border transition-all text-left"
+                  style={{
+                    background: entry.dateStr === currentFormatted ? 'hsl(var(--g8))' : 'hsl(var(--card))',
+                    borderColor: entry.dateStr === currentFormatted ? 'hsl(var(--g4))' : 'hsl(var(--border))',
+                    color: entry.dateStr === currentFormatted ? '#fff' : 'inherit',
+                  }}
+                >
                   <div>
-                    <p className="text-[12px] font-bold">{entry.date}</p>
-                    <p className="text-[10px] text-muted-foreground capitalize">{entry.dayOfWeek}</p>
+                    <p className="text-[12px] font-bold">{entry.dateStr}</p>
+                    <p className="text-[10px] capitalize" style={{ opacity: 0.7 }}>{entry.dayOfWeek}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[11px] text-muted-foreground">{entry.operarios} op. · {entry.horasTotales}h</p>
-                    <span className="pill pill-ok mt-0.5 inline-block">{entry.estado}</span>
+                    <p className="text-[11px]" style={{ opacity: 0.7 }}>{entry.operarios} op. · {entry.horasTotales}h</p>
+                    <span className={`pill ${entry.isToday ? 'pill-warn' : 'pill-ok'} mt-0.5 inline-block`}>
+                      {entry.estado}
+                    </span>
+                    {!entry.isToday && (
+                      <span className="text-[9px] ml-1.5" style={{ opacity: 0.5 }}>🔒</span>
+                    )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
