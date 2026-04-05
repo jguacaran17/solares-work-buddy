@@ -14,6 +14,7 @@ import BottomNav from "@/components/BottomNav";
 interface Assignment {
   activity: string;
   workerIds: string[];
+  comment?: string;
 }
 
 const navLabels: Record<string, string> = {

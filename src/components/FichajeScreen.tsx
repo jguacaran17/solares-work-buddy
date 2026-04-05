@@ -1,5 +1,20 @@
 import { useState } from "react";
-import { mockZones, Worker, FaltaMotivo } from "@/lib/mock-data";
+import { mockZones, Worker, FaltaMotivo, WorkerTipo } from "@/lib/mock-data";
+
+const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+};
+
+const TipoBadge = ({ tipo }: { tipo: WorkerTipo }) => (
+  <span
+    className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none"
+    style={{ background: tipoBadgeStyles[tipo].bg, color: tipoBadgeStyles[tipo].color }}
+  >
+    {tipo}
+  </span>
+);
 
 interface FichajeScreenProps {
   workers: Worker[];
@@ -169,7 +184,10 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                       {worker.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[12px] font-semibold">{worker.name}</div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-semibold">{worker.name}</span>
+                        <TipoBadge tipo={worker.tipo} />
+                      </div>
                       {isPresente && <div className="text-[10px] text-muted-foreground">Entrada {worker.clockIn || generalTime}</div>}
                       {isFalta && <div className="text-[10px] text-destructive">Falta: {worker.faltaMotivo || 'Sin avisar'}</div>}
                     </div>

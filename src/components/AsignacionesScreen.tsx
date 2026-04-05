@@ -1,10 +1,26 @@
 import { useState } from "react";
-import { mockActivities, Worker } from "@/lib/mock-data";
+import { mockActivities, Worker, WorkerTipo } from "@/lib/mock-data";
 
 interface Assignment {
   activity: string;
   workerIds: string[];
+  comment?: string;
 }
+
+const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+};
+
+const TipoBadge = ({ tipo }: { tipo: WorkerTipo }) => (
+  <span
+    className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none"
+    style={{ background: tipoBadgeStyles[tipo].bg, color: tipoBadgeStyles[tipo].color }}
+  >
+    {tipo}
+  </span>
+);
 
 interface AsignacionesScreenProps {
   workers: Worker[];
@@ -180,6 +196,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
                               >
                                 <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
                                 {w.name}
+                                <TipoBadge tipo={w.tipo} />
                               </span>
                             );
                           })}
@@ -189,6 +206,27 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
                       <div className="text-[11px] py-1" style={{ color: 'hsl(var(--g6))' }}>No quedan operarios disponibles</div>
                     );
                   })()}
+
+                  {/* Comment input per activity */}
+                  <div className="mt-3 pt-2" style={{ borderTop: '1px solid hsl(var(--border))' }}>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Comentarios de tarea</label>
+                    <textarea
+                      value={assigned?.comment || ''}
+                      onChange={e => {
+                        let updated = [...assignments];
+                        const existing = updated.find(a => a.activity === activity);
+                        if (existing) {
+                          updated = updated.map(a => a.activity === activity ? { ...a, comment: e.target.value } : a);
+                        } else {
+                          updated.push({ activity, workerIds: [], comment: e.target.value });
+                        }
+                        onUpdateAssignments(updated);
+                      }}
+                      className="w-full min-h-[40px] border border-border rounded-md px-2 py-1.5 text-[11px] resize-none"
+                      style={{ background: 'hsl(var(--background))' }}
+                      placeholder="Notas para esta actividad..."
+                    />
+                  </div>
                 </div>
               )}
             </div>
