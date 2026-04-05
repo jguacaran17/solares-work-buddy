@@ -84,14 +84,6 @@ const EnviarScreen = ({ workers, assignments }: EnviarScreenProps) => {
         )}
       </div>
 
-      <div className="sec-title mt-2.5">Comentarios</div>
-      <textarea
-        value={comments}
-        onChange={e => setComments(e.target.value)}
-        className="w-full min-h-[65px] border border-border rounded-lg p-2.5 text-[13px] resize-none mb-3"
-        style={{ background: 'hsl(var(--card))' }}
-        placeholder="Notas del día..."
-      />
 
       <button className="sbtn" onClick={handleSend}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
