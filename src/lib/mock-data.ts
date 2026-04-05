@@ -74,15 +74,15 @@ export const projectInfo = {
 };
 
 export const mockWorkers: Worker[] = [
-  { id: '1', name: 'Juan Martinez', role: 'Operario', avatar: 'JM', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '2', name: 'Andres Lopez', role: 'Operario', avatar: 'AL', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '3', name: 'Carlos Soto', role: 'Operario', avatar: 'CS', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '4', name: 'Diego Vargas', role: 'Operario', avatar: 'DV', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '5', name: 'Pedro Ruiz', role: 'Operario', avatar: 'PR', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '6', name: 'Miguel Garcia', role: 'Operario', avatar: 'MG', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '7', name: 'Ernesto Blanco', role: 'Operario', avatar: 'EB', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '8', name: 'Fernando Torres', role: 'Operario', avatar: 'FT', zone: 'Zona A', status: 'sin-fichar' },
-  { id: '9', name: 'Roberto Mora', role: 'Operario', avatar: 'RM', zone: 'Zona A', status: 'sin-fichar' },
+  { id: '1', name: 'Juan Martinez', role: 'Operario', avatar: 'JM', zone: 'Zona A', tipo: 'FIELD', status: 'sin-fichar' },
+  { id: '2', name: 'Andres Lopez', role: 'Operario', avatar: 'AL', zone: 'Zona A', tipo: 'FIELD', status: 'sin-fichar' },
+  { id: '3', name: 'Carlos Soto', role: 'Operario', avatar: 'CS', zone: 'Zona A', tipo: 'LOCAL', status: 'sin-fichar' },
+  { id: '4', name: 'Diego Vargas', role: 'Operario', avatar: 'DV', zone: 'Zona A', tipo: 'DESP', status: 'sin-fichar' },
+  { id: '5', name: 'Pedro Ruiz', role: 'Operario', avatar: 'PR', zone: 'Zona A', tipo: 'DESP', status: 'sin-fichar' },
+  { id: '6', name: 'Miguel Garcia', role: 'Operario', avatar: 'MG', zone: 'Zona A', tipo: 'LOCAL', status: 'sin-fichar' },
+  { id: '7', name: 'Ernesto Blanco', role: 'Operario', avatar: 'EB', zone: 'Zona A', tipo: 'FIELD', status: 'sin-fichar' },
+  { id: '8', name: 'Fernando Torres', role: 'Operario', avatar: 'FT', zone: 'Zona A', tipo: 'FIELD', status: 'sin-fichar' },
+  { id: '9', name: 'Roberto Mora', role: 'Operario', avatar: 'RM', zone: 'Zona A', tipo: 'LOCAL', status: 'sin-fichar' },
 ];
 
 export const mockZones: Zone[] = [
