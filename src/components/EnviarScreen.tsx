@@ -197,8 +197,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap }: EnviarS
           if (prodRows.length === 0) return null;
 
           const totalUds = prodRows.reduce((s, r) => s + r.udsNum, 0);
-          const totalHH = prodRows.reduce((s, r) => s + r.hhNum, 0);
-          const totalHHUd = totalUds > 0 ? (totalHH / totalUds).toFixed(2) : '—';
+          const totalHHUd = totalUds > 0 ? (stats.hh / totalUds).toFixed(2) : '—';
 
           return (
             <div>
