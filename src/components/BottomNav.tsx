@@ -2,6 +2,7 @@ interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   pendingCount?: number;
+  incidentCount?: number;
 }
 
 const tabs = [
@@ -27,12 +28,13 @@ const tabs = [
   },
 ];
 
-const BottomNav = ({ activeTab, onTabChange, pendingCount }: BottomNavProps) => {
+const BottomNav = ({ activeTab, onTabChange, pendingCount, incidentCount }: BottomNavProps) => {
   return (
     <div className="flex-shrink-0 border-t border-border" style={{ height: 'var(--nav-height, 60px)', background: 'hsl(var(--card))' }}>
       <div className="grid grid-cols-5 h-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
+          const badge = tab.id === 'solicitudes' ? pendingCount : tab.id === 'incidencias' ? incidentCount : 0;
           return (
             <button
               key={tab.id}
@@ -51,9 +53,9 @@ const BottomNav = ({ activeTab, onTabChange, pendingCount }: BottomNavProps) => 
               >
                 {tab.label}
               </span>
-              {tab.id === 'solicitudes' && pendingCount && pendingCount > 0 ? (
+              {badge && badge > 0 ? (
                 <span className="absolute top-1 right-2 w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center text-white" style={{ background: '#e53e3e' }}>
-                  {pendingCount}
+                  {badge}
                 </span>
               ) : null}
             </button>

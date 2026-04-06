@@ -2,6 +2,7 @@ import { useState } from "react";
 import { isToday as isTodayFn, format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { mockWorkers as initialWorkers, mockMachines as initialMachines, mockTransferRequests, Worker, Machine, TransferRequest, TransferStatus } from "@/lib/mock-data";
+import type { Incident } from "@/components/MaquinariaScreen";
 import AppHeader from "@/components/AppHeader";
 import StepNav from "@/components/StepNav";
 import FichajeScreen from "@/components/FichajeScreen";
@@ -65,6 +66,7 @@ const Index = () => {
 
   // Incidencia pre-fill state
   const [incidenciaPreFill, setIncidenciaPreFill] = useState<{ name: string; tab: 'maquinaria' | 'flota' } | null>(null);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
 
   const handleAddOutgoing = (req: OutgoingRequest) => {
     setOutgoingRequests(prev => [req, ...prev]);
@@ -182,7 +184,7 @@ const Index = () => {
       case 'parte':
         return renderParteStep();
       case 'incidencias':
-        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} preFill={incidenciaPreFill} onClearPreFill={() => setIncidenciaPreFill(null)} />;
+        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} preFill={incidenciaPreFill} onClearPreFill={() => setIncidenciaPreFill(null)} incidents={incidents} onUpdateIncidents={setIncidents} />;
       case 'tracking':
         return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
@@ -228,7 +230,7 @@ const Index = () => {
           </button>
         </div>
       )}
-      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} pendingCount={pendingTransfers} />
+      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} pendingCount={pendingTransfers} incidentCount={incidents.filter(i => i.status === 'activa').length} />
     </div>
   );
 };
