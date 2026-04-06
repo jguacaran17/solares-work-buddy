@@ -33,7 +33,94 @@ const TIPO_STYLES: Record<WorkerTipo, { bg: string; color: string; label: string
   FIELD: { bg: '#dbeafe', color: '#1e3a5f', label: 'FLD' },
 };
 
-// Helper: find zone for a worker
+// ── Signature Canvas Component ──
+const SignatureCanvas = ({ label, subtitle }: { label: string; subtitle: string }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSignature, setHasSignature] = useState(false);
+
+  const getPos = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    if ('touches' in e) {
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+    return { x: (e as React.MouseEvent).clientX - rect.left, y: (e as React.MouseEvent).clientY - rect.top };
+  }, []);
+
+  const startDraw = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    setIsDrawing(true);
+    setHasSignature(true);
+  }, [getPos]);
+
+  const draw = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const pos = getPos(e);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#0f1f3a';
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }, [isDrawing, getPos]);
+
+  const stopDraw = useCallback(() => setIsDrawing(false), []);
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasSignature(false);
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.scale(2, 2);
+  }, []);
+
+  return (
+    <div className="text-center">
+      <canvas
+        ref={canvasRef}
+        className="w-full border border-border rounded-md mb-1 bg-white cursor-crosshair"
+        style={{ height: 80, touchAction: 'none' }}
+        onMouseDown={startDraw}
+        onMouseMove={draw}
+        onMouseUp={stopDraw}
+        onMouseLeave={stopDraw}
+        onTouchStart={startDraw}
+        onTouchMove={draw}
+        onTouchEnd={stopDraw}
+      />
+      <div className="text-[10px] font-bold text-muted-foreground uppercase">{label}</div>
+      <div className="text-[9px] text-muted-foreground">{subtitle}</div>
+      {hasSignature && (
+        <button
+          className="text-[9px] font-bold mt-1 px-2 py-0.5 rounded border border-border text-destructive"
+          onClick={clearCanvas}
+        >
+          Borrar
+        </button>
+      )}
+    </div>
+  );
+};
+
+
 const getWorkerZone = (workerId: string): string => {
   for (const z of mockZones) {
     if (z.workers.includes(workerId)) return `${z.name} · ${z.activity}`;
