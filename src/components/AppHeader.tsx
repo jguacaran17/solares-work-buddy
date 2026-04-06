@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { TransferRequest, TransferStatus } from "@/lib/mock-data";
+import SolicitudesPanel from "@/components/SolicitudesPanel";
 import { format, subDays, isToday as isTodayFn } from "date-fns";
 import { es } from "date-fns/locale";
 
