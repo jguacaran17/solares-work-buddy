@@ -117,7 +117,7 @@ const Index = () => {
             </div>
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="stat-card text-center py-2">
-                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--g4))' }}>{presentes}</p>
+                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--teal))' }}>{presentes}</p>
                 <p className="text-[10px] text-muted-foreground">Presentes</p>
               </div>
               <div className="stat-card text-center py-2">
