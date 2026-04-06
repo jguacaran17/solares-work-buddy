@@ -139,7 +139,7 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const [filter, setFilter] = useState<string>("Todos");
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
