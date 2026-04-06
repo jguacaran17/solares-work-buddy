@@ -27,7 +27,7 @@ const tabs = [
   },
 ];
 
-const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
+const BottomNav = ({ activeTab, onTabChange, pendingCount }: BottomNavProps) => {
   return (
     <div className="flex-shrink-0 border-t border-border" style={{ height: 'var(--nav-height, 60px)', background: 'hsl(var(--card))' }}>
       <div className="grid grid-cols-5 h-full">
