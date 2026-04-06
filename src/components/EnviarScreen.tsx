@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Worker, Machine, projectInfo, WorkerTipo } from "@/lib/mock-data";
+import { Worker, Machine, projectInfo, WorkerTipo, mockZones } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 
@@ -33,10 +33,26 @@ const TIPO_STYLES: Record<WorkerTipo, { bg: string; color: string; label: string
   FIELD: { bg: '#dbeafe', color: '#1e3a5f', label: 'FLD' },
 };
 
+// Helper: find zone for a worker
+const getWorkerZone = (workerId: string): string => {
+  for (const z of mockZones) {
+    if (z.workers.includes(workerId)) return `${z.name} · ${z.activity}`;
+  }
+  return '—';
+};
+
+// Helper: find zone label for an activity (best match from assigned workers)
+const getActivityZone = (workerIds: string[]): string => {
+  if (workerIds.length === 0) return '—';
+  // Use the zone of the first worker
+  return getWorkerZone(workerIds[0]);
+};
+
 const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const [generalComments, setGeneralComments] = useState('');
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
+  const [expandedMachine, setExpandedMachine] = useState<string | null>(null);
 
   const getHours = (wId: string) => hoursMap[wId] ?? DEFAULT_HOURS;
 
@@ -50,10 +66,31 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
     return { hh, dv, eu };
   }, [assignments, hoursMap]);
 
+  // Zone breakdown stats
+  const zoneStats = useMemo(() => {
+    const map: Record<string, { workers: number; hh: number }> = {};
+    for (const z of mockZones) {
+      const key = `${z.name} · ${z.activity}`;
+      const zoneWorkerIds = new Set(z.workers);
+      const assignedInZone = new Set<string>();
+      assignments.forEach(a => {
+        a.workerIds.forEach(wId => {
+          if (zoneWorkerIds.has(wId)) assignedInZone.add(wId);
+        });
+      });
+      let hh = 0;
+      assignedInZone.forEach(wId => { hh += getHours(wId); });
+      if (assignedInZone.size > 0) {
+        map[key] = { workers: assignedInZone.size, hh };
+      }
+    }
+    return map;
+  }, [assignments, hoursMap]);
+
   const activityTipoCounts = useMemo(() => {
-    const map: Record<string, { DESP: number; LOCAL: number; FIELD: number; hh: number; comment?: string; workers: { id: string; name: string; tipo: WorkerTipo; hours: number }[] }> = {};
+    const map: Record<string, { DESP: number; LOCAL: number; FIELD: number; hh: number; comment?: string; zone: string; workers: { id: string; name: string; tipo: WorkerTipo; hours: number }[] }> = {};
     assignments.forEach(a => {
-      if (!map[a.activity]) map[a.activity] = { DESP: 0, LOCAL: 0, FIELD: 0, hh: 0, comment: a.comment, workers: [] };
+      if (!map[a.activity]) map[a.activity] = { DESP: 0, LOCAL: 0, FIELD: 0, hh: 0, comment: a.comment, zone: getActivityZone(a.workerIds), workers: [] };
       a.workerIds.forEach(wId => {
         const w = workers.find(x => x.id === wId);
         if (w) {
@@ -96,10 +133,25 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
           <span className="text-[12px] text-muted-foreground">Desviación</span>
           <span className="text-[13px] font-bold font-mono">{stats.dv >= 0 ? '+' : ''}{stats.dv.toFixed(1)}h</span>
         </div>
-        <div className="flex justify-between py-2">
+        <div className="flex justify-between py-2 border-b border-border">
           <span className="text-[12px] text-muted-foreground">Coste extra</span>
           <span className="text-[13px] font-bold font-mono">{stats.eu > 0 ? `-EUR${stats.eu}` : `+EUR${Math.abs(stats.eu)}`}</span>
         </div>
+
+        {/* Zone breakdown */}
+        {Object.keys(zoneStats).length > 0 && (
+          <>
+            <div className="pt-2 pb-1">
+              <span className="text-[10px] font-bold uppercase text-muted-foreground">Desglose por zona</span>
+            </div>
+            {Object.entries(zoneStats).map(([zone, data]) => (
+              <div key={zone} className="flex justify-between py-1.5 border-b border-border last:border-b-0">
+                <span className="text-[11px] text-muted-foreground">{zone}</span>
+                <span className="text-[11px] font-mono font-bold">{data.workers} op. · {data.hh.toFixed(1)}h</span>
+              </div>
+            ))}
+          </>
+        )}
       </div>
 
       {/* PARTE MARACOF-E */}
@@ -124,12 +176,13 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
           </div>
 
           {/* Table header */}
-          <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 36px 36px 36px minmax(0, 1.5fr) 45px', borderBottom: '1px solid hsl(var(--g2))' }}>
+          <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr) 30px 30px 30px minmax(0, 1fr) 40px', borderBottom: '1px solid hsl(var(--g2))' }}>
             <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Actividad</div>
-            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center" style={{ background: '#fef3c7', color: '#92400e' }}>DESP</div>
-            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center" style={{ background: '#ccfbf1', color: '#115e59' }}>LOC</div>
-            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center" style={{ background: '#dbeafe', color: '#1e3a5f' }}>FLD</div>
-            <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Comentarios</div>
+            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Zona</div>
+            <div className="px-0.5 py-1.5 font-bold text-[8px] uppercase text-center" style={{ background: '#fef3c7', color: '#92400e' }}>D</div>
+            <div className="px-0.5 py-1.5 font-bold text-[8px] uppercase text-center" style={{ background: '#ccfbf1', color: '#115e59' }}>L</div>
+            <div className="px-0.5 py-1.5 font-bold text-[8px] uppercase text-center" style={{ background: '#dbeafe', color: '#1e3a5f' }}>F</div>
+            <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Comentarios</div>
             <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
           </div>
 
@@ -141,7 +194,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
                 <div
                   className="grid gap-0 items-center cursor-pointer"
                   style={{
-                    gridTemplateColumns: 'minmax(0, 2fr) 36px 36px 36px minmax(0, 1.5fr) 45px',
+                    gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr) 30px 30px 30px minmax(0, 1fr) 40px',
                     borderBottom: isExpanded ? 'none' : '1px solid hsl(var(--border))',
                     background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
                   }}
@@ -155,10 +208,11 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
                     />
                     {activity}
                   </div>
-                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.DESP || '—'}</div>
-                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.LOCAL || '—'}</div>
-                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.FIELD || '—'}</div>
-                  <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{data.comment || '—'}</div>
+                  <div className="px-1 py-1.5 text-[9px] text-muted-foreground truncate">{data.zone}</div>
+                  <div className="px-0.5 py-1.5 text-[10px] font-mono text-center font-bold">{data.DESP || '—'}</div>
+                  <div className="px-0.5 py-1.5 text-[10px] font-mono text-center font-bold">{data.LOCAL || '—'}</div>
+                  <div className="px-0.5 py-1.5 text-[10px] font-mono text-center font-bold">{data.FIELD || '—'}</div>
+                  <div className="px-1 py-1.5 text-[9px] text-muted-foreground truncate">{data.comment || '—'}</div>
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{data.hh.toFixed(1)}</div>
                 </div>
 
@@ -195,22 +249,23 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
             <div
               className="grid gap-0 items-center"
               style={{
-                gridTemplateColumns: 'minmax(0, 2fr) 36px 36px 36px minmax(0, 1.5fr) 45px',
+                gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr) 30px 30px 30px minmax(0, 1fr) 40px',
                 borderTop: '2px solid hsl(var(--g2))',
                 background: 'hsl(var(--g05))',
               }}
             >
               <div className="px-2 py-2 text-[10px] font-bold uppercase">Total</div>
-              <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">
+              <div className="px-1 py-2"></div>
+              <div className="px-0.5 py-2 text-[10px] font-mono text-center font-bold">
                 {Object.values(activityTipoCounts).reduce((s, d) => s + d.DESP, 0) || '—'}
               </div>
-              <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">
+              <div className="px-0.5 py-2 text-[10px] font-mono text-center font-bold">
                 {Object.values(activityTipoCounts).reduce((s, d) => s + d.LOCAL, 0) || '—'}
               </div>
-              <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">
+              <div className="px-0.5 py-2 text-[10px] font-mono text-center font-bold">
                 {Object.values(activityTipoCounts).reduce((s, d) => s + d.FIELD, 0) || '—'}
               </div>
-              <div className="px-2 py-2"></div>
+              <div className="px-1 py-2"></div>
               <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">{stats.hh.toFixed(1)}</div>
             </div>
           )}
@@ -288,7 +343,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
           );
         })()}
 
-        {/* MAQUINARIA TABLE */}
+        {/* MAQUINARIA / FLOTA TABLES with expandable rows */}
         {(['maquinaria', 'flota'] as const).map(cat => {
           const catMachines = machines.filter(m => m.category === cat);
           if (catMachines.length === 0) return null;
@@ -303,49 +358,111 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
               <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
                 {title}
               </div>
-              <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px', borderBottom: '1px solid hsl(var(--g2))' }}>
+              <div className="grid gap-0" style={{ gridTemplateColumns: 'minmax(0, 2fr) 50px 50px', borderBottom: '1px solid hsl(var(--g2))' }}>
                 <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Máquina</div>
-                <div className="px-2 py-1.5 font-bold text-[9px] uppercase text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Tarea</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>Estado</div>
                 <div className="px-1 py-1.5 font-bold text-[9px] uppercase text-center text-muted-foreground" style={{ background: 'hsl(var(--g05))' }}>HH</div>
               </div>
-              {sorted.map((m, i) => (
-                <div
-                  key={m.id}
-                  className="grid gap-0 items-center"
-                  style={{
-                    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px',
-                    borderBottom: '1px solid hsl(var(--border))',
-                    background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
-                  }}
-                >
-                  <div className="px-2 py-1.5 text-[10px] font-semibold truncate">{m.name}</div>
-                  <div className="px-2 py-1.5 text-[9px] text-muted-foreground truncate">{m.task || '—'}</div>
-                  <div className="px-1 py-1.5 text-center">
-                    <span
-                      className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
+              {sorted.map((m, i) => {
+                const isExpanded = expandedMachine === m.id;
+                const operatorWorkers = m.operators.map(opId => workers.find(w => w.id === opId)).filter(Boolean) as Worker[];
+                return (
+                  <div key={m.id}>
+                    <div
+                      className="grid gap-0 items-center cursor-pointer"
                       style={{
-                        background: m.status === 'activa' ? '#dcfce7' : m.status === 'averia' ? '#fee2e2' : '#fef9c3',
-                        color: m.status === 'activa' ? '#166534' : m.status === 'averia' ? '#991b1b' : '#854d0e',
+                        gridTemplateColumns: 'minmax(0, 2fr) 50px 50px',
+                        borderBottom: isExpanded ? 'none' : '1px solid hsl(var(--border))',
+                        background: i % 2 === 0 ? 'transparent' : 'hsl(var(--g05))',
                       }}
+                      onClick={() => setExpandedMachine(isExpanded ? null : m.id)}
                     >
-                      {m.status === 'activa' ? 'OK' : m.status === 'averia' ? 'AVR' : 'STOP'}
-                    </span>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold truncate flex items-center gap-1">
+                        <ChevronDown
+                          size={12}
+                          className="flex-shrink-0 text-muted-foreground transition-transform duration-200"
+                          style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                        />
+                        {m.name}
+                      </div>
+                      <div className="px-1 py-1.5 text-center">
+                        <span
+                          className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                          style={{
+                            background: m.status === 'activa' ? '#dcfce7' : m.status === 'averia' ? '#fee2e2' : '#fef9c3',
+                            color: m.status === 'activa' ? '#166534' : m.status === 'averia' ? '#991b1b' : '#854d0e',
+                          }}
+                        >
+                          {m.status === 'activa' ? 'OK' : m.status === 'averia' ? 'AVR' : 'STOP'}
+                        </span>
+                      </div>
+                      <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{m.hoursToday > 0 ? m.hoursToday.toFixed(1) : '—'}</div>
+                    </div>
+
+                    {/* Expanded machine detail */}
+                    {isExpanded && (
+                      <div style={{ background: 'hsl(var(--g05))', borderBottom: '1px solid hsl(var(--border))' }}>
+                        {/* Task */}
+                        <div className="flex items-center gap-2 px-4 py-1.5" style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}>
+                          <span className="text-[9px] font-bold uppercase text-muted-foreground w-[40px]">Tarea</span>
+                          <span className="text-[10px] font-medium flex-1 truncate">{m.task || '—'}</span>
+                        </div>
+                        {/* Status */}
+                        <div className="flex items-center gap-2 px-4 py-1.5" style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}>
+                          <span className="text-[9px] font-bold uppercase text-muted-foreground w-[40px]">Estado</span>
+                          <span
+                            className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                            style={{
+                              background: m.status === 'activa' ? '#dcfce7' : m.status === 'averia' ? '#fee2e2' : '#fef9c3',
+                              color: m.status === 'activa' ? '#166534' : m.status === 'averia' ? '#991b1b' : '#854d0e',
+                            }}
+                          >
+                            {m.status === 'activa' ? 'Activa' : m.status === 'averia' ? 'Avería' : 'Parada'}
+                          </span>
+                          <span className="text-[10px] font-mono font-bold ml-auto">{m.hoursToday > 0 ? `${m.hoursToday.toFixed(1)}h` : '—'}</span>
+                        </div>
+                        {/* Operators */}
+                        {operatorWorkers.length > 0 ? (
+                          operatorWorkers.map(w => {
+                            const ts = TIPO_STYLES[w.tipo];
+                            return (
+                              <div
+                                key={w.id}
+                                className="flex items-center gap-2 px-4 py-1.5"
+                                style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}
+                              >
+                                <span className="text-[9px] font-bold uppercase text-muted-foreground w-[40px]">Oper.</span>
+                                <span className="text-[10px] font-medium flex-1 truncate">{w.name}</span>
+                                <span
+                                  className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                                  style={{ background: ts.bg, color: ts.color }}
+                                >
+                                  {ts.label}
+                                </span>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="flex items-center gap-2 px-4 py-1.5" style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}>
+                            <span className="text-[9px] font-bold uppercase text-muted-foreground w-[40px]">Oper.</span>
+                            <span className="text-[10px] text-muted-foreground">Sin operario asignado</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{m.hoursToday > 0 ? m.hoursToday.toFixed(1) : '—'}</div>
-                </div>
-              ))}
+                );
+              })}
               {/* TOTAL row */}
               <div
                 className="grid gap-0 items-center"
                 style={{
-                  gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px',
+                  gridTemplateColumns: 'minmax(0, 2fr) 50px 50px',
                   borderTop: '2px solid hsl(var(--g2))',
                   background: 'hsl(var(--g05))',
                 }}
               >
-                <div className="px-2 py-2 text-[10px] font-bold uppercase">Total</div>
-                <div className="px-2 py-2 text-[9px] text-muted-foreground">{catActive.length} activas</div>
+                <div className="px-2 py-2 text-[10px] font-bold uppercase">{catActive.length} activas de {catMachines.length}</div>
                 <div className="px-1 py-2"></div>
                 <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">{totalHH.toFixed(1)}</div>
               </div>
