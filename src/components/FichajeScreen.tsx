@@ -160,7 +160,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
         const pillClass = zoneFichados === zoneWorkers.length ? 'pill-ok' : 'pill-gray';
 
         return (
-          <div key={zone.id} className="glass-card rounded-[10px] overflow-hidden mb-2.5">
+          <div key={zone.id} className="glass-card overflow-hidden mb-2.5">
             {/* Zone header */}
             <div
               className="flex items-center justify-between px-3.5 py-2.5 cursor-pointer active:opacity-80"
