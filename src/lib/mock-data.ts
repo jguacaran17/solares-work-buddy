@@ -55,6 +55,23 @@ export interface Machine {
   endTime?: string;
 }
 
+export type TransferStatus = 'pending' | 'approved' | 'rejected';
+
+export interface TransferRequest {
+  id: string;
+  workerId: string;
+  workerName: string;
+  fromZone: string;
+  toZone: string;
+  fromActivity: string;
+  toActivity: string;
+  requestedBy: string;   // foreman name
+  requestedAt: string;   // time string
+  status: TransferStatus;
+  hoursBeforeTransfer: number;
+  hoursAfterTransfer: number;
+}
+
 export interface DailyReport {
   date: string;
   foreman: string;
