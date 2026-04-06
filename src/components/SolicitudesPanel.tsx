@@ -128,6 +128,21 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
       return;
     }
     const foreman = otherForemen.find(f => f.id === selectedForeman);
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    selectedWorkerIds.forEach(wid => {
+      const worker = foreman?.workers.find(w => w.id === wid);
+      if (worker && onAddOutgoing) {
+        onAddOutgoing({
+          id: `out-${Date.now()}-${wid}`,
+          workerName: worker.name,
+          toZone: `${foreman!.zone} · ${foreman!.activity}`,
+          toActivity: selectedTask,
+          requestedAt: timeStr,
+          status: 'pending',
+        });
+      }
+    });
     const workerNames = selectedWorkerIds
       .map(wid => foreman?.workers.find(w => w.id === wid)?.name)
       .filter(Boolean)
