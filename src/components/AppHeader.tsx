@@ -43,7 +43,7 @@ interface AppHeaderProps {
   onUpdateTransferStatus?: (id: string, status: TransferStatus) => void;
 }
 
-const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelectDate }: AppHeaderProps) => {
+const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelectDate, transfers, onUpdateTransferStatus }: AppHeaderProps) => {
   const [showNotif, setShowNotif] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
