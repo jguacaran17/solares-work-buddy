@@ -195,8 +195,89 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines,
     return map;
   }, [assignments, workers, hoursMap]);
 
+  const [submitted, setSubmitted] = useState(false);
+
   const handleSend = () => {
     toast.success('Parte enviado. Jefe de obra notificado.');
+    setSubmitted(true);
+  };
+
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    // Header
+    doc.setFillColor(15, 31, 58);
+    doc.rect(0, 0, 210, 35, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text('PARTE DIARIO DE TRABAJO', 15, 15);
+    doc.setFontSize(10);
+    doc.text(`${projectInfo.name} · ${dateStr}`, 15, 23);
+    doc.text(`Capataz: ${projectInfo.foreman}`, 15, 30);
+
+    doc.setTextColor(0, 0, 0);
+    let y = 45;
+
+    // Workers by activity
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Personal Operario', 15, y); y += 7;
+
+    Object.entries(activityTipoCounts).forEach(([activity, data]) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(activity, 15, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${data.hh.toFixed(1)}h · D:${data.DESP} L:${data.LOCAL} F:${data.FIELD}`, 100, y);
+      y += 5;
+      data.workers.forEach(w => {
+        const badge = TIPO_STYLES[w.tipo].label;
+        doc.setFontSize(8);
+        doc.text(`  ${w.name} [${badge}] — ${w.hours.toFixed(1)}h`, 20, y);
+        y += 4;
+      });
+      y += 2;
+    });
+
+    // Machines
+    y += 3;
+    if (y > 260) { doc.addPage(); y = 20; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Maquinaria & Flota', 15, y); y += 7;
+    machines.filter(m => m.status === 'activa').forEach(m => {
+      if (y > 275) { doc.addPage(); y = 20; }
+      const ops = m.operators.map(id => workers.find(w => w.id === id)?.name || '?').join(', ');
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${m.name} · ${m.hoursToday.toFixed(1)}h · ${ops || 'Sin op.'}`, 15, y);
+      y += 5;
+    });
+
+    // Production
+    y += 3;
+    if (y > 260) { doc.addPage(); y = 20; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Producción', 15, y); y += 7;
+    assignments.forEach(a => {
+      const p = productionMap[a.activity];
+      if (p && p.udsProd && parseFloat(p.udsProd) > 0) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${a.activity}: ${p.udsProd} uds (${p.tipo || '—'})`, 15, y);
+        y += 5;
+      }
+    });
+
+    // Summary
+    y += 5;
+    if (y > 260) { doc.addPage(); y = 20; }
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`HH Totales: ${stats.hh.toFixed(1)}h | Desviación: ${stats.dv >= 0 ? '+' : ''}${stats.dv.toFixed(1)}h | Coste extra: EUR${stats.eu}`, 15, y);
+
+    doc.save(`parte_diario_${dateStr.replace(/\//g, '-')}.pdf`);
   };
 
   const today = new Date();
