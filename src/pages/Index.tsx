@@ -184,7 +184,7 @@ const Index = () => {
       case 'parte':
         return renderParteStep();
       case 'incidencias':
-        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} preFill={incidenciaPreFill} onClearPreFill={() => setIncidenciaPreFill(null)} />;
+        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} preFill={incidenciaPreFill} onClearPreFill={() => setIncidenciaPreFill(null)} incidents={incidents} onUpdateIncidents={setIncidents} />;
       case 'tracking':
         return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
