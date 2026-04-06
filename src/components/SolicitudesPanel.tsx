@@ -341,7 +341,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
           {pending.length > 0 && (
             <>
               <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Pendientes · {pending.length}</div>
-              {pending.map(t => <TransferCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
+              {pending.map(t => <RecibidaCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
             </>
           )}
           {resolved.length > 0 && (
