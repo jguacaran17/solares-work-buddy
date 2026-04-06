@@ -14,6 +14,7 @@ import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
 import SolicitudesPanel, { type OutgoingRequest } from "@/components/SolicitudesPanel";
 import HistorialScreen from "@/components/HistorialScreen";
+import LoginScreen from "@/components/LoginScreen";
 
 interface Assignment {
   activity: string;
@@ -36,7 +37,6 @@ const navLabels: Record<string, string> = {
   historial: 'Historial de partes',
 };
 
-// Generate dummy past-day workers (random statuses, already filed)
 const generatePastWorkers = (): Worker[] => {
   return initialWorkers.map(w => ({
     ...w,
@@ -47,6 +47,7 @@ const generatePastWorkers = (): Worker[] => {
 };
 
 const Index = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [bottomTab, setBottomTab] = useState('parte');
   const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
@@ -62,11 +63,13 @@ const Index = () => {
     { id: 'out1', workerName: 'Pedro Ruiz', toZone: 'Zona B · Estructura', toActivity: 'Estructura', requestedAt: '08:45', status: 'pending' },
   ]);
 
+  // Incidencia pre-fill state
+  const [incidenciaPreFill, setIncidenciaPreFill] = useState<{ name: string; tab: 'maquinaria' | 'flota' } | null>(null);
+
   const handleAddOutgoing = (req: OutgoingRequest) => {
     setOutgoingRequests(prev => [req, ...prev]);
   };
 
-  // Past day snapshots
   const [pastWorkers] = useState<Worker[]>(generatePastWorkers);
   const [pastAssignments] = useState<Assignment[]>([
     { activity: 'Hincado principal', workerIds: ['1', '2', '3'] },
@@ -86,14 +89,20 @@ const Index = () => {
   const handleSelectDate = (date: Date, isToday: boolean) => {
     setSelectedDate(date);
     setIsEditableDay(isToday);
-    if (isToday) {
-      setActiveStep(1);
-    }
+    if (isToday) setActiveStep(1);
   };
+
+  const handleReportIncidencia = (machineName: string, category: 'maquinaria' | 'flota') => {
+    setIncidenciaPreFill({ name: machineName, tab: category });
+    setBottomTab('incidencias');
+  };
+
+  if (!isLoggedIn) {
+    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   const renderParteStep = () => {
     if (!isEditableDay) {
-      // Read-only view for past days
       return (
         <div className="space-y-3">
           <div className="glass-card rounded-[10px] p-4">
@@ -119,8 +128,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-
-          {/* Workers list read-only */}
           <div className="glass-card rounded-[10px] p-3">
             <p className="text-[12px] font-bold mb-2">Operarios</p>
             <div className="space-y-1.5">
@@ -137,8 +144,6 @@ const Index = () => {
               ))}
             </div>
           </div>
-
-          {/* Assignments read-only */}
           {currentAssignments.length > 0 && (
             <div className="glass-card rounded-[10px] p-3">
               <p className="text-[12px] font-bold mb-2">Asignaciones</p>
@@ -164,7 +169,7 @@ const Index = () => {
       case 3:
         return <HoursScreen workers={workers} assignments={assignments} hoursMap={hoursMap} onUpdateHoursMap={setHoursMap} previstasMap={previstasMap} onUpdatePrevistasMap={setPrevistasMap} productionMap={productionMap} onUpdateProductionMap={setProductionMap} transfers={transfers} onNext={() => setActiveStep(4)} />;
       case 4:
-        return <MaquinariaStepScreen machines={machines} onUpdateMachines={setMachines} onNext={() => setActiveStep(5)} />;
+        return <MaquinariaStepScreen machines={machines} onUpdateMachines={setMachines} onNext={() => setActiveStep(5)} onReportIncidencia={handleReportIncidencia} />;
       case 5:
         return <EnviarScreen workers={workers} assignments={assignments} hoursMap={hoursMap} productionMap={productionMap} machines={machines} transfers={transfers} />;
       default:
@@ -177,7 +182,7 @@ const Index = () => {
       case 'parte':
         return renderParteStep();
       case 'incidencias':
-        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} />;
+        return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} preFill={incidenciaPreFill} onClearPreFill={() => setIncidenciaPreFill(null)} />;
       case 'tracking':
         return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
@@ -200,60 +205,29 @@ const Index = () => {
         transfers={transfers}
         onUpdateTransferStatus={handleUpdateTransferStatus}
       />
-
       {bottomTab === 'parte' && isEditableDay && (
         <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
       )}
-
-      {/* Read-only banner */}
       {!isEditableDay && bottomTab === 'parte' && (
         <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: '#f6ad55', color: '#744210' }}>
           <span className="text-[12px] font-bold">🔒 Visualizando día anterior — solo lectura</span>
-          <button
-            onClick={() => handleSelectDate(new Date(), true)}
-            className="text-[11px] font-bold px-3 py-1 rounded-full"
-            style={{ background: 'rgba(0,0,0,.15)' }}
-          >
-            Ir a hoy
-          </button>
+          <button onClick={() => handleSelectDate(new Date(), true)} className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,.15)' }}>Ir a hoy</button>
         </div>
       )}
-
-      {/* Scrollable content area */}
       <div className="flex-1 relative overflow-hidden">
-        <div
-          className="absolute inset-0 overflow-y-auto"
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            padding: '12px 14px',
-            paddingBottom: 'calc(var(--nav-height, 60px) + 16px)',
-          }}
-        >
+        <div className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', padding: '12px 14px', paddingBottom: 'calc(var(--nav-height, 60px) + 16px)' }}>
           {renderContent()}
         </div>
       </div>
-
-      {/* Continue button for step 1 - only on today */}
       {bottomTab === 'parte' && activeStep === 1 && isEditableDay && (
         <div className="flex-shrink-0 px-3.5 pt-2 pb-1" style={{ background: 'hsl(var(--background))' }}>
-          <button
-            onClick={() => setActiveStep(2)}
-            className="w-full py-3.5 rounded-xl border-none text-[14px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
-            style={{
-              background: '#0f1f3a',
-              color: '#fff',
-              opacity: presentes > 0 ? 1 : 0.6,
-            }}
-            disabled={presentes === 0}
-          >
+          <button onClick={() => setActiveStep(2)} className="w-full py-3.5 rounded-xl border-none text-[14px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
+            style={{ background: '#0f1f3a', color: '#fff', opacity: presentes > 0 ? 1 : 0.6 }} disabled={presentes === 0}>
             Continuar → Asignar tareas
-            <span className="rounded-[20px] px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>
-              {presentes} pres.
-            </span>
+            <span className="rounded-[20px] px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>{presentes} pres.</span>
           </button>
         </div>
       )}
-
       <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} pendingCount={pendingTransfers} />
     </div>
   );

@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Machine, mockWorkers, mockActivities } from "@/lib/mock-data";
-import { Construction, Truck, Lock } from "lucide-react";
+import { Construction, Truck, Lock, AlertTriangle } from "lucide-react";
 
 interface MaquinariaStepScreenProps {
   machines: Machine[];
   onUpdateMachines: (machines: Machine[]) => void;
   onNext: () => void;
+  onReportIncidencia?: (machineName: string, category: 'maquinaria' | 'flota') => void;
 }
 
-const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: MaquinariaStepScreenProps) => {
+const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext, onReportIncidencia }: MaquinariaStepScreenProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const maquinaria = machines.filter(m => m.category === 'maquinaria');
@@ -71,7 +72,7 @@ const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: Maquinaria
     );
   };
 
-  const renderMachineList = (list: Machine[]) => (
+  const renderMachineList = (list: Machine[], category: 'maquinaria' | 'flota') => (
     <div className="glass-card rounded-[10px] overflow-hidden mb-3">
       {list.map((machine) => {
         const isExpanded = expandedId === machine.id;
@@ -185,6 +186,17 @@ const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: Maquinaria
                     </select>
                   </div>
                 </div>
+                {/* Report incidencia button */}
+                {onReportIncidencia && (
+                  <button
+                    onClick={() => onReportIncidencia(machine.name, category)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold border-none cursor-pointer mt-1"
+                    style={{ background: 'hsl(var(--red-bg))', color: 'hsl(var(--destructive))', border: '1px solid #fca5a5' }}
+                  >
+                    <AlertTriangle size={13} />
+                    ⚠ Reportar avería
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -201,14 +213,14 @@ const MaquinariaStepScreen = ({ machines, onUpdateMachines, onNext }: Maquinaria
         Maquinaria
       </div>
       {renderKPIs(maquinaria)}
-      {renderMachineList(maquinaria)}
+      {renderMachineList(maquinaria, 'maquinaria')}
 
       <div className="sec-title flex items-center gap-2" style={{ marginTop: 8 }}>
         <Truck size={18} className="text-muted-foreground" />
         Flota
       </div>
       {renderKPIs(flota)}
-      {renderMachineList(flota)}
+      {renderMachineList(flota, 'flota')}
 
       <button className="sbtn" onClick={onNext}>
         Revisar resumen → Enviar
