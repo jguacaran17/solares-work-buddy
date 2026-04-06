@@ -134,9 +134,9 @@ const Index = () => {
             <p className="text-[12px] font-bold mb-2">Operarios</p>
             <div className="space-y-1.5">
               {currentWorkers.map(w => (
-                <div key={w.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{ background: 'hsl(var(--g05))' }}>
+                <div key={w.id} className="flex items-center justify-between py-1.5 px-2 rounded-xl" style={{ background: 'hsl(var(--teal-bg))' }}>
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'hsl(var(--g6))' }}>{w.avatar}</div>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'hsl(var(--teal))' }}>{w.avatar}</div>
                     <span className="text-[12px] font-medium">{w.name}</span>
                   </div>
                   <span className={`pill ${w.status === 'presente' ? 'pill-ok' : 'pill-danger'}`}>
