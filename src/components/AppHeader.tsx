@@ -39,6 +39,8 @@ interface AppHeaderProps {
   headerSub?: string;
   selectedDate?: Date;
   onSelectDate?: (date: Date, isToday: boolean) => void;
+  transfers?: TransferRequest[];
+  onUpdateTransferStatus?: (id: string, status: TransferStatus) => void;
 }
 
 const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelectDate }: AppHeaderProps) => {
