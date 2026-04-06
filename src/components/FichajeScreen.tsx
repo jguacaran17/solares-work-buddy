@@ -168,7 +168,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
               onClick={() => toggleZone(zone.id)}
             >
               <div>
-                <div className="text-[12px] font-bold" style={{ color: 'hsl(var(--g8))' }}>{zone.name} · {zone.activity}</div>
+                <div className="text-[12px] font-bold" style={{ color: 'hsl(var(--navy))' }}>{zone.name} · {zone.activity}</div>
                 <div className="text-[10px] text-muted-foreground">{zoneFichados} / {zoneWorkers.length} fichados</div>
               </div>
               <div className="flex items-center gap-1.5">
