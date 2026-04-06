@@ -347,7 +347,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
           {resolved.length > 0 && (
             <>
               <div className="text-[10px] font-bold text-muted-foreground uppercase mt-3 mb-1">Resueltas · {resolved.length}</div>
-              {resolved.map(t => <TransferCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
+              {resolved.map(t => <RecibidaCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
             </>
           )}
         </div>
