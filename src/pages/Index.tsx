@@ -223,10 +223,10 @@ const Index = () => {
       </div>
       {bottomTab === 'parte' && activeStep === 1 && isEditableDay && (
         <div className="flex-shrink-0 px-3.5 pt-2 pb-1" style={{ background: 'hsl(var(--background))' }}>
-          <button onClick={() => setActiveStep(2)} className="w-full py-3.5 rounded-xl border-none text-[14px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
-            style={{ background: '#0f1f3a', color: '#fff', opacity: presentes > 0 ? 1 : 0.6 }} disabled={presentes === 0}>
+          <button onClick={() => setActiveStep(2)} className="sbtn"
+            style={{ opacity: presentes > 0 ? 1 : 0.6 }} disabled={presentes === 0}>
             Continuar → Asignar tareas
-            <span className="rounded-[20px] px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>{presentes} pres.</span>
+            <span className="rounded-full px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>{presentes} pres.</span>
           </button>
         </div>
       )}
