@@ -1,6 +1,7 @@
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  pendingCount?: number;
 }
 
 const tabs = [
