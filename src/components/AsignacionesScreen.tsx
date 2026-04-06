@@ -8,9 +8,9 @@ interface Assignment {
 }
 
 const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+  DESP: { bg: 'hsl(40,96%,89%)', color: 'hsl(28,67%,31%)' },
+  LOCAL: { bg: 'hsl(168,76%,90%)', color: 'hsl(173,60%,23%)' },
+  FIELD: { bg: 'hsl(214,95%,93%)', color: 'hsl(216,57%,24%)' },
 };
 
 const TipoBadge = ({ tipo }: { tipo: WorkerTipo }) => (
@@ -30,7 +30,7 @@ interface AsignacionesScreenProps {
   onNext: () => void;
 }
 
-const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
+const avatarColors = ['hsl(216,57%,32%)', 'hsl(28,78%,52%)', 'hsl(6,65%,46%)', 'hsl(152,60%,42%)', 'hsl(282,44%,47%)', 'hsl(168,55%,42%)', 'hsl(40,78%,46%)', 'hsl(28,67%,25%)', 'hsl(168,55%,42%)'];
 
 const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfers, onNext }: AsignacionesScreenProps) => {
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
@@ -101,8 +101,8 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
       <div className="sec-title">Asigna operarios por actividad</div>
 
       {/* Activity list */}
-      <div className="glass-card rounded-[10px] overflow-hidden mb-2.5">
-        <div className="px-3.5 py-2.5 flex items-center justify-between border-b border-border" style={{ background: '#fafaf8' }}>
+      <div className="glass-card overflow-hidden mb-2.5">
+        <div className="px-3.5 py-2.5 flex items-center justify-between border-b border-border" style={{ background: 'hsl(var(--teal-bg))' }}>
           <span className="text-[12px] font-bold">Actividades del día</span>
           <span className="text-[10px] text-muted-foreground font-mono">{totalAssigned} asignados</span>
         </div>
@@ -127,7 +127,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
               </div>
 
               {isExpanded && (
-                <div className="px-3.5 pb-3 pt-2" style={{ background: '#f8f8f6', borderTop: '1px solid hsl(var(--border))' }}>
+                <div className="px-3.5 pb-3 pt-2" style={{ background: 'hsl(var(--teal-bg))', borderTop: '1px solid hsl(var(--border))' }}>
                   {/* Already assigned pills grouped by tipo */}
                   {count > 0 && (() => {
                     const assignedWorkers = assigned!.workerIds.map(wId => workers.find(x => x.id === wId)).filter(Boolean) as Worker[];
@@ -202,7 +202,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
                           <span className="text-[10px] text-muted-foreground font-bold uppercase">Toca para asignar:</span>
                           <button
                             className="text-[10px] font-bold px-2.5 py-1 rounded-full border-none cursor-pointer"
-                            style={{ background: '#0f1f3a', color: '#fff' }}
+                            style={{ background: 'hsl(var(--teal))', color: '#fff' }}
                             onClick={() => {
                               const idsToAdd = availableForThis.map(w => w.id);
                               let updated = [...assignments];
@@ -282,7 +282,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
 
       {/* Unassigned */}
       <div className="sec-title mt-1">Operarios sin asignar</div>
-      <div className="glass-card rounded-[10px] p-2.5 mb-2.5">
+      <div className="glass-card p-2.5 mb-2.5">
         <div className="flex flex-wrap gap-1.5">
           {unassignedWorkers.length > 0 ? unassignedWorkers.map(w => {
             const ci = parseInt(w.id) % avatarColors.length;

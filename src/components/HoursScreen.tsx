@@ -29,12 +29,12 @@ interface HoursScreenProps {
 
 const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
-const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
+const avatarColors = ['hsl(216,57%,32%)', 'hsl(28,78%,52%)', 'hsl(6,65%,46%)', 'hsl(152,60%,42%)', 'hsl(282,44%,47%)', 'hsl(168,55%,42%)', 'hsl(40,78%,46%)', 'hsl(28,67%,25%)', 'hsl(168,55%,42%)'];
 
 const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string; label: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e', label: 'DESP' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59', label: 'LOC' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f', label: 'FLD' },
+  DESP: { bg: 'hsl(40,96%,89%)', color: 'hsl(28,67%,31%)', label: 'DESP' },
+  LOCAL: { bg: 'hsl(168,76%,90%)', color: 'hsl(173,60%,23%)', label: 'LOC' },
+  FIELD: { bg: 'hsl(214,95%,93%)', color: 'hsl(216,57%,24%)', label: 'FLD' },
 };
 
 // Theoretical HH/Ud for activities (from Historial Producción data)

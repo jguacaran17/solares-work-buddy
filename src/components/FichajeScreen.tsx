@@ -2,9 +2,9 @@ import { useState } from "react";
 import { mockZones, Worker, FaltaMotivo, WorkerTipo } from "@/lib/mock-data";
 
 const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+  DESP: { bg: 'hsl(40,96%,89%)', color: 'hsl(28,67%,31%)' },
+  LOCAL: { bg: 'hsl(168,76%,90%)', color: 'hsl(173,60%,23%)' },
+  FIELD: { bg: 'hsl(214,95%,93%)', color: 'hsl(216,57%,24%)' },
 };
 
 const TipoBadge = ({ tipo }: { tipo: WorkerTipo }) => (
@@ -136,7 +136,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
           <button
             onClick={() => setAllStatus('presente')}
             className="flex-1 py-2.5 px-1.5 rounded-lg border-none text-[13px] font-bold cursor-pointer flex items-center justify-center gap-1"
-            style={{ background: 'hsl(var(--g8))', color: '#fff' }}
+            style={{ background: 'hsl(var(--navy))', color: '#fff' }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             Todos presentes
@@ -160,15 +160,15 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
         const pillClass = zoneFichados === zoneWorkers.length ? 'pill-ok' : 'pill-gray';
 
         return (
-          <div key={zone.id} className="glass-card rounded-[10px] overflow-hidden mb-2.5">
+          <div key={zone.id} className="glass-card overflow-hidden mb-2.5">
             {/* Zone header */}
             <div
               className="flex items-center justify-between px-3.5 py-2.5 cursor-pointer active:opacity-80"
-              style={{ background: '#f5f5f2', borderBottom: '1px solid hsl(var(--border))' }}
+              style={{ background: 'hsl(var(--teal-bg))', borderBottom: '1px solid hsl(var(--border))' }}
               onClick={() => toggleZone(zone.id)}
             >
               <div>
-                <div className="text-[12px] font-bold" style={{ color: 'hsl(var(--g8))' }}>{zone.name} · {zone.activity}</div>
+                <div className="text-[12px] font-bold" style={{ color: 'hsl(var(--navy))' }}>{zone.name} · {zone.activity}</div>
                 <div className="text-[10px] text-muted-foreground">{zoneFichados} / {zoneWorkers.length} fichados</div>
               </div>
               <div className="flex items-center gap-1.5">
@@ -182,7 +182,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
               const isPresente = worker.status === 'presente';
               const isFalta = worker.status === 'falta';
               const isExpanded = expandedWorker === worker.id;
-              const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
+              const avatarColors = ['hsl(216,57%,32%)', 'hsl(28,78%,52%)', 'hsl(6,65%,46%)', 'hsl(152,60%,42%)', 'hsl(282,44%,47%)', 'hsl(168,55%,42%)', 'hsl(40,78%,46%)', 'hsl(28,67%,25%)', 'hsl(168,55%,42%)'];
               const colorIdx = parseInt(worker.id) % avatarColors.length;
 
               return (
@@ -211,7 +211,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                         onClick={(e) => { e.stopPropagation(); setWorkerStatus(worker.id, 'presente'); }}
                         className="px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
                         style={{
-                          background: isPresente ? 'hsl(var(--g8))' : 'hsl(var(--background))',
+                          background: isPresente ? 'hsl(var(--teal))' : 'hsl(var(--background))',
                           color: isPresente ? '#fff' : 'hsl(var(--muted-foreground))',
                         }}
                       >
@@ -232,7 +232,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
 
                   {/* Expanded detail panel for present workers — editable entry time */}
                   {isPresente && isExpanded && (
-                    <div className="px-3.5 pb-2.5 pt-0.5" style={{ background: 'hsl(var(--g05))' }}>
+                    <div className="px-3.5 pb-2.5 pt-0.5" style={{ background: 'hsl(var(--teal-bg))' }}>
                       <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">Hora de entrada individual</label>
                       <input
                         type="time"

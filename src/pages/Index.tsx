@@ -117,15 +117,15 @@ const Index = () => {
             </div>
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="stat-card text-center py-2">
-                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--g4))' }}>{presentes}</p>
+                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--teal))' }}>{presentes}</p>
                 <p className="text-[10px] text-muted-foreground">Presentes</p>
               </div>
               <div className="stat-card text-center py-2">
-                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--g4))' }}>{currentWorkers.filter(w => w.status === 'falta').length}</p>
+                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--teal))' }}>{currentWorkers.filter(w => w.status === 'falta').length}</p>
                 <p className="text-[10px] text-muted-foreground">Faltas</p>
               </div>
               <div className="stat-card text-center py-2">
-                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--g4))' }}>{currentAssignments.length}</p>
+                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--teal))' }}>{currentAssignments.length}</p>
                 <p className="text-[10px] text-muted-foreground">Actividades</p>
               </div>
             </div>
@@ -134,9 +134,9 @@ const Index = () => {
             <p className="text-[12px] font-bold mb-2">Operarios</p>
             <div className="space-y-1.5">
               {currentWorkers.map(w => (
-                <div key={w.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{ background: 'hsl(var(--g05))' }}>
+                <div key={w.id} className="flex items-center justify-between py-1.5 px-2 rounded-xl" style={{ background: 'hsl(var(--teal-bg))' }}>
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'hsl(var(--g6))' }}>{w.avatar}</div>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'hsl(var(--teal))' }}>{w.avatar}</div>
                     <span className="text-[12px] font-medium">{w.name}</span>
                   </div>
                   <span className={`pill ${w.status === 'presente' ? 'pill-ok' : 'pill-danger'}`}>
@@ -211,9 +211,9 @@ const Index = () => {
         <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
       )}
       {!isEditableDay && bottomTab === 'parte' && (
-        <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: '#f6ad55', color: '#744210' }}>
+        <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: 'hsl(var(--amber-bg))', color: 'hsl(var(--amber-text))' }}>
           <span className="text-[12px] font-bold">🔒 Visualizando día anterior — solo lectura</span>
-          <button onClick={() => handleSelectDate(new Date(), true)} className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,.15)' }}>Ir a hoy</button>
+          <button onClick={() => handleSelectDate(new Date(), true)} className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: 'hsl(var(--teal))', color: '#fff' }}>Ir a hoy</button>
         </div>
       )}
       <div className="flex-1 relative overflow-hidden">
@@ -223,10 +223,10 @@ const Index = () => {
       </div>
       {bottomTab === 'parte' && activeStep === 1 && isEditableDay && (
         <div className="flex-shrink-0 px-3.5 pt-2 pb-1" style={{ background: 'hsl(var(--background))' }}>
-          <button onClick={() => setActiveStep(2)} className="w-full py-3.5 rounded-xl border-none text-[14px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
-            style={{ background: '#0f1f3a', color: '#fff', opacity: presentes > 0 ? 1 : 0.6 }} disabled={presentes === 0}>
+          <button onClick={() => setActiveStep(2)} className="sbtn"
+            style={{ opacity: presentes > 0 ? 1 : 0.6 }} disabled={presentes === 0}>
             Continuar → Asignar tareas
-            <span className="rounded-[20px] px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>{presentes} pres.</span>
+            <span className="rounded-full px-2.5 py-0.5 text-[12px] font-semibold" style={{ background: 'rgba(255,255,255,.2)' }}>{presentes} pres.</span>
           </button>
         </div>
       )}

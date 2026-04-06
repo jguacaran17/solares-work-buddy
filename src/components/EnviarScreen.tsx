@@ -30,9 +30,9 @@ const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 
 const TIPO_STYLES: Record<WorkerTipo, { bg: string; color: string; label: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e', label: 'DESP' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59', label: 'LOC' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f', label: 'FLD' },
+  DESP: { bg: 'hsl(40,96%,89%)', color: 'hsl(28,67%,31%)', label: 'DESP' },
+  LOCAL: { bg: 'hsl(168,76%,90%)', color: 'hsl(173,60%,23%)', label: 'LOC' },
+  FIELD: { bg: 'hsl(214,95%,93%)', color: 'hsl(216,57%,24%)', label: 'FLD' },
 };
 
 // ── Signature Canvas Component ──
