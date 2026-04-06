@@ -58,6 +58,13 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
     onUpdateWorkers(updated);
   };
 
+  const setWorkerClockIn = (workerId: string, time: string) => {
+    const updated = workers.map(w =>
+      w.id === workerId ? { ...w, clockIn: time } : w
+    );
+    onUpdateWorkers(updated);
+  };
+
   const setWorkerMotivo = (workerId: string, motivo: FaltaMotivo) => {
     const updated = workers.map(w =>
       w.id === workerId ? { ...w, faltaMotivo: motivo } : w
@@ -78,6 +85,10 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
       else next.add(zoneId);
       return next;
     });
+  };
+
+  const toggleExpandWorker = (workerId: string) => {
+    setExpandedWorker(prev => prev === workerId ? null : workerId);
   };
 
   const progressClass = progress >= 100 ? 'prog-fill-ok' : progress >= 50 ? 'prog-fill-warn' : 'prog-fill-warn';
@@ -176,7 +187,10 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
 
               return (
                 <div key={worker.id} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-                  <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+                  <div
+                    className="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer active:opacity-80"
+                    onClick={() => isPresente && toggleExpandWorker(worker.id)}
+                  >
                     <div
                       className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
                       style={{ background: avatarColors[colorIdx] }}
@@ -194,7 +208,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                     {/* Toggle buttons */}
                     <div className="flex border border-border rounded-md overflow-hidden flex-shrink-0">
                       <button
-                        onClick={() => setWorkerStatus(worker.id, 'presente')}
+                        onClick={(e) => { e.stopPropagation(); setWorkerStatus(worker.id, 'presente'); }}
                         className="px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
                         style={{
                           background: isPresente ? 'hsl(var(--g8))' : 'hsl(var(--background))',
@@ -204,7 +218,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                         ✓
                       </button>
                       <button
-                        onClick={() => setWorkerStatus(worker.id, 'falta')}
+                        onClick={(e) => { e.stopPropagation(); setWorkerStatus(worker.id, 'falta'); }}
                         className="px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
                         style={{
                           background: isFalta ? 'hsl(var(--destructive))' : 'hsl(var(--background))',
@@ -215,6 +229,21 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                       </button>
                     </div>
                   </div>
+
+                  {/* Expanded detail panel for present workers — editable entry time */}
+                  {isPresente && isExpanded && (
+                    <div className="px-3.5 pb-2.5 pt-0.5" style={{ background: 'hsl(var(--g05))' }}>
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">Hora de entrada individual</label>
+                      <input
+                        type="time"
+                        value={worker.clockIn || generalTime}
+                        onChange={e => setWorkerClockIn(worker.id, e.target.value)}
+                        onClick={e => e.stopPropagation()}
+                        className="w-full border border-border rounded-md px-2.5 py-2 font-mono text-[16px] font-bold outline-none"
+                        style={{ background: 'hsl(var(--background))' }}
+                      />
+                    </div>
+                  )}
 
                   {/* Falta motivo select */}
                   {isFalta && (
