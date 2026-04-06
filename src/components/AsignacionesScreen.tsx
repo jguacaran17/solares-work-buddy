@@ -126,28 +126,45 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
 
               {isExpanded && (
                 <div className="px-3.5 pb-3 pt-2" style={{ background: '#f8f8f6', borderTop: '1px solid hsl(var(--border))' }}>
-                  {/* Already assigned pills */}
-                  {count > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {assigned!.workerIds.map(wId => {
-                        const w = workers.find(x => x.id === wId);
-                        if (!w) return null;
-                        const ci = parseInt(w.id) % avatarColors.length;
-                        return (
-                          <span
-                            key={wId}
-                            className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] cursor-pointer"
-                            style={{ background: 'hsl(var(--g05))', border: '1px solid hsl(var(--g2))' }}
-                            onClick={() => removeFromActivity(activity, wId)}
-                          >
-                            <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
-                            {w.name.split(' ')[0]}
-                            <span className="text-destructive text-[10px]">✗</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
+                  {/* Already assigned pills grouped by tipo */}
+                  {count > 0 && (() => {
+                    const assignedWorkers = assigned!.workerIds.map(wId => workers.find(x => x.id === wId)).filter(Boolean) as Worker[];
+                    const groups: { tipo: WorkerTipo; label: string; items: typeof assignedWorkers }[] = [
+                      { tipo: 'DESP', label: 'DESPLAZADOS', items: assignedWorkers.filter(w => w.tipo === 'DESP') },
+                      { tipo: 'LOCAL', label: 'LOCAL', items: assignedWorkers.filter(w => w.tipo === 'LOCAL') },
+                      { tipo: 'FIELD', label: 'FIELD', items: assignedWorkers.filter(w => w.tipo === 'FIELD') },
+                    ];
+                    return (
+                      <div className="mb-2">
+                        {groups.map(group => {
+                          if (group.items.length === 0) return null;
+                          return (
+                            <div key={group.tipo} className="mb-1.5">
+                              <div className="text-[9px] font-bold uppercase text-muted-foreground mb-1" style={{ letterSpacing: '0.06em' }}>{group.label}</div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {group.items.map(w => {
+                                  const ci = parseInt(w.id) % avatarColors.length;
+                                  return (
+                                    <span
+                                      key={w.id}
+                                      className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] cursor-pointer"
+                                      style={{ background: 'hsl(var(--g05))', border: '1px solid hsl(var(--g2))' }}
+                                      onClick={() => removeFromActivity(activity, w.id)}
+                                    >
+                                      <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
+                                      {w.name.split(' ')[0]}
+                                      <TipoBadge tipo={w.tipo} />
+                                      <span className="text-destructive text-[10px]">✗</span>
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
 
                   {/* Available workers grouped by tipo */}
                   {(() => {
