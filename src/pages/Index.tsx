@@ -66,6 +66,7 @@ const Index = () => {
 
   // Incidencia pre-fill state
   const [incidenciaPreFill, setIncidenciaPreFill] = useState<{ name: string; tab: 'maquinaria' | 'flota' } | null>(null);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
 
   const handleAddOutgoing = (req: OutgoingRequest) => {
     setOutgoingRequests(prev => [req, ...prev]);
