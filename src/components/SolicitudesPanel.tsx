@@ -230,11 +230,11 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
 
       {/* MIS SOLICITUDES ENVIADAS */}
       <div className="sec-title">Mis solicitudes enviadas</div>
-      {mockOutgoing.length === 0 ? (
+      {outgoing.length === 0 ? (
         <div className="glass-card rounded-[10px] p-4 text-center text-[12px] text-muted-foreground">Sin solicitudes enviadas</div>
       ) : (
         <div className="space-y-2">
-          {mockOutgoing.map(o => {
+          {outgoing.map(o => {
             const st = statusStyles[o.status];
             return (
               <div key={o.id} className="rounded-lg border border-border overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
