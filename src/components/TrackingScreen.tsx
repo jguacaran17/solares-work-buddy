@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { X } from "lucide-react";
+import type { WorkerTipo } from "@/lib/mock-data";
+
+interface Passenger {
+  name: string;
+  avatar: string;
+  tipo: WorkerTipo;
+}
 
 interface Vehicle {
   id: string;
@@ -10,6 +18,11 @@ interface Vehicle {
   lat: number;
   lng: number;
   driver: string;
+  driverTipo: WorkerTipo;
+  departureTime: string;
+  estimatedArrival: string;
+  destination: string;
+  passengers: Passenger[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -18,25 +31,102 @@ const STATUS_COLORS: Record<string, string> = {
   "Libre": "#888888",
 };
 
+const TIPO_COLORS: Record<WorkerTipo, string> = {
+  DESP: "#d97706",
+  LOCAL: "#2fb7a4",
+  FIELD: "#0f1f3a",
+};
+
+const TIPO_LABELS: Record<WorkerTipo, string> = {
+  DESP: "DESP",
+  LOCAL: "LOC",
+  FIELD: "FLD",
+};
+
 const mockVehicles: Vehicle[] = [
-  { id: "v1", plate: "4521-GKR", type: "Camión grúa", status: "En obra", lat: 38.6953, lng: -4.1079, driver: "J. Martínez" },
-  { id: "v2", plate: "8834-HNV", type: "Retroexcavadora", status: "En ruta", lat: 38.6900, lng: -4.1150, driver: "P. López" },
-  { id: "v3", plate: "2290-FLT", type: "Furgoneta", status: "Libre", lat: 38.6980, lng: -4.0980, driver: "Sin asignar" },
-  { id: "v4", plate: "5567-JMD", type: "Camión pluma", status: "En obra", lat: 38.6930, lng: -4.1020, driver: "R. García" },
-  { id: "v5", plate: "1103-KPS", type: "Dumper", status: "En ruta", lat: 38.6870, lng: -4.1200, driver: "A. Fernández" },
+  {
+    id: "v1", plate: "8432-BKM", type: "Renault Trafic", status: "En obra",
+    lat: 38.6953, lng: -4.1079, driver: "Juan Martínez", driverTipo: "FIELD",
+    departureTime: "06:45", estimatedArrival: "07:30", destination: "Zona A",
+    passengers: [
+      { name: "Andrés López", avatar: "AL", tipo: "FIELD" },
+      { name: "Carlos Soto", avatar: "CS", tipo: "LOCAL" },
+      { name: "Diego Vargas", avatar: "DV", tipo: "DESP" },
+    ],
+  },
+  {
+    id: "v2", plate: "3821-PLK", type: "Ford Transit", status: "En ruta",
+    lat: 38.6900, lng: -4.1150, driver: "Pedro Ruiz", driverTipo: "DESP",
+    departureTime: "07:10", estimatedArrival: "07:55", destination: "Zona B",
+    passengers: [
+      { name: "Miguel García", avatar: "MG", tipo: "LOCAL" },
+      { name: "Ernesto Blanco", avatar: "EB", tipo: "FIELD" },
+    ],
+  },
+  {
+    id: "v3", plate: "5541-GHJ", type: "Seat Ateca", status: "Libre",
+    lat: 38.6980, lng: -4.0980, driver: "Roberto Mora", driverTipo: "LOCAL",
+    departureTime: "-", estimatedArrival: "-", destination: "-",
+    passengers: [],
+  },
+  {
+    id: "v4", plate: "9012-RNT", type: "Iveco Daily", status: "En obra",
+    lat: 38.6930, lng: -4.1020, driver: "Fernando Torres", driverTipo: "FIELD",
+    departureTime: "06:30", estimatedArrival: "07:15", destination: "Zona C",
+    passengers: [
+      { name: "Álvaro Sánchez", avatar: "AS", tipo: "DESP" },
+      { name: "Tomás Herrera", avatar: "TH", tipo: "LOCAL" },
+      { name: "Raúl Méndez", avatar: "RM", tipo: "FIELD" },
+      { name: "Iván Delgado", avatar: "ID", tipo: "DESP" },
+    ],
+  },
+  {
+    id: "v5", plate: "7723-MNO", type: "Citroën Jumper", status: "En ruta",
+    lat: 38.6870, lng: -4.1200, driver: "Sergio Navarro", driverTipo: "FIELD",
+    departureTime: "07:20", estimatedArrival: "07:50", destination: "Zona D",
+    passengers: [],
+  },
 ];
 
-const createCircleIcon = (color: string, plate: string) => {
+const getDelayMinutes = (estimatedArrival: string): number => {
+  if (estimatedArrival === "-") return 0;
+  const [h, m] = estimatedArrival.split(":").map(Number);
+  const now = new Date();
+  const arrivalMinutes = h * 60 + m;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  return currentMinutes > arrivalMinutes ? currentMinutes - arrivalMinutes : 0;
+};
+
+const TipoBadge = ({ tipo, small }: { tipo: WorkerTipo; small?: boolean }) => (
+  <span
+    className="inline-block rounded-full font-bold uppercase"
+    style={{
+      background: TIPO_COLORS[tipo],
+      color: "#fff",
+      fontSize: small ? 7 : 9,
+      padding: small ? "1px 4px" : "2px 6px",
+    }}
+  >
+    {TIPO_LABELS[tipo]}
+  </span>
+);
+
+const createCircleIcon = (color: string, plate: string, driverTipo: WorkerTipo) => {
+  const tipoColor = TIPO_COLORS[driverTipo];
+  const tipoLabel = TIPO_LABELS[driverTipo];
   return L.divIcon({
     className: "",
     html: `
-      <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%)">
-        <div style="width:18px;height:18px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);cursor:pointer">
+        <div style="position:relative">
+          <div style="width:20px;height:20px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>
+          <div style="position:absolute;top:-6px;right:-12px;background:${tipoColor};color:#fff;font-size:6px;font-weight:800;padding:1px 3px;border-radius:3px;line-height:1.2">${tipoLabel}</div>
+        </div>
         <div style="margin-top:2px;background:#fff;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:700;color:#333;box-shadow:0 1px 3px rgba(0,0,0,.2);white-space:nowrap">${plate}</div>
       </div>
     `,
-    iconSize: [60, 36],
-    iconAnchor: [30, 18],
+    iconSize: [70, 40],
+    iconAnchor: [35, 20],
   });
 };
 
@@ -47,7 +137,9 @@ interface TrackingScreenProps {
 const TrackingScreen = ({ visible }: TrackingScreenProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const [filter, setFilter] = useState<string>("Todos");
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -64,13 +156,14 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
 
     mockVehicles.forEach((v) => {
       const color = STATUS_COLORS[v.status];
-      L.marker([v.lat, v.lng], { icon: createCircleIcon(color, v.plate) }).addTo(map);
+      const marker = L.marker([v.lat, v.lng], { icon: createCircleIcon(color, v.plate, v.driverTipo) }).addTo(map);
+      marker.on("click", () => setSelectedVehicle(v));
+      markersRef.current.push(marker);
     });
 
     mapInstance.current = map;
   }, []);
 
-  // Fix map size when tab becomes visible
   useEffect(() => {
     if (visible && mapInstance.current) {
       const timer = setTimeout(() => {
@@ -86,6 +179,103 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
     "En obra": mockVehicles.filter((v) => v.status === "En obra").length,
     "En ruta": mockVehicles.filter((v) => v.status === "En ruta").length,
     "Libre": mockVehicles.filter((v) => v.status === "Libre").length,
+  };
+
+  const renderDetail = () => {
+    if (!selectedVehicle) return null;
+    const v = selectedVehicle;
+    const delay = getDelayMinutes(v.estimatedArrival);
+    const totalPassengers = v.passengers.length;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setSelectedVehicle(null)}>
+        <div className="absolute inset-0 bg-black/40" />
+        <div
+          className="relative w-full max-w-lg rounded-t-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
+          style={{ background: 'hsl(var(--background))', maxHeight: '75vh' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div className="flex items-center gap-2.5">
+              <div className="w-3.5 h-3.5 rounded-full" style={{ background: STATUS_COLORS[v.status] }} />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-bold">{v.plate}</span>
+                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: STATUS_COLORS[v.status], color: '#fff' }}>{v.status}</span>
+                  {delay > 0 && v.status === "En ruta" && (
+                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#ef4444', color: '#fff' }}>ATRASADO +{delay}min</span>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground">{v.type}</p>
+              </div>
+            </div>
+            <button onClick={() => setSelectedVehicle(null)} className="p-1 rounded-full hover:bg-muted cursor-pointer border-none bg-transparent">
+              <X size={20} className="text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="px-5 py-4 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(75vh - 70px)' }}>
+            {/* Driver */}
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-1.5">Conductor</label>
+              <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: TIPO_COLORS[v.driverTipo] }}>
+                  {v.driver.split(" ").map(n => n[0]).join("")}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12px] font-bold">{v.driver}</span>
+                    <TipoBadge tipo={v.driverTipo} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trip info */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-lg border border-border px-3 py-2 text-center" style={{ background: 'hsl(var(--card))' }}>
+                <div className="text-[10px] text-muted-foreground">Salida</div>
+                <div className="text-[14px] font-bold">{v.departureTime}</div>
+              </div>
+              <div className="rounded-lg border border-border px-3 py-2 text-center" style={{ background: 'hsl(var(--card))' }}>
+                <div className="text-[10px] text-muted-foreground">Llegada est.</div>
+                <div className="text-[14px] font-bold">{v.estimatedArrival}</div>
+              </div>
+              <div className="rounded-lg border border-border px-3 py-2 text-center" style={{ background: 'hsl(var(--card))' }}>
+                <div className="text-[10px] text-muted-foreground">Destino</div>
+                <div className="text-[14px] font-bold">{v.destination}</div>
+              </div>
+            </div>
+
+            {/* Passengers */}
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-1.5">
+                Pasajeros {totalPassengers > 0 ? `(${totalPassengers})` : ""}
+              </label>
+              {totalPassengers === 0 ? (
+                <div className="px-3 py-3 rounded-lg border border-border text-center text-[12px] text-muted-foreground" style={{ background: 'hsl(var(--card))' }}>
+                  Solo conductor
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {v.passengers.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: TIPO_COLORS[p.tipo] }}>
+                        {p.avatar}
+                      </div>
+                      <span className="text-[12px] font-medium flex-1">{p.name}</span>
+                      <TipoBadge tipo={p.tipo} small />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -117,31 +307,24 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
         {filtered.map((v) => (
           <div
             key={v.id}
-            className="flex items-center gap-3 px-3.5 py-3"
+            className="flex items-center gap-3 px-3.5 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
             style={{ borderBottom: "1px solid hsl(var(--border))" }}
+            onClick={() => setSelectedVehicle(v)}
           >
-            <div
-              className="w-3 h-3 rounded-full flex-shrink-0"
-              style={{ background: STATUS_COLORS[v.status] }}
-            />
+            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: STATUS_COLORS[v.status] }} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-[13px] font-bold">{v.plate}</span>
-                <span
-                  className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full"
-                  style={{
-                    background: STATUS_COLORS[v.status],
-                    color: "#fff",
-                  }}
-                >
-                  {v.status}
-                </span>
+                <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: STATUS_COLORS[v.status], color: "#fff" }}>{v.status}</span>
+                <TipoBadge tipo={v.driverTipo} small />
               </div>
-              <p className="text-[11px] text-muted-foreground">{v.type} · {v.driver}</p>
+              <p className="text-[11px] text-muted-foreground">{v.type} · {v.driver} · {v.passengers.length > 0 ? `${v.passengers.length + 1} pers.` : "Solo conductor"}</p>
             </div>
           </div>
         ))}
       </div>
+
+      {renderDetail()}
     </div>
   );
 };
