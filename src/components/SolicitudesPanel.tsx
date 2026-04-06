@@ -261,8 +261,11 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
         onAddOutgoing({
           id: `out-${Date.now()}-${wid}`,
           workerName: worker.name,
+          workerTipo: worker.tipo,
           toZone: `${foreman!.zone} · ${foreman!.activity}`,
           toActivity: selectedTask,
+          fromActivity: worker.task,
+          foremanName: foreman!.name,
           requestedAt: timeStr,
           status: 'pending',
         });
