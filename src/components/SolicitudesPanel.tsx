@@ -3,10 +3,21 @@ import { TransferRequest, TransferStatus, mockActivities } from "@/lib/mock-data
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
+export interface OutgoingRequest {
+  id: string;
+  workerName: string;
+  toZone: string;
+  toActivity: string;
+  requestedAt: string;
+  status: TransferStatus;
+}
+
 interface SolicitudesPanelProps {
   transfers: TransferRequest[];
   onUpdateStatus: (id: string, status: TransferStatus) => void;
   compact?: boolean;
+  outgoingRequests?: OutgoingRequest[];
+  onAddOutgoing?: (req: OutgoingRequest) => void;
 }
 
 const statusStyles: Record<TransferStatus, { bg: string; color: string; label: string }> = {
@@ -15,7 +26,7 @@ const statusStyles: Record<TransferStatus, { bg: string; color: string; label: s
   rejected: { bg: '#fee2e2', color: '#991b1b', label: 'Rechazado' },
 };
 
-const mockOutgoing: { id: string; workerName: string; toZone: string; toActivity: string; requestedAt: string; status: TransferStatus }[] = [
+const initialOutgoing: OutgoingRequest[] = [
   { id: 'out1', workerName: 'Pedro Ruiz', toZone: 'Zona B · Estructura', toActivity: 'Estructura', requestedAt: '08:45', status: 'pending' },
 ];
 
@@ -84,7 +95,8 @@ const TransferCard = ({ t, onUpdateStatus }: { t: TransferRequest; onUpdateStatu
   );
 };
 
-const SolicitudesPanel = ({ transfers, onUpdateStatus, compact }: SolicitudesPanelProps) => {
+const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests, onAddOutgoing }: SolicitudesPanelProps) => {
+  const outgoing = outgoingRequests ?? initialOutgoing;
   const [showModal, setShowModal] = useState(false);
   const [selectedForeman, setSelectedForeman] = useState("");
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>([]);
@@ -116,6 +128,21 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact }: SolicitudesPan
       return;
     }
     const foreman = otherForemen.find(f => f.id === selectedForeman);
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    selectedWorkerIds.forEach(wid => {
+      const worker = foreman?.workers.find(w => w.id === wid);
+      if (worker && onAddOutgoing) {
+        onAddOutgoing({
+          id: `out-${Date.now()}-${wid}`,
+          workerName: worker.name,
+          toZone: `${foreman!.zone} · ${foreman!.activity}`,
+          toActivity: selectedTask,
+          requestedAt: timeStr,
+          status: 'pending',
+        });
+      }
+    });
     const workerNames = selectedWorkerIds
       .map(wid => foreman?.workers.find(w => w.id === wid)?.name)
       .filter(Boolean)
@@ -162,7 +189,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact }: SolicitudesPan
         </div>
         <div className="stat-card">
           <div className="kmi-label">Enviadas</div>
-          <div className="kmi-value" style={{ color: 'hsl(var(--g6))' }}>{mockOutgoing.length}</div>
+          <div className="kmi-value" style={{ color: 'hsl(var(--g6))' }}>{outgoing.length}</div>
         </div>
         <div className="stat-card">
           <div className="kmi-label">Resueltas</div>
@@ -203,11 +230,11 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact }: SolicitudesPan
 
       {/* MIS SOLICITUDES ENVIADAS */}
       <div className="sec-title">Mis solicitudes enviadas</div>
-      {mockOutgoing.length === 0 ? (
+      {outgoing.length === 0 ? (
         <div className="glass-card rounded-[10px] p-4 text-center text-[12px] text-muted-foreground">Sin solicitudes enviadas</div>
       ) : (
         <div className="space-y-2">
-          {mockOutgoing.map(o => {
+          {outgoing.map(o => {
             const st = statusStyles[o.status];
             return (
               <div key={o.id} className="rounded-lg border border-border overflow-hidden" style={{ background: 'hsl(var(--card))' }}>

@@ -12,7 +12,7 @@ import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
 import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
-import SolicitudesPanel from "@/components/SolicitudesPanel";
+import SolicitudesPanel, { type OutgoingRequest } from "@/components/SolicitudesPanel";
 
 interface Assignment {
   activity: string;
@@ -57,6 +57,13 @@ const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
   const [transfers, setTransfers] = useState<TransferRequest[]>(mockTransferRequests);
+  const [outgoingRequests, setOutgoingRequests] = useState<OutgoingRequest[]>([
+    { id: 'out1', workerName: 'Pedro Ruiz', toZone: 'Zona B · Estructura', toActivity: 'Estructura', requestedAt: '08:45', status: 'pending' },
+  ]);
+
+  const handleAddOutgoing = (req: OutgoingRequest) => {
+    setOutgoingRequests(prev => [req, ...prev]);
+  };
 
   // Past day snapshots
   const [pastWorkers] = useState<Worker[]>(generatePastWorkers);
@@ -173,7 +180,7 @@ const Index = () => {
       case 'tracking':
         return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
-        return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} />;
+        return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} outgoingRequests={outgoingRequests} onAddOutgoing={handleAddOutgoing} />;
       case 'historial':
         return (
           <div className="glass-card rounded-[10px] p-6 text-center">
