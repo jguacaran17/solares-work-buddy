@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Worker, Machine, projectInfo, WorkerTipo, mockZones } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
