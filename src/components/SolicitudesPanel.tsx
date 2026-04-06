@@ -3,10 +3,21 @@ import { TransferRequest, TransferStatus, mockActivities } from "@/lib/mock-data
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
+export interface OutgoingRequest {
+  id: string;
+  workerName: string;
+  toZone: string;
+  toActivity: string;
+  requestedAt: string;
+  status: TransferStatus;
+}
+
 interface SolicitudesPanelProps {
   transfers: TransferRequest[];
   onUpdateStatus: (id: string, status: TransferStatus) => void;
   compact?: boolean;
+  outgoingRequests?: OutgoingRequest[];
+  onAddOutgoing?: (req: OutgoingRequest) => void;
 }
 
 const statusStyles: Record<TransferStatus, { bg: string; color: string; label: string }> = {
