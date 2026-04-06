@@ -127,7 +127,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
               </div>
 
               {isExpanded && (
-                <div className="px-3.5 pb-3 pt-2" style={{ background: '#f8f8f6', borderTop: '1px solid hsl(var(--border))' }}>
+                <div className="px-3.5 pb-3 pt-2" style={{ background: 'hsl(var(--teal-bg))', borderTop: '1px solid hsl(var(--border))' }}>
                   {/* Already assigned pills grouped by tipo */}
                   {count > 0 && (() => {
                     const assignedWorkers = assigned!.workerIds.map(wId => workers.find(x => x.id === wId)).filter(Boolean) as Worker[];
