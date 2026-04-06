@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { WorkerTipo } from "@/lib/mock-data";
 
 interface Passenger {
