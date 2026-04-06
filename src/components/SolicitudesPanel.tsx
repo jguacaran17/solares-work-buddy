@@ -95,7 +95,8 @@ const TransferCard = ({ t, onUpdateStatus }: { t: TransferRequest; onUpdateStatu
   );
 };
 
-const SolicitudesPanel = ({ transfers, onUpdateStatus, compact }: SolicitudesPanelProps) => {
+const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests, onAddOutgoing }: SolicitudesPanelProps) => {
+  const outgoing = outgoingRequests ?? initialOutgoing;
   const [showModal, setShowModal] = useState(false);
   const [selectedForeman, setSelectedForeman] = useState("");
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>([]);
