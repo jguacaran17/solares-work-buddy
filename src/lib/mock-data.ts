@@ -195,6 +195,37 @@ export const mockMachines: Machine[] = [
   { id: 'f5', name: 'Citroen Jumper', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
 ];
 
+export const mockTransferRequests: TransferRequest[] = [
+  {
+    id: 'tr1',
+    workerId: '3',
+    workerName: 'Carlos Soto',
+    fromZone: 'Zona A · Hincado',
+    toZone: 'Zona B · Estructura',
+    fromActivity: 'Hincado principal',
+    toActivity: 'Estructura',
+    requestedBy: 'Manuel Reyes',
+    requestedAt: '09:30',
+    status: 'pending',
+    hoursBeforeTransfer: 3,
+    hoursAfterTransfer: 5,
+  },
+  {
+    id: 'tr2',
+    workerId: '7',
+    workerName: 'Ernesto Blanco',
+    fromZone: 'Zona A · Micropilotes',
+    toZone: 'Zona C · Módulos',
+    fromActivity: 'Micropilotes emplantillado',
+    toActivity: 'Modulos',
+    requestedBy: 'Luis Fernandez',
+    requestedAt: '10:15',
+    status: 'pending',
+    hoursBeforeTransfer: 2.5,
+    hoursAfterTransfer: 5.5,
+  },
+];
+
 export const mockReport: DailyReport = {
   date: '31/03/2026',
   foreman: 'Pepe Cabrerizo',
