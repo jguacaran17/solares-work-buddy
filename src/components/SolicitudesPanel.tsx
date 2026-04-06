@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { TransferRequest, TransferStatus, mockActivities } from "@/lib/mock-data";
+import { TransferRequest, TransferStatus, WorkerTipo, mockActivities } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
 export interface OutgoingRequest {
   id: string;
   workerName: string;
+  workerTipo?: WorkerTipo;
   toZone: string;
   toActivity: string;
+  fromActivity?: string;
+  foremanName?: string;
   requestedAt: string;
   status: TransferStatus;
+  resolvedAt?: string;
 }
 
 interface SolicitudesPanelProps {
@@ -26,8 +30,14 @@ const statusStyles: Record<TransferStatus, { bg: string; color: string; label: s
   rejected: { bg: '#fee2e2', color: '#991b1b', label: 'Rechazado' },
 };
 
+const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+};
+
 const initialOutgoing: OutgoingRequest[] = [
-  { id: 'out1', workerName: 'Pedro Ruiz', toZone: 'Zona B · Estructura', toActivity: 'Estructura', requestedAt: '08:45', status: 'pending' },
+  { id: 'out1', workerName: 'Pedro Ruiz', workerTipo: 'DESP', toZone: 'Zona B · Estructura', toActivity: 'Estructura', fromActivity: 'Hincado principal', foremanName: 'Luis Fernández', requestedAt: '08:45', status: 'pending' },
 ];
 
 // Foremen from other zones with their available workers
@@ -39,9 +49,9 @@ const otherForemen = [
     activity: 'Módulos',
     label: 'Mario Ruiz · Zona C (Módulos)',
     workers: [
-      { id: 'ext1', name: 'Álvaro Sánchez', avatar: 'AS', task: 'Montaje módulos' },
-      { id: 'ext2', name: 'Tomás Herrera', avatar: 'TH', task: 'Cableado módulos' },
-      { id: 'ext3', name: 'Raúl Méndez', avatar: 'RM', task: 'Revisión módulos' },
+      { id: 'ext1', name: 'Álvaro Sánchez', avatar: 'AS', task: 'Montaje módulos', tipo: 'FIELD' as WorkerTipo },
+      { id: 'ext2', name: 'Tomás Herrera', avatar: 'TH', task: 'Cableado módulos', tipo: 'LOCAL' as WorkerTipo },
+      { id: 'ext3', name: 'Raúl Méndez', avatar: 'RM', task: 'Revisión módulos', tipo: 'DESP' as WorkerTipo },
     ],
   },
   {
@@ -51,8 +61,8 @@ const otherForemen = [
     activity: 'Estructura',
     label: 'Luis Fernández · Zona B (Estructura)',
     workers: [
-      { id: 'ext4', name: 'Iván Delgado', avatar: 'ID', task: 'Soldadura perfiles' },
-      { id: 'ext5', name: 'Sergio Navarro', avatar: 'SN', task: 'Montaje perfiles' },
+      { id: 'ext4', name: 'Iván Delgado', avatar: 'ID', task: 'Soldadura perfiles', tipo: 'FIELD' as WorkerTipo },
+      { id: 'ext5', name: 'Sergio Navarro', avatar: 'SN', task: 'Montaje perfiles', tipo: 'LOCAL' as WorkerTipo },
     ],
   },
   {
@@ -62,35 +72,150 @@ const otherForemen = [
     activity: 'Cableado',
     label: 'Pablo Castro · Zona D (Cableado)',
     workers: [
-      { id: 'ext6', name: 'Marcos Peña', avatar: 'MP', task: 'Tirada cable BT' },
-      { id: 'ext7', name: 'Óscar Rivas', avatar: 'OR', task: 'Conexionado cajas' },
-      { id: 'ext8', name: 'Adrián Vega', avatar: 'AV', task: 'Etiquetado bandejas' },
+      { id: 'ext6', name: 'Marcos Peña', avatar: 'MP', task: 'Tirada cable BT', tipo: 'DESP' as WorkerTipo },
+      { id: 'ext7', name: 'Óscar Rivas', avatar: 'OR', task: 'Conexionado cajas', tipo: 'FIELD' as WorkerTipo },
+      { id: 'ext8', name: 'Adrián Vega', avatar: 'AV', task: 'Etiquetado bandejas', tipo: 'LOCAL' as WorkerTipo },
     ],
   },
 ];
 
-const TransferCard = ({ t, onUpdateStatus }: { t: TransferRequest; onUpdateStatus: (id: string, status: TransferStatus) => void }) => {
+// Worker tipo lookup from mock transfer data
+const workerTipoMap: Record<string, WorkerTipo> = {
+  'Carlos Soto': 'LOCAL',
+  'Diego Vargas': 'DESP',
+  'Ernesto Blanco': 'FIELD',
+};
+
+const TipoBadge = ({ tipo }: { tipo?: WorkerTipo }) => {
+  if (!tipo) return null;
+  const s = tipoBadgeStyles[tipo];
+  return (
+    <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none flex-shrink-0" style={{ background: s.bg, color: s.color }}>
+      {tipo === 'LOCAL' ? 'LOC' : tipo === 'FIELD' ? 'FLD' : tipo}
+    </span>
+  );
+};
+
+const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  <div className="flex items-start gap-2 py-1">
+    <span className="text-[10px] font-semibold flex-shrink-0 w-[70px]" style={{ color: 'hsl(var(--g5))' }}>{label}</span>
+    <span className="text-[11px]" style={{ color: 'hsl(var(--g8))' }}>{value}</span>
+  </div>
+);
+
+/* ── RECIBIDAS card ── */
+const RecibidaCard = ({ t, onUpdateStatus }: { t: TransferRequest; onUpdateStatus: (id: string, status: TransferStatus) => void }) => {
+  const [expanded, setExpanded] = useState(false);
   const st = statusStyles[t.status];
+  const tipo = workerTipoMap[t.workerName];
+
   return (
     <div className="rounded-lg border border-border overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
-      <div className="px-3 py-2.5">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[12px] font-bold">{t.workerName}</span>
+      {/* Collapsed */}
+      <div className="flex items-center justify-between px-3 py-2.5 cursor-pointer active:opacity-80" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[12px] font-bold truncate">{t.workerName}</span>
+          {tipo && <TipoBadge tipo={tipo} />}
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
           <span className="inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+          <span className="text-[10px] font-semibold" style={{ color: 'hsl(var(--primary))' }}>{expanded ? 'Cerrar ‹' : 'Ver detalle ›'}</span>
         </div>
-        <div className="text-[10px] text-muted-foreground space-y-0.5">
-          <div><span className="font-semibold">De:</span> {t.fromZone} → {t.fromActivity}</div>
-          <div><span className="font-semibold">A:</span> {t.toZone} → {t.toActivity}</div>
-          <div><span className="font-semibold">Solicita:</span> {t.requestedBy} a las {t.requestedAt}</div>
-          <div className="font-mono font-bold mt-0.5" style={{ color: 'hsl(var(--g8))' }}>{t.hoursBeforeTransfer}h antes · {t.hoursAfterTransfer}h después</div>
-        </div>
-        {t.status === 'pending' && (
-          <div className="flex gap-2 mt-2">
-            <button className="flex-1 py-1.5 rounded-lg text-[11px] font-bold border-none cursor-pointer" style={{ background: '#0f1f3a', color: '#fff' }} onClick={() => onUpdateStatus(t.id, 'approved')}>✓ Aprobar</button>
-            <button className="flex-1 py-1.5 rounded-lg text-[11px] font-bold border border-border cursor-pointer" style={{ background: 'hsl(var(--card))', color: 'hsl(var(--destructive))' }} onClick={() => onUpdateStatus(t.id, 'rejected')}>✕ Rechazar</button>
-          </div>
-        )}
       </div>
+
+      {/* Expanded */}
+      {expanded && (
+        <div className="px-3 pb-3 pt-0" style={{ borderTop: '1px solid hsl(var(--g1))' }}>
+          <div className="pt-2 space-y-0">
+            <DetailRow label="Solicita" value={<span className="font-semibold">{t.requestedBy}</span>} />
+            <DetailRow label="Zona" value={`${t.fromZone} → ${t.toZone}`} />
+            <DetailRow label="Operario" value={
+              <span className="flex items-center gap-1.5">
+                <span className="font-semibold">{t.workerName}</span>
+                <TipoBadge tipo={tipo} />
+              </span>
+            } />
+            <DetailRow label="Tarea actual" value={t.fromActivity} />
+            <DetailRow label="Tarea destino" value={<span className="font-semibold">{t.toActivity}</span>} />
+            <DetailRow label="Hora" value={t.requestedAt} />
+            <DetailRow label="Horas" value={
+              <span className="font-mono text-[10px]">{t.hoursBeforeTransfer}h antes · {t.hoursAfterTransfer}h después</span>
+            } />
+          </div>
+
+          {t.status === 'pending' && (
+            <div className="flex gap-2 mt-3">
+              <button className="flex-1 py-2 rounded-lg text-[11px] font-bold border-none cursor-pointer" style={{ background: '#0f1f3a', color: '#fff' }} onClick={() => onUpdateStatus(t.id, 'approved')}>✓ Aprobar</button>
+              <button className="flex-1 py-2 rounded-lg text-[11px] font-bold border border-border cursor-pointer" style={{ background: 'hsl(var(--card))', color: 'hsl(var(--destructive))' }} onClick={() => onUpdateStatus(t.id, 'rejected')}>✕ Rechazar</button>
+            </div>
+          )}
+          {t.status === 'approved' && (
+            <div className="mt-2 text-[11px] font-semibold flex items-center gap-1" style={{ color: '#166534' }}>
+              ✓ Aprobado
+            </div>
+          )}
+          {t.status === 'rejected' && (
+            <div className="mt-2 text-[11px] font-semibold flex items-center gap-1" style={{ color: '#991b1b' }}>
+              ✗ Rechazado
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── ENVIADAS card ── */
+const EnviadaCard = ({ o }: { o: OutgoingRequest }) => {
+  const [expanded, setExpanded] = useState(false);
+  const st = statusStyles[o.status];
+
+  return (
+    <div className="rounded-lg border border-border overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+      {/* Collapsed */}
+      <div className="flex items-center justify-between px-3 py-2.5 cursor-pointer active:opacity-80" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[12px] font-bold truncate">{o.workerName}</span>
+          {o.workerTipo && <TipoBadge tipo={o.workerTipo} />}
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+          <span className="text-[10px] font-semibold" style={{ color: 'hsl(var(--primary))' }}>{expanded ? 'Cerrar ‹' : 'Ver detalle ›'}</span>
+        </div>
+      </div>
+
+      {/* Expanded */}
+      {expanded && (
+        <div className="px-3 pb-3 pt-0" style={{ borderTop: '1px solid hsl(var(--g1))' }}>
+          <div className="pt-2 space-y-0">
+            {o.foremanName && <DetailRow label="Capataz" value={<span className="font-semibold">{o.foremanName}</span>} />}
+            <DetailRow label="Operario" value={
+              <span className="flex items-center gap-1.5">
+                <span className="font-semibold">{o.workerName}</span>
+                {o.workerTipo && <TipoBadge tipo={o.workerTipo} />}
+              </span>
+            } />
+            {o.fromActivity && <DetailRow label="Tarea orig." value={o.fromActivity} />}
+            <DetailRow label="Tarea nueva" value={<span className="font-semibold">{o.toActivity}</span>} />
+            <DetailRow label="Destino" value={o.toZone} />
+            <DetailRow label="Enviada" value={o.requestedAt} />
+            <DetailRow label="Estado" value={
+              <span className="inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+            } />
+          </div>
+
+          {o.status === 'approved' && (
+            <div className="mt-2 text-[11px] font-semibold flex items-center gap-1" style={{ color: '#166534' }}>
+              ✓ Aprobado a las {o.resolvedAt || o.requestedAt}
+            </div>
+          )}
+          {o.status === 'rejected' && (
+            <div className="mt-2 text-[11px] font-semibold flex items-center gap-1" style={{ color: '#991b1b' }}>
+              ✗ Rechazado a las {o.resolvedAt || o.requestedAt}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -136,8 +261,11 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
         onAddOutgoing({
           id: `out-${Date.now()}-${wid}`,
           workerName: worker.name,
+          workerTipo: worker.tipo,
           toZone: `${foreman!.zone} · ${foreman!.activity}`,
           toActivity: selectedTask,
+          fromActivity: worker.task,
+          foremanName: foreman!.name,
           requestedAt: timeStr,
           status: 'pending',
         });
@@ -168,7 +296,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
         ) : (
           <>
             <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Solicitudes recibidas ({pending.length})</div>
-            {pending.map(t => <TransferCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
+            {pending.map(t => <RecibidaCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
           </>
         )}
       </div>
@@ -216,13 +344,13 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
           {pending.length > 0 && (
             <>
               <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Pendientes · {pending.length}</div>
-              {pending.map(t => <TransferCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
+              {pending.map(t => <RecibidaCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
             </>
           )}
           {resolved.length > 0 && (
             <>
               <div className="text-[10px] font-bold text-muted-foreground uppercase mt-3 mb-1">Resueltas · {resolved.length}</div>
-              {resolved.map(t => <TransferCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
+              {resolved.map(t => <RecibidaCard key={t.id} t={t} onUpdateStatus={onUpdateStatus} />)}
             </>
           )}
         </div>
@@ -234,23 +362,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
         <div className="glass-card rounded-[10px] p-4 text-center text-[12px] text-muted-foreground">Sin solicitudes enviadas</div>
       ) : (
         <div className="space-y-2">
-          {outgoing.map(o => {
-            const st = statusStyles[o.status];
-            return (
-              <div key={o.id} className="rounded-lg border border-border overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
-                <div className="px-3 py-2.5">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[12px] font-bold">{o.workerName}</span>
-                    <span className="inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    <div><span className="font-semibold">Destino:</span> {o.toZone} → {o.toActivity}</div>
-                    <div><span className="font-semibold">Enviada:</span> {o.requestedAt}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {outgoing.map(o => <EnviadaCard key={o.id} o={o} />)}
         </div>
       )}
 
