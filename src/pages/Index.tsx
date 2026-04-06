@@ -211,9 +211,9 @@ const Index = () => {
         <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
       )}
       {!isEditableDay && bottomTab === 'parte' && (
-        <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: '#f6ad55', color: '#744210' }}>
+        <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: 'hsl(var(--amber-bg))', color: 'hsl(var(--amber-text))' }}>
           <span className="text-[12px] font-bold">🔒 Visualizando día anterior — solo lectura</span>
-          <button onClick={() => handleSelectDate(new Date(), true)} className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,.15)' }}>Ir a hoy</button>
+          <button onClick={() => handleSelectDate(new Date(), true)} className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: 'hsl(var(--teal))', color: '#fff' }}>Ir a hoy</button>
         </div>
       )}
       <div className="flex-1 relative overflow-hidden">
