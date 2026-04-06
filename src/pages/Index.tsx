@@ -125,7 +125,7 @@ const Index = () => {
                 <p className="text-[10px] text-muted-foreground">Faltas</p>
               </div>
               <div className="stat-card text-center py-2">
-                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--g4))' }}>{currentAssignments.length}</p>
+                <p className="text-[18px] font-bold" style={{ color: 'hsl(var(--teal))' }}>{currentAssignments.length}</p>
                 <p className="text-[10px] text-muted-foreground">Actividades</p>
               </div>
             </div>
