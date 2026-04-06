@@ -297,6 +297,7 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
           const catStopped = catMachines.filter(m => m.status === 'parada');
           const sorted = [...catActive, ...catBroken, ...catStopped];
           const title = cat === 'maquinaria' ? 'Maquinaria' : 'Flota';
+          const totalHH = catActive.reduce((sum, m) => sum + m.hoursToday, 0);
           return (
             <div key={cat}>
               <div className="px-3.5 py-2 font-bold text-[11px] uppercase" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g6))', borderBottom: '2px solid hsl(var(--g2))', borderTop: '2px solid hsl(var(--g2))' }}>
@@ -334,6 +335,20 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
                   <div className="px-1 py-1.5 text-[10px] font-mono text-center font-bold">{m.hoursToday > 0 ? m.hoursToday.toFixed(1) : '—'}</div>
                 </div>
               ))}
+              {/* TOTAL row */}
+              <div
+                className="grid gap-0 items-center"
+                style={{
+                  gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.5fr) 50px 50px',
+                  borderTop: '2px solid hsl(var(--g2))',
+                  background: 'hsl(var(--g05))',
+                }}
+              >
+                <div className="px-2 py-2 text-[10px] font-bold uppercase">Total</div>
+                <div className="px-2 py-2 text-[9px] text-muted-foreground">{catActive.length} activas</div>
+                <div className="px-1 py-2"></div>
+                <div className="px-1 py-2 text-[10px] font-mono text-center font-bold">{totalHH.toFixed(1)}</div>
+              </div>
             </div>
           );
         })}
