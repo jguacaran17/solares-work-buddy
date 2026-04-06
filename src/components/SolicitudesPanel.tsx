@@ -359,23 +359,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
         <div className="glass-card rounded-[10px] p-4 text-center text-[12px] text-muted-foreground">Sin solicitudes enviadas</div>
       ) : (
         <div className="space-y-2">
-          {outgoing.map(o => {
-            const st = statusStyles[o.status];
-            return (
-              <div key={o.id} className="rounded-lg border border-border overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
-                <div className="px-3 py-2.5">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[12px] font-bold">{o.workerName}</span>
-                    <span className="inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    <div><span className="font-semibold">Destino:</span> {o.toZone} → {o.toActivity}</div>
-                    <div><span className="font-semibold">Enviada:</span> {o.requestedAt}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {outgoing.map(o => <EnviadaCard key={o.id} o={o} />)}
         </div>
       )}
 
