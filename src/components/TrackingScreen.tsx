@@ -154,10 +154,10 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
       attribution: '© OpenStreetMap',
     }).addTo(map);
 
-    mockVehicles.forEach((v) => {
+    mockVehicles.forEach((v, i) => {
       const color = STATUS_COLORS[v.status];
       const marker = L.marker([v.lat, v.lng], { icon: createCircleIcon(color, v.plate, v.driverTipo) }).addTo(map);
-      marker.on("click", () => setSelectedVehicle(v));
+      marker.on("click", () => setExpandedId(prev => prev === v.id ? null : v.id));
       markersRef.current.push(marker);
     });
 
