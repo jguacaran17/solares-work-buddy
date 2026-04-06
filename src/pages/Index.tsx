@@ -13,6 +13,7 @@ import MaquinariaScreen from "@/components/MaquinariaScreen";
 import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
 import SolicitudesPanel, { type OutgoingRequest } from "@/components/SolicitudesPanel";
+import HistorialScreen from "@/components/HistorialScreen";
 
 interface Assignment {
   activity: string;
@@ -182,13 +183,7 @@ const Index = () => {
       case 'solicitudes':
         return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} outgoingRequests={outgoingRequests} onAddOutgoing={handleAddOutgoing} />;
       case 'historial':
-        return (
-          <div className="glass-card rounded-[10px] p-6 text-center">
-            <p className="text-2xl mb-2">🕐</p>
-            <p className="text-sm font-bold mb-1">Historial</p>
-            <p className="text-xs text-muted-foreground">Historial de partes enviados. Próximamente.</p>
-          </div>
-        );
+        return <HistorialScreen />;
       default:
         return null;
     }
