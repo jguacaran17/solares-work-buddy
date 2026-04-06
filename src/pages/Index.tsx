@@ -13,6 +13,7 @@ import MaquinariaScreen from "@/components/MaquinariaScreen";
 import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
 import SolicitudesPanel, { type OutgoingRequest } from "@/components/SolicitudesPanel";
+import HistorialScreen from "@/components/HistorialScreen";
 
 interface Assignment {
   activity: string;
