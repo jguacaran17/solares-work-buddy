@@ -180,7 +180,7 @@ const Index = () => {
       case 'tracking':
         return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
-        return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} />;
+        return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} outgoingRequests={outgoingRequests} onAddOutgoing={handleAddOutgoing} />;
       case 'historial':
         return (
           <div className="glass-card rounded-[10px] p-6 text-center">
