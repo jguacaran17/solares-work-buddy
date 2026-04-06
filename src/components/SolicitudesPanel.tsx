@@ -189,7 +189,7 @@ const SolicitudesPanel = ({ transfers, onUpdateStatus, compact, outgoingRequests
         </div>
         <div className="stat-card">
           <div className="kmi-label">Enviadas</div>
-          <div className="kmi-value" style={{ color: 'hsl(var(--g6))' }}>{mockOutgoing.length}</div>
+          <div className="kmi-value" style={{ color: 'hsl(var(--g6))' }}>{outgoing.length}</div>
         </div>
         <div className="stat-card">
           <div className="kmi-label">Resueltas</div>
