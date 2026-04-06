@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Worker, WorkerTipo, TransferRequest } from "@/lib/mock-data";
+import { Worker, WorkerTipo, TransferRequest, mockActivitySubtasks, defaultSubtasks } from "@/lib/mock-data";
 
 interface Assignment {
   activity: string;
@@ -31,16 +31,25 @@ const COST_PER_HOUR = 28;
 const DEFAULT_HOURS = 8;
 const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
 
-const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string; label: string }> = {
+  DESP: { bg: '#fef3c7', color: '#92400e', label: 'DESP' },
+  LOCAL: { bg: '#ccfbf1', color: '#115e59', label: 'LOC' },
+  FIELD: { bg: '#dbeafe', color: '#1e3a5f', label: 'FLD' },
+};
+
+// Theoretical HH/Ud for activities (from Historial Producción data)
+const THEORETICAL_HH_UD: Record<string, number> = {
+  'Modulos': 0.28, 'Trackers': 0.85, 'Hincas': 5.32, 'Marcos': 9.80,
+  'Lima/Pintura': 2.11, 'Micropilotes': 7.19, 'Estructura': 1.64, 'Varios': 1.00,
+  'Hincado principal': 5.32, 'Lima y pintura': 2.11, 'Micropilotes emplantillado': 7.19,
+  'Micropilotes hormigonado': 7.19, 'Montaje cabezales': 9.80, 'Corte y mecanizado': 1.64,
 };
 
 const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, transfers, onNext }: HoursScreenProps) => {
   const approvedTransfers = transfers.filter(t => t.status === 'approved');
   const transferredWorkerIds = new Set(approvedTransfers.map(t => t.workerId));
-  // Initialize hours for workers that don't have a value yet (only once per new worker)
+  const [timeErrors, setTimeErrors] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const missing: Record<string, number> = {};
     assignments.forEach(a => {
@@ -59,10 +68,23 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
   const getHours = (wId: string) => hoursMap[wId] ?? DEFAULT_HOURS;
 
   const updateProduction = (activity: string, field: keyof TaskProduction, value: string) => {
-    onUpdateProductionMap(prev => ({
-      ...prev,
-      [activity]: { ...(prev[activity] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' }), [field]: value },
-    }));
+    onUpdateProductionMap(prev => {
+      const current = prev[activity] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' };
+      const updated = { ...current, [field]: value };
+
+      // Validate hora fin > hora inicio
+      if (field === 'horaFin' && updated.horaInicio && value && value <= updated.horaInicio) {
+        setTimeErrors(e => ({ ...e, [activity]: 'Hora fin debe ser posterior a hora inicio' }));
+        return prev; // Don't update
+      }
+      if (field === 'horaInicio' && updated.horaFin && updated.horaFin <= value) {
+        setTimeErrors(e => ({ ...e, [activity]: 'Hora inicio debe ser anterior a hora fin' }));
+        return prev;
+      }
+      setTimeErrors(e => { const n = { ...e }; delete n[activity]; return n; });
+
+      return { ...prev, [activity]: updated };
+    });
   };
 
   const updateHours = (workerId: string, value: string) => {
@@ -143,10 +165,22 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
           .filter(Boolean) as Worker[];
         const prod = productionMap[a.activity] || { horaInicio: '', horaFin: '', udsProd: '', tipo: '' };
         const totalTaskHH = taskWorkers.reduce((s, w) => s + getHours(w.id), 0);
-        const hhUd = prod.udsProd && parseFloat(prod.udsProd) > 0
-          ? (totalTaskHH / parseFloat(prod.udsProd)).toFixed(2)
-          : '—';
+        const udsNum = prod.udsProd ? parseFloat(prod.udsProd) : 0;
+        const hhUd = udsNum > 0 ? (totalTaskHH / udsNum).toFixed(2) : '—';
+        const hhUdNum = udsNum > 0 ? totalTaskHH / udsNum : null;
+        const theoretical = THEORETICAL_HH_UD[a.activity];
         const previstas = previstasMap[a.activity] ?? DEFAULT_HOURS;
+        const subtasks = mockActivitySubtasks[a.activity] || defaultSubtasks;
+        const timeError = timeErrors[a.activity];
+
+        // Desviación vs theoretical
+        let desvColor = '';
+        let desvLabel = '';
+        if (hhUdNum !== null && theoretical) {
+          const desvPct = ((hhUdNum - theoretical) / theoretical) * 100;
+          desvColor = desvPct <= 0 ? '#16a34a' : desvPct < 15 ? '#d97706' : '#dc2626';
+          desvLabel = `${desvPct >= 0 ? '+' : ''}${desvPct.toFixed(0)}% vs teórico (${theoretical})`;
+        }
 
         return (
           <div key={a.activity} className="glass-card rounded-[10px] overflow-hidden mb-2.5">
@@ -168,6 +202,18 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
 
             {!isCollapsed && (
               <div className="px-3.5 pb-3">
+                {/* Subtarea assigned */}
+                <div className="py-1.5 mb-1" style={{ borderBottom: '1px solid hsl(var(--g1))' }}>
+                  <div className="text-[9px] font-bold uppercase text-muted-foreground mb-1">Subtareas asignadas</div>
+                  <div className="flex flex-wrap gap-1">
+                    {subtasks.map(st => (
+                      <span key={st.id} className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono" style={{ background: 'hsl(var(--g1))', color: 'hsl(var(--g7))' }}>
+                        {st.name} ({st.standardHours}h)
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Horas previstas */}
                 <div className="flex items-center gap-2 py-2 mb-1" style={{ borderBottom: '1px solid hsl(var(--g1))' }}>
                   <label className="text-[11px] font-semibold" style={{ color: 'hsl(var(--g6))' }}>Horas previstas</label>
@@ -191,6 +237,7 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
                   const inputClass = dev > 0 ? 'over' : 'ok';
                   const transfer = approvedTransfers.find(t => t.workerId === w.id);
                   const isTransferred = !!transfer;
+                  const ts = tipoBadgeStyles[w.tipo];
 
                   return (
                     <div key={w.id} className="py-1.5" style={{ borderBottom: '1px solid #f0f0ec', opacity: isTransferred ? 0.7 : 1 }}>
@@ -206,9 +253,9 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
                             ) : (
                               <span
                                 className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none flex-shrink-0"
-                                style={{ background: tipoBadgeStyles[w.tipo].bg, color: tipoBadgeStyles[w.tipo].color }}
+                                style={{ background: ts.bg, color: ts.color }}
                               >
-                                {w.tipo}
+                                {ts.label}
                               </span>
                             )}
                           </div>
@@ -245,7 +292,6 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
                           </div>
                         )}
                       </div>
-                      {/* Split hours for transferred worker */}
                       {isTransferred && transfer && (
                         <div className="ml-8 mt-1 flex items-center gap-2 text-[9px] font-mono text-muted-foreground">
                           <span className="px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--g1))' }}>Antes: {transfer.hoursBeforeTransfer}h</span>
@@ -278,11 +324,13 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
                         value={prod.horaFin}
                         onChange={e => updateProduction(a.activity, 'horaFin', e.target.value)}
                         className="w-full border border-border rounded px-1.5 py-1 text-[11px] font-mono"
-                        style={{ background: 'hsl(var(--background))' }}
+                        style={{ background: 'hsl(var(--background))', borderColor: timeError ? '#dc2626' : undefined }}
+                        min={prod.horaInicio || undefined}
                       />
+                      {timeError && <div className="text-[8px] mt-0.5" style={{ color: '#dc2626' }}>{timeError}</div>}
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-1.5 mb-1.5">
                     <div>
                       <label className="text-[9px] text-muted-foreground">Uds prod.</label>
                       <input
@@ -317,6 +365,13 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
                       </div>
                     </div>
                   </div>
+                  {/* Desviación vs theoretical */}
+                  {desvLabel && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="inline-block w-2 h-2 rounded-full" style={{ background: desvColor }} />
+                      <span className="text-[9px] font-bold font-mono" style={{ color: desvColor }}>{desvLabel}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
