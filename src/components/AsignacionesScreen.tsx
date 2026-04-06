@@ -202,7 +202,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
                           <span className="text-[10px] text-muted-foreground font-bold uppercase">Toca para asignar:</span>
                           <button
                             className="text-[10px] font-bold px-2.5 py-1 rounded-full border-none cursor-pointer"
-                            style={{ background: '#0f1f3a', color: '#fff' }}
+                            style={{ background: 'hsl(var(--teal))', color: '#fff' }}
                             onClick={() => {
                               const idsToAdd = availableForThis.map(w => w.id);
                               let updated = [...assignments];
