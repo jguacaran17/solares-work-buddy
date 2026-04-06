@@ -149,23 +149,32 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
                     </div>
                   )}
 
-                  {/* Available workers */}
+                  {/* Available workers grouped by tipo */}
                   {(() => {
                     const availableForThis = presentWorkers.filter(w => {
                       if (assigned?.workerIds.includes(w.id)) return false;
                       return true;
                     });
-                    return availableForThis.length > 0 ? (
+                    if (availableForThis.length === 0) {
+                      return <div className="text-[11px] py-1" style={{ color: 'hsl(var(--g6))' }}>No quedan operarios disponibles</div>;
+                    }
+
+                    const groups: { tipo: WorkerTipo; label: string; workers: typeof availableForThis }[] = [
+                      { tipo: 'DESP', label: 'DESPLAZADOS', workers: availableForThis.filter(w => w.tipo === 'DESP') },
+                      { tipo: 'LOCAL', label: 'LOCAL', workers: availableForThis.filter(w => w.tipo === 'LOCAL') },
+                      { tipo: 'FIELD', label: 'FIELD', workers: availableForThis.filter(w => w.tipo === 'FIELD') },
+                    ];
+
+                    return (
                       <>
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] text-muted-foreground font-bold uppercase">Toca para asignar:</span>
                           <button
                             className="text-[10px] font-bold px-2.5 py-1 rounded-full border-none cursor-pointer"
-                            style={{ background: 'hsl(var(--g6))', color: '#fff' }}
+                            style={{ background: '#0f1f3a', color: '#fff' }}
                             onClick={() => {
                               const idsToAdd = availableForThis.map(w => w.id);
                               let updated = [...assignments];
-                              // Remove these workers from other activities
                               updated = updated.map(a =>
                                 a.activity !== activity ? { ...a, workerIds: a.workerIds.filter(id => !idsToAdd.includes(id)) } : a
                               );
@@ -183,27 +192,33 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext 
                             + Asignar todos ({availableForThis.length})
                           </button>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {availableForThis.map(w => {
-                            const isInOther = assignedIds.has(w.id);
-                            const ci = parseInt(w.id) % avatarColors.length;
-                            return (
-                              <span
-                                key={w.id}
-                                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] cursor-pointer border border-border"
-                                style={{ background: 'hsl(var(--card))', opacity: isInOther ? 0.4 : 1 }}
-                                onClick={() => toggleWorkerInActivity(activity, w.id)}
-                              >
-                                <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
-                                {w.name}
-                                <TipoBadge tipo={w.tipo} />
-                              </span>
-                            );
-                          })}
-                        </div>
+                        {groups.map(group => {
+                          if (group.workers.length === 0) return null;
+                          return (
+                            <div key={group.tipo} className="mb-2">
+                              <div className="text-[9px] font-bold uppercase text-muted-foreground mb-1 mt-1" style={{ letterSpacing: '0.06em' }}>{group.label}</div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {group.workers.map(w => {
+                                  const isInOther = assignedIds.has(w.id);
+                                  const ci = parseInt(w.id) % avatarColors.length;
+                                  return (
+                                    <span
+                                      key={w.id}
+                                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] cursor-pointer border border-border"
+                                      style={{ background: 'hsl(var(--card))', opacity: isInOther ? 0.4 : 1 }}
+                                      onClick={() => toggleWorkerInActivity(activity, w.id)}
+                                    >
+                                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
+                                      {w.name}
+                                      <TipoBadge tipo={w.tipo} />
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </>
-                    ) : (
-                      <div className="text-[11px] py-1" style={{ color: 'hsl(var(--g6))' }}>No quedan operarios disponibles</div>
                     );
                   })()}
 
