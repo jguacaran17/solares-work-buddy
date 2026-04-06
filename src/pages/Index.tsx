@@ -10,6 +10,7 @@ import HoursScreen from "@/components/HoursScreen";
 import EnviarScreen from "@/components/EnviarScreen";
 import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
+import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
 import SolicitudesPanel from "@/components/SolicitudesPanel";
 
@@ -170,13 +171,7 @@ const Index = () => {
       case 'incidencias':
         return <MaquinariaScreen machines={machines} onUpdateMachines={setMachines} />;
       case 'tracking':
-        return (
-          <div className="glass-card rounded-[10px] p-6 text-center">
-            <p className="text-2xl mb-2">📍</p>
-            <p className="text-sm font-bold mb-1">Tracking GPS</p>
-            <p className="text-xs text-muted-foreground">Seguimiento de ubicación. Próximamente.</p>
-          </div>
-        );
+        return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
         return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} />;
       case 'historial':
