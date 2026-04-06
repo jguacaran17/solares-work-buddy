@@ -230,7 +230,7 @@ const Index = () => {
           </button>
         </div>
       )}
-      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} pendingCount={pendingTransfers} />
+      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} pendingCount={pendingTransfers} incidentCount={incidents.filter(i => i.status === 'activa').length} />
     </div>
   );
 };
