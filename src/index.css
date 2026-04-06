@@ -191,7 +191,7 @@
   .sbtn {
     width: 100%;
     padding: 14px;
-    background: hsl(var(--g6));
+    background: #0f1f3a;
     color: #fff;
     border: none;
     border-radius: 12px;
@@ -206,7 +206,7 @@
     gap: 8px;
   }
 
-  .sbtn:active { background: hsl(var(--g7)); }
+  .sbtn:active { background: #1a2d4a; }
 
   .toast-custom {
     position: fixed;
