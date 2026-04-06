@@ -164,7 +164,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
             {/* Zone header */}
             <div
               className="flex items-center justify-between px-3.5 py-2.5 cursor-pointer active:opacity-80"
-              style={{ background: '#f5f5f2', borderBottom: '1px solid hsl(var(--border))' }}
+              style={{ background: 'hsl(var(--teal-bg))', borderBottom: '1px solid hsl(var(--border))' }}
               onClick={() => toggleZone(zone.id)}
             >
               <div>
