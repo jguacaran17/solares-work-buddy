@@ -10,6 +10,7 @@ import HoursScreen from "@/components/HoursScreen";
 import EnviarScreen from "@/components/EnviarScreen";
 import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
+import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
 import SolicitudesPanel from "@/components/SolicitudesPanel";
 
