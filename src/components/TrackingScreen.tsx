@@ -181,101 +181,13 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
     "Libre": mockVehicles.filter((v) => v.status === "Libre").length,
   };
 
-  const renderDetail = () => {
-    if (!selectedVehicle) return null;
-    const v = selectedVehicle;
+  const DelayBadge = ({ v }: { v: Vehicle }) => {
+    if (v.estimatedArrival === "-" || v.status === "Libre") return null;
     const delay = getDelayMinutes(v.estimatedArrival);
-    const totalPassengers = v.passengers.length;
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setSelectedVehicle(null)}>
-        <div className="absolute inset-0 bg-black/40" />
-        <div
-          className="relative w-full max-w-lg rounded-t-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
-          style={{ background: 'hsl(var(--background))', maxHeight: '75vh' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div className="flex items-center gap-2.5">
-              <div className="w-3.5 h-3.5 rounded-full" style={{ background: STATUS_COLORS[v.status] }} />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-bold">{v.plate}</span>
-                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: STATUS_COLORS[v.status], color: '#fff' }}>{v.status}</span>
-                  {delay > 0 && v.status === "En ruta" && (
-                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#ef4444', color: '#fff' }}>ATRASADO +{delay}min</span>
-                  )}
-                </div>
-                <p className="text-[11px] text-muted-foreground">{v.type}</p>
-              </div>
-            </div>
-            <button onClick={() => setSelectedVehicle(null)} className="p-1 rounded-full hover:bg-muted cursor-pointer border-none bg-transparent">
-              <X size={20} className="text-muted-foreground" />
-            </button>
-          </div>
-
-          {/* Body */}
-          <div className="px-5 py-4 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(75vh - 70px)' }}>
-            {/* Driver */}
-            <div>
-              <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-1.5">Conductor</label>
-              <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: TIPO_COLORS[v.driverTipo] }}>
-                  {v.driver.split(" ").map(n => n[0]).join("")}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[12px] font-bold">{v.driver}</span>
-                    <TipoBadge tipo={v.driverTipo} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Trip info */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-lg border border-border px-3 py-2 text-center" style={{ background: 'hsl(var(--card))' }}>
-                <div className="text-[10px] text-muted-foreground">Salida</div>
-                <div className="text-[14px] font-bold">{v.departureTime}</div>
-              </div>
-              <div className="rounded-lg border border-border px-3 py-2 text-center" style={{ background: 'hsl(var(--card))' }}>
-                <div className="text-[10px] text-muted-foreground">Llegada est.</div>
-                <div className="text-[14px] font-bold">{v.estimatedArrival}</div>
-              </div>
-              <div className="rounded-lg border border-border px-3 py-2 text-center" style={{ background: 'hsl(var(--card))' }}>
-                <div className="text-[10px] text-muted-foreground">Destino</div>
-                <div className="text-[14px] font-bold">{v.destination}</div>
-              </div>
-            </div>
-
-            {/* Passengers */}
-            <div>
-              <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-1.5">
-                Pasajeros {totalPassengers > 0 ? `(${totalPassengers})` : ""}
-              </label>
-              {totalPassengers === 0 ? (
-                <div className="px-3 py-3 rounded-lg border border-border text-center text-[12px] text-muted-foreground" style={{ background: 'hsl(var(--card))' }}>
-                  Solo conductor
-                </div>
-              ) : (
-                <div className="space-y-1.5">
-                  {v.passengers.map((p, i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: TIPO_COLORS[p.tipo] }}>
-                        {p.avatar}
-                      </div>
-                      <span className="text-[12px] font-medium flex-1">{p.name}</span>
-                      <TipoBadge tipo={p.tipo} small />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    if (delay > 0) {
+      return <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#ef4444', color: '#fff' }}>ATRASADO +{delay}min</span>;
+    }
+    return <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#22c55e', color: '#fff' }}>A tiempo</span>;
   };
 
   return (
@@ -302,29 +214,95 @@ const TrackingScreen = ({ visible }: TrackingScreenProps) => {
         ))}
       </div>
 
-      {/* Vehicle list */}
+      {/* Vehicle list with inline accordion */}
       <div className="glass-card rounded-[10px] overflow-hidden">
-        {filtered.map((v) => (
-          <div
-            key={v.id}
-            className="flex items-center gap-3 px-3.5 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
-            style={{ borderBottom: "1px solid hsl(var(--border))" }}
-            onClick={() => setSelectedVehicle(v)}
-          >
-            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: STATUS_COLORS[v.status] }} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[13px] font-bold">{v.plate}</span>
-                <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: STATUS_COLORS[v.status], color: "#fff" }}>{v.status}</span>
-                <TipoBadge tipo={v.driverTipo} small />
+        {filtered.map((v) => {
+          const isExpanded = expandedId === v.id;
+          const delay = getDelayMinutes(v.estimatedArrival);
+          return (
+            <div key={v.id} style={{ borderBottom: "1px solid hsl(var(--border))" }}>
+              {/* Row header */}
+              <div
+                className="flex items-center gap-3 px-3.5 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={() => setExpandedId(isExpanded ? null : v.id)}
+              >
+                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: STATUS_COLORS[v.status] }} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[13px] font-bold">{v.plate}</span>
+                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: STATUS_COLORS[v.status], color: "#fff" }}>{v.status}</span>
+                    <TipoBadge tipo={v.driverTipo} small />
+                    <DelayBadge v={v} />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">{v.type} · {v.driver} · {v.passengers.length > 0 ? `${v.passengers.length + 1} pers.` : "Solo conductor"}</p>
+                </div>
+                <ChevronDown
+                  size={16}
+                  className="text-muted-foreground flex-shrink-0 transition-transform duration-200"
+                  style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
+                />
               </div>
-              <p className="text-[11px] text-muted-foreground">{v.type} · {v.driver} · {v.passengers.length > 0 ? `${v.passengers.length + 1} pers.` : "Solo conductor"}</p>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {renderDetail()}
+              {/* Expanded detail */}
+              {isExpanded && (
+                <div className="px-3.5 pb-3.5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Conductor */}
+                  <div>
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Conductor</div>
+                    <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: TIPO_COLORS[v.driverTipo] }}>
+                        {v.driver.split(" ").map(n => n[0]).join("")}
+                      </div>
+                      <span className="text-[12px] font-bold flex-1">{v.driver}</span>
+                      <TipoBadge tipo={v.driverTipo} small />
+                    </div>
+                  </div>
+
+                  {/* Trip info */}
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <div className="rounded-lg border border-border px-2 py-1.5 text-center" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="text-[9px] text-muted-foreground">Salida</div>
+                      <div className="text-[13px] font-bold">{v.departureTime}</div>
+                    </div>
+                    <div className="rounded-lg border border-border px-2 py-1.5 text-center" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="text-[9px] text-muted-foreground">Llegada est.</div>
+                      <div className="text-[13px] font-bold">{v.estimatedArrival}</div>
+                    </div>
+                    <div className="rounded-lg border border-border px-2 py-1.5 text-center" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="text-[9px] text-muted-foreground">Destino</div>
+                      <div className="text-[13px] font-bold">{v.destination}</div>
+                    </div>
+                  </div>
+
+                  {/* Passengers */}
+                  <div>
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
+                      Pasajeros {v.passengers.length > 0 ? `(${v.passengers.length})` : ""}
+                    </div>
+                    {v.passengers.length === 0 ? (
+                      <div className="px-3 py-2 rounded-lg border border-border text-center text-[11px] text-muted-foreground" style={{ background: 'hsl(var(--card))' }}>
+                        Solo conductor
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {v.passengers.map((p, i) => (
+                          <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{ background: TIPO_COLORS[p.tipo] }}>
+                              {p.avatar}
+                            </div>
+                            <span className="text-[11px] font-medium flex-1">{p.name}</span>
+                            <TipoBadge tipo={p.tipo} small />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
