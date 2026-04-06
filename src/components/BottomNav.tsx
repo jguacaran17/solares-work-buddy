@@ -30,7 +30,7 @@ const tabs = [
 
 const BottomNav = ({ activeTab, onTabChange, pendingCount, incidentCount }: BottomNavProps) => {
   return (
-    <div className="flex-shrink-0 border-t border-border" style={{ height: 'var(--nav-height, 60px)', background: 'hsl(var(--card))' }}>
+    <div className="flex-shrink-0" style={{ height: 'var(--nav-height, 64px)', background: 'hsl(var(--navy))' }}>
       <div className="grid grid-cols-5 h-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -39,22 +39,26 @@ const BottomNav = ({ activeTab, onTabChange, pendingCount, incidentCount }: Bott
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className="relative flex flex-col items-center justify-center gap-[3px] border-none bg-transparent cursor-pointer px-1.5 active:bg-background"
+              className="relative flex flex-col items-center justify-center gap-[3px] border-none bg-transparent cursor-pointer px-1.5 transition-colors"
+              style={{ background: isActive ? 'rgba(47,183,164,0.1)' : 'transparent' }}
             >
+              {isActive && (
+                <div className="absolute top-0 left-3 right-3 h-[3px] rounded-b-full" style={{ background: 'hsl(var(--teal))' }} />
+              )}
               <div
                 className="flex items-center justify-center w-[22px] h-[22px]"
-                style={{ color: isActive ? 'hsl(var(--g6))' : 'hsl(var(--muted-foreground))' }}
+                style={{ color: isActive ? 'hsl(var(--teal))' : 'rgba(255,255,255,0.4)' }}
               >
                 {tab.icon}
               </div>
               <span
                 className="text-[10px] font-semibold"
-                style={{ color: isActive ? 'hsl(var(--g7))' : 'hsl(var(--muted-foreground))' }}
+                style={{ color: isActive ? 'hsl(var(--teal))' : 'rgba(255,255,255,0.4)' }}
               >
                 {tab.label}
               </span>
               {badge && badge > 0 ? (
-                <span className="absolute top-1 right-2 w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center text-white" style={{ background: '#e53e3e' }}>
+                <span className="absolute top-1.5 right-2 min-w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center text-white px-1" style={{ background: '#e53e3e' }}>
                   {badge}
                 </span>
               ) : null}
