@@ -211,7 +211,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
                         onClick={(e) => { e.stopPropagation(); setWorkerStatus(worker.id, 'presente'); }}
                         className="px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
                         style={{
-                          background: isPresente ? 'hsl(var(--g8))' : 'hsl(var(--background))',
+                          background: isPresente ? 'hsl(var(--teal))' : 'hsl(var(--background))',
                           color: isPresente ? '#fff' : 'hsl(var(--muted-foreground))',
                         }}
                       >
