@@ -128,7 +128,13 @@ const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelec
               <div className="text-[14px] font-bold text-white">Notificaciones</div>
               <button onClick={() => setShowNotif(false)} className="text-white text-[12px] font-bold px-3 py-1 rounded-[20px]" style={{ background: 'rgba(255,255,255,.2)' }}>Cerrar</button>
             </div>
-            <div className="p-3 text-center text-[13px] text-muted-foreground">Sin notificaciones nuevas</div>
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+              {transfers && onUpdateTransferStatus ? (
+                <SolicitudesPanel transfers={transfers} onUpdateStatus={onUpdateTransferStatus} compact />
+              ) : (
+                <div className="p-3 text-center text-[13px] text-muted-foreground">Sin notificaciones nuevas</div>
+              )}
+            </div>
           </div>
         </div>
       )}

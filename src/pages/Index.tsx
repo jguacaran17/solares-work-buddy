@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { isToday as isTodayFn, format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { mockWorkers as initialWorkers, mockMachines as initialMachines, Worker, Machine } from "@/lib/mock-data";
+import { mockWorkers as initialWorkers, mockMachines as initialMachines, mockTransferRequests, Worker, Machine, TransferRequest, TransferStatus } from "@/lib/mock-data";
 import AppHeader from "@/components/AppHeader";
 import StepNav from "@/components/StepNav";
 import FichajeScreen from "@/components/FichajeScreen";
@@ -11,6 +11,7 @@ import EnviarScreen from "@/components/EnviarScreen";
 import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
 import BottomNav from "@/components/BottomNav";
+import SolicitudesPanel from "@/components/SolicitudesPanel";
 
 interface Assignment {
   activity: string;
@@ -54,6 +55,7 @@ const Index = () => {
   const [machines, setMachines] = useState<Machine[]>(initialMachines);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
+  const [transfers, setTransfers] = useState<TransferRequest[]>(mockTransferRequests);
 
   // Past day snapshots
   const [pastWorkers] = useState<Worker[]>(generatePastWorkers);
@@ -66,6 +68,11 @@ const Index = () => {
   const currentWorkers = isEditableDay ? workers : pastWorkers;
   const currentAssignments = isEditableDay ? assignments : pastAssignments;
   const presentes = currentWorkers.filter(w => w.status === 'presente').length;
+  const pendingTransfers = transfers.filter(t => t.status === 'pending').length;
+
+  const handleUpdateTransferStatus = (id: string, status: TransferStatus) => {
+    setTransfers(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+  };
 
   const handleSelectDate = (date: Date, isToday: boolean) => {
     setSelectedDate(date);
@@ -144,13 +151,13 @@ const Index = () => {
       case 1:
         return <FichajeScreen workers={workers} onUpdateWorkers={setWorkers} onNext={() => setActiveStep(2)} />;
       case 2:
-        return <AsignacionesScreen workers={workers} assignments={assignments} onUpdateAssignments={setAssignments} onNext={() => setActiveStep(3)} />;
+        return <AsignacionesScreen workers={workers} assignments={assignments} onUpdateAssignments={setAssignments} transfers={transfers} onNext={() => setActiveStep(3)} />;
       case 3:
-        return <HoursScreen workers={workers} assignments={assignments} hoursMap={hoursMap} onUpdateHoursMap={setHoursMap} previstasMap={previstasMap} onUpdatePrevistasMap={setPrevistasMap} productionMap={productionMap} onUpdateProductionMap={setProductionMap} onNext={() => setActiveStep(4)} />;
+        return <HoursScreen workers={workers} assignments={assignments} hoursMap={hoursMap} onUpdateHoursMap={setHoursMap} previstasMap={previstasMap} onUpdatePrevistasMap={setPrevistasMap} productionMap={productionMap} onUpdateProductionMap={setProductionMap} transfers={transfers} onNext={() => setActiveStep(4)} />;
       case 4:
         return <MaquinariaStepScreen machines={machines} onUpdateMachines={setMachines} onNext={() => setActiveStep(5)} />;
       case 5:
-        return <EnviarScreen workers={workers} assignments={assignments} hoursMap={hoursMap} productionMap={productionMap} machines={machines} />;
+        return <EnviarScreen workers={workers} assignments={assignments} hoursMap={hoursMap} productionMap={productionMap} machines={machines} transfers={transfers} />;
       default:
         return null;
     }
@@ -171,13 +178,7 @@ const Index = () => {
           </div>
         );
       case 'solicitudes':
-        return (
-          <div className="glass-card rounded-[10px] p-6 text-center">
-            <p className="text-2xl mb-2">📋</p>
-            <p className="text-sm font-bold mb-1">Solicitudes</p>
-            <p className="text-xs text-muted-foreground">Gestión de solicitudes. Próximamente.</p>
-          </div>
-        );
+        return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} />;
       case 'historial':
         return (
           <div className="glass-card rounded-[10px] p-6 text-center">
@@ -194,11 +195,13 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <AppHeader
-        notifications={1}
+        notifications={pendingTransfers}
         activeStep={bottomTab === 'parte' ? activeStep : undefined}
         headerSub={navLabels[bottomTab]}
         selectedDate={selectedDate}
         onSelectDate={handleSelectDate}
+        transfers={transfers}
+        onUpdateTransferStatus={handleUpdateTransferStatus}
       />
 
       {bottomTab === 'parte' && isEditableDay && (
@@ -240,7 +243,7 @@ const Index = () => {
             onClick={() => setActiveStep(2)}
             className="w-full py-3.5 rounded-xl border-none text-[14px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
             style={{
-              background: 'hsl(var(--g8))',
+              background: '#0f1f3a',
               color: '#fff',
               opacity: presentes > 0 ? 1 : 0.6,
             }}
@@ -254,7 +257,7 @@ const Index = () => {
         </div>
       )}
 
-      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} />
+      <BottomNav activeTab={bottomTab} onTabChange={setBottomTab} pendingCount={pendingTransfers} />
     </div>
   );
 };
