@@ -146,17 +146,29 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
                               <div className="flex flex-wrap gap-1.5">
                                 {group.items.map(w => {
                                   const ci = parseInt(w.id) % avatarColors.length;
+                                  const isTransferred = approvedTransferWorkerIds.has(w.id);
                                   return (
                                     <span
                                       key={w.id}
-                                      className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] cursor-pointer"
-                                      style={{ background: 'hsl(var(--g05))', border: '1px solid hsl(var(--g2))' }}
-                                      onClick={() => removeFromActivity(activity, w.id)}
+                                      className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px]"
+                                      style={{
+                                        background: isTransferred ? '#fee2e2' : 'hsl(var(--g05))',
+                                        border: isTransferred ? '1px solid #fca5a5' : '1px solid hsl(var(--g2))',
+                                        opacity: isTransferred ? 0.7 : 1,
+                                        cursor: isTransferred ? 'default' : 'pointer',
+                                      }}
+                                      onClick={() => !isTransferred && removeFromActivity(activity, w.id)}
                                     >
                                       <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{ background: avatarColors[ci] }}>{w.avatar}</span>
                                       {w.name.split(' ')[0]}
-                                      <TipoBadge tipo={w.tipo} />
-                                      <span className="text-destructive text-[10px]">✗</span>
+                                      {isTransferred ? (
+                                        <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none" style={{ background: '#fee2e2', color: '#991b1b' }}>TRANSFERIDO</span>
+                                      ) : (
+                                        <>
+                                          <TipoBadge tipo={w.tipo} />
+                                          <span className="text-destructive text-[10px]">✗</span>
+                                        </>
+                                      )}
                                     </span>
                                   );
                                 })}
