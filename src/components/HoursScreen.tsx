@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Worker, WorkerTipo } from "@/lib/mock-data";
+import { Worker, WorkerTipo, TransferRequest } from "@/lib/mock-data";
 
 interface Assignment {
   activity: string;
@@ -23,6 +23,7 @@ interface HoursScreenProps {
   onUpdatePrevistasMap: (fn: (prev: Record<string, number>) => Record<string, number>) => void;
   productionMap: Record<string, TaskProduction>;
   onUpdateProductionMap: (fn: (prev: Record<string, TaskProduction>) => Record<string, TaskProduction>) => void;
+  transfers: TransferRequest[];
   onNext: () => void;
 }
 
@@ -36,7 +37,9 @@ const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
   FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
 };
 
-const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, onNext }: HoursScreenProps) => {
+const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, transfers, onNext }: HoursScreenProps) => {
+  const approvedTransfers = transfers.filter(t => t.status === 'approved');
+  const transferredWorkerIds = new Set(approvedTransfers.map(t => t.workerId));
   // Initialize hours for workers that don't have a value yet (only once per new worker)
   useEffect(() => {
     const missing: Record<string, number> = {};
@@ -186,48 +189,70 @@ const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previst
                   const dev = val - DEFAULT_HOURS;
                   const ci = parseInt(w.id) % avatarColors.length;
                   const inputClass = dev > 0 ? 'over' : 'ok';
+                  const transfer = approvedTransfers.find(t => t.workerId === w.id);
+                  const isTransferred = !!transfer;
 
                   return (
-                    <div key={w.id} className="flex items-center gap-2 py-1.5" style={{ borderBottom: '1px solid #f0f0ec' }}>
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold text-white flex-shrink-0" style={{ background: avatarColors[ci] }}>
-                        {w.avatar}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1">
-                          <span className="text-[11px] font-semibold truncate">{w.name}</span>
-                          <span
-                            className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none flex-shrink-0"
-                            style={{ background: tipoBadgeStyles[w.tipo].bg, color: tipoBadgeStyles[w.tipo].color }}
-                          >
-                            {w.tipo}
-                          </span>
+                    <div key={w.id} className="py-1.5" style={{ borderBottom: '1px solid #f0f0ec', opacity: isTransferred ? 0.7 : 1 }}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold text-white flex-shrink-0" style={{ background: avatarColors[ci] }}>
+                          {w.avatar}
                         </div>
-                        <div className="text-[9px] text-muted-foreground font-mono">Entrada {w.clockIn || '07:00'}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[11px] font-semibold truncate">{w.name}</span>
+                            {isTransferred ? (
+                              <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none flex-shrink-0" style={{ background: '#fee2e2', color: '#991b1b' }}>TRANSFERIDO</span>
+                            ) : (
+                              <span
+                                className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase leading-none flex-shrink-0"
+                                style={{ background: tipoBadgeStyles[w.tipo].bg, color: tipoBadgeStyles[w.tipo].color }}
+                              >
+                                {w.tipo}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[9px] text-muted-foreground font-mono">Entrada {w.clockIn || '07:00'}</div>
+                        </div>
+                        {!isTransferred ? (
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              value={val}
+                              step="0.25"
+                              min="0"
+                              onChange={e => updateHours(w.id, e.target.value)}
+                              className="w-[48px] border border-border rounded-md px-1 py-0.5 text-[12px] font-mono font-semibold text-center outline-none"
+                              style={{
+                                background: inputClass === 'over' ? 'hsl(var(--red-bg))' : 'hsl(var(--g05))',
+                                borderColor: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g4))',
+                                color: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
+                              }}
+                            />
+                            <span
+                              className="text-[9px] font-bold font-mono px-1 py-0.5 rounded min-w-[30px] text-center"
+                              style={{
+                                background: dev > 0 ? 'hsl(var(--red-bg))' : 'hsl(var(--g1))',
+                                color: dev > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
+                              }}
+                            >
+                              {dev > 0 ? '+' : ''}{dev.toFixed(1)}h
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-right">
+                            <span className="text-[10px] font-mono font-bold">{transfer.hoursBeforeTransfer}h</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="number"
-                          value={val}
-                          step="0.25"
-                          min="0"
-                          onChange={e => updateHours(w.id, e.target.value)}
-                          className="w-[48px] border border-border rounded-md px-1 py-0.5 text-[12px] font-mono font-semibold text-center outline-none"
-                          style={{
-                            background: inputClass === 'over' ? 'hsl(var(--red-bg))' : 'hsl(var(--g05))',
-                            borderColor: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g4))',
-                            color: inputClass === 'over' ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
-                          }}
-                        />
-                        <span
-                          className="text-[9px] font-bold font-mono px-1 py-0.5 rounded min-w-[30px] text-center"
-                          style={{
-                            background: dev > 0 ? 'hsl(var(--red-bg))' : 'hsl(var(--g1))',
-                            color: dev > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--g8))',
-                          }}
-                        >
-                          {dev > 0 ? '+' : ''}{dev.toFixed(1)}h
-                        </span>
-                      </div>
+                      {/* Split hours for transferred worker */}
+                      {isTransferred && transfer && (
+                        <div className="ml-8 mt-1 flex items-center gap-2 text-[9px] font-mono text-muted-foreground">
+                          <span className="px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--g1))' }}>Antes: {transfer.hoursBeforeTransfer}h</span>
+                          <span>→</span>
+                          <span className="px-1.5 py-0.5 rounded" style={{ background: '#fef3c7' }}>Después: {transfer.hoursAfterTransfer}h ({transfer.toActivity})</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

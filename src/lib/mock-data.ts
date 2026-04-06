@@ -55,6 +55,23 @@ export interface Machine {
   endTime?: string;
 }
 
+export type TransferStatus = 'pending' | 'approved' | 'rejected';
+
+export interface TransferRequest {
+  id: string;
+  workerId: string;
+  workerName: string;
+  fromZone: string;
+  toZone: string;
+  fromActivity: string;
+  toActivity: string;
+  requestedBy: string;   // foreman name
+  requestedAt: string;   // time string
+  status: TransferStatus;
+  hoursBeforeTransfer: number;
+  hoursAfterTransfer: number;
+}
+
 export interface DailyReport {
   date: string;
   foreman: string;
@@ -176,6 +193,37 @@ export const mockMachines: Machine[] = [
   { id: 'f3', name: 'Seat Ateca', type: 'turismo', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
   { id: 'f4', name: 'Iveco Daily', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
   { id: 'f5', name: 'Citroen Jumper', type: 'furgoneta', category: 'flota', operators: [], task: '', status: 'parada', hoursToday: 0 },
+];
+
+export const mockTransferRequests: TransferRequest[] = [
+  {
+    id: 'tr1',
+    workerId: '3',
+    workerName: 'Carlos Soto',
+    fromZone: 'Zona A · Hincado',
+    toZone: 'Zona B · Estructura',
+    fromActivity: 'Hincado principal',
+    toActivity: 'Estructura',
+    requestedBy: 'Manuel Reyes',
+    requestedAt: '09:30',
+    status: 'pending',
+    hoursBeforeTransfer: 3,
+    hoursAfterTransfer: 5,
+  },
+  {
+    id: 'tr2',
+    workerId: '7',
+    workerName: 'Ernesto Blanco',
+    fromZone: 'Zona A · Micropilotes',
+    toZone: 'Zona C · Módulos',
+    fromActivity: 'Micropilotes emplantillado',
+    toActivity: 'Modulos',
+    requestedBy: 'Luis Fernandez',
+    requestedAt: '10:15',
+    status: 'pending',
+    hoursBeforeTransfer: 2.5,
+    hoursAfterTransfer: 5.5,
+  },
 ];
 
 export const mockReport: DailyReport = {

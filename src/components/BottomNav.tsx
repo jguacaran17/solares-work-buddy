@@ -1,6 +1,7 @@
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  pendingCount?: number;
 }
 
 const tabs = [
@@ -26,7 +27,7 @@ const tabs = [
   },
 ];
 
-const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
+const BottomNav = ({ activeTab, onTabChange, pendingCount }: BottomNavProps) => {
   return (
     <div className="flex-shrink-0 border-t border-border" style={{ height: 'var(--nav-height, 60px)', background: 'hsl(var(--card))' }}>
       <div className="grid grid-cols-5 h-full">
@@ -36,7 +37,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className="flex flex-col items-center justify-center gap-[3px] border-none bg-transparent cursor-pointer px-1.5 active:bg-background"
+              className="relative flex flex-col items-center justify-center gap-[3px] border-none bg-transparent cursor-pointer px-1.5 active:bg-background"
             >
               <div
                 className="flex items-center justify-center w-[22px] h-[22px]"
@@ -50,6 +51,11 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
               >
                 {tab.label}
               </span>
+              {tab.id === 'solicitudes' && pendingCount && pendingCount > 0 ? (
+                <span className="absolute top-1 right-2 w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center text-white" style={{ background: '#e53e3e' }}>
+                  {pendingCount}
+                </span>
+              ) : null}
             </button>
           );
         })}

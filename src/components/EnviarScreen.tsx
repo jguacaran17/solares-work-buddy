@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Worker, Machine, projectInfo, WorkerTipo, mockZones } from "@/lib/mock-data";
+import { Worker, Machine, projectInfo, WorkerTipo, mockZones, TransferRequest } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 
@@ -22,6 +22,7 @@ interface EnviarScreenProps {
   hoursMap: Record<string, number>;
   productionMap: Record<string, TaskProduction>;
   machines: Machine[];
+  transfers: TransferRequest[];
 }
 
 const COST_PER_HOUR = 28;
@@ -135,8 +136,10 @@ const getActivityZone = (workerIds: string[]): string => {
   return getWorkerZone(workerIds[0]);
 };
 
-const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines, transfers }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
+  const approvedTransfers = transfers.filter(t => t.status === 'approved');
+  const transferredWorkerIds = new Set(approvedTransfers.map(t => t.workerId));
   const [generalComments, setGeneralComments] = useState('');
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [expandedMachine, setExpandedMachine] = useState<string | null>(null);
@@ -309,19 +312,25 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
                     {data.workers.map((w) => {
                       const ts = TIPO_STYLES[w.tipo];
                       return (
-                        <div
-                          key={w.id}
-                          className="flex items-center gap-2 px-4 py-1.5"
-                          style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}
-                        >
-                          <span className="text-[10px] font-medium flex-1 truncate">{w.name}</span>
-                          <span
-                            className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
-                            style={{ background: ts.bg, color: ts.color }}
-                          >
-                            {ts.label}
-                          </span>
-                          <span className="text-[10px] font-mono font-bold w-[36px] text-right">{w.hours.toFixed(1)}h</span>
+                        <div key={w.id} style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}>
+                          <div className="flex items-center gap-2 px-4 py-1.5">
+                            <span className="text-[10px] font-medium flex-1 truncate">{w.name}</span>
+                            {transferredWorkerIds.has(w.id) ? (
+                              <span className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase" style={{ background: '#fee2e2', color: '#991b1b' }}>TRANSFERIDO</span>
+                            ) : (
+                              <span className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase" style={{ background: ts.bg, color: ts.color }}>{ts.label}</span>
+                            )}
+                            <span className="text-[10px] font-mono font-bold w-[36px] text-right">{w.hours.toFixed(1)}h</span>
+                          </div>
+                          {(() => {
+                            const transfer = approvedTransfers.find(t => t.workerId === w.id);
+                            if (!transfer) return null;
+                            return (
+                              <div className="px-4 pb-1.5 text-[9px] font-mono text-muted-foreground" style={{ marginLeft: 4 }}>
+                                Transferido · HH hasta traslado: {transfer.hoursBeforeTransfer}h → {transfer.toZone}
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })}
