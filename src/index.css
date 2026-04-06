@@ -65,7 +65,17 @@
     --amber-text: 36 100% 24%;
     --red-bg: 0 78% 95%;
 
-    --nav-height: 64px;
+    /* Backward compat aliases */
+    --g8: var(--navy);
+    --g7: var(--navy-light);
+    --g6: var(--teal);
+    --g4: var(--teal-light);
+    --g2: var(--teal-pale);
+    --g1: var(--teal-pale);
+    --g05: var(--teal-bg);
+    --g5: var(--muted-foreground);
+  }
+}
 
     --sidebar-background: 216 57% 15%;
     --sidebar-foreground: 0 0% 96%;
