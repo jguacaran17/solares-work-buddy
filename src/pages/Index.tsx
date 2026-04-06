@@ -12,7 +12,7 @@ import MaquinariaStepScreen from "@/components/MaquinariaStepScreen";
 import MaquinariaScreen from "@/components/MaquinariaScreen";
 import TrackingScreen from "@/components/TrackingScreen";
 import BottomNav from "@/components/BottomNav";
-import SolicitudesPanel from "@/components/SolicitudesPanel";
+import SolicitudesPanel, { type OutgoingRequest } from "@/components/SolicitudesPanel";
 
 interface Assignment {
   activity: string;
