@@ -232,7 +232,7 @@ const FichajeScreen = ({ workers, onUpdateWorkers, onNext }: FichajeScreenProps)
 
                   {/* Expanded detail panel for present workers — editable entry time */}
                   {isPresente && isExpanded && (
-                    <div className="px-3.5 pb-2.5 pt-0.5" style={{ background: 'hsl(var(--g05))' }}>
+                    <div className="px-3.5 pb-2.5 pt-0.5" style={{ background: 'hsl(var(--teal-bg))' }}>
                       <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">Hora de entrada individual</label>
                       <input
                         type="time"
