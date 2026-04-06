@@ -136,8 +136,10 @@ const getActivityZone = (workerIds: string[]): string => {
   return getWorkerZone(workerIds[0]);
 };
 
-const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines }: EnviarScreenProps) => {
+const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines, transfers }: EnviarScreenProps) => {
   const presentWorkers = workers.filter(w => w.status === 'presente');
+  const approvedTransfers = transfers.filter(t => t.status === 'approved');
+  const transferredWorkerIds = new Set(approvedTransfers.map(t => t.workerId));
   const [generalComments, setGeneralComments] = useState('');
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [expandedMachine, setExpandedMachine] = useState<string | null>(null);
