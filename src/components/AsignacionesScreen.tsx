@@ -101,8 +101,8 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
       <div className="sec-title">Asigna operarios por actividad</div>
 
       {/* Activity list */}
-      <div className="glass-card rounded-[10px] overflow-hidden mb-2.5">
-        <div className="px-3.5 py-2.5 flex items-center justify-between border-b border-border" style={{ background: '#fafaf8' }}>
+      <div className="glass-card overflow-hidden mb-2.5">
+        <div className="px-3.5 py-2.5 flex items-center justify-between border-b border-border" style={{ background: 'hsl(var(--teal-bg))' }}>
           <span className="text-[12px] font-bold">Actividades del día</span>
           <span className="text-[10px] text-muted-foreground font-mono">{totalAssigned} asignados</span>
         </div>
