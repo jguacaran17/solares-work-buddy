@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Worker, Machine, projectInfo, WorkerTipo, mockZones } from "@/lib/mock-data";
+import { Worker, Machine, projectInfo, WorkerTipo, mockZones, TransferRequest } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 
@@ -22,6 +22,7 @@ interface EnviarScreenProps {
   hoursMap: Record<string, number>;
   productionMap: Record<string, TaskProduction>;
   machines: Machine[];
+  transfers: TransferRequest[];
 }
 
 const COST_PER_HOUR = 28;

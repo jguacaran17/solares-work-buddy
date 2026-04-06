@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Worker, WorkerTipo } from "@/lib/mock-data";
+import { Worker, WorkerTipo, TransferRequest } from "@/lib/mock-data";
 
 interface Assignment {
   activity: string;
@@ -23,6 +23,7 @@ interface HoursScreenProps {
   onUpdatePrevistasMap: (fn: (prev: Record<string, number>) => Record<string, number>) => void;
   productionMap: Record<string, TaskProduction>;
   onUpdateProductionMap: (fn: (prev: Record<string, TaskProduction>) => Record<string, TaskProduction>) => void;
+  transfers: TransferRequest[];
   onNext: () => void;
 }
 
@@ -36,7 +37,9 @@ const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
   FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
 };
 
-const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, onNext }: HoursScreenProps) => {
+const HoursScreen = ({ workers, assignments, hoursMap, onUpdateHoursMap, previstasMap, onUpdatePrevistasMap, productionMap, onUpdateProductionMap, transfers, onNext }: HoursScreenProps) => {
+  const approvedTransfers = transfers.filter(t => t.status === 'approved');
+  const transferredWorkerIds = new Set(approvedTransfers.map(t => t.workerId));
   // Initialize hours for workers that don't have a value yet (only once per new worker)
   useEffect(() => {
     const missing: Record<string, number> = {};

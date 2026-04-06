@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { mockActivities, Worker, WorkerTipo } from "@/lib/mock-data";
+import { mockActivities, Worker, WorkerTipo, TransferRequest } from "@/lib/mock-data";
 
 interface Assignment {
   activity: string;
@@ -26,13 +26,15 @@ interface AsignacionesScreenProps {
   workers: Worker[];
   assignments: Assignment[];
   onUpdateAssignments: (a: Assignment[]) => void;
+  transfers: TransferRequest[];
   onNext: () => void;
 }
 
 const avatarColors = ['#2c5282', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#2fb7a4', '#d4a017', '#744210', '#1abc9c'];
 
-const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, onNext }: AsignacionesScreenProps) => {
+const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfers, onNext }: AsignacionesScreenProps) => {
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
+  const approvedTransferWorkerIds = new Set(transfers.filter(t => t.status === 'approved').map(t => t.workerId));
 
   const presentWorkers = workers.filter(w => w.status === 'presente');
   const assignedIds = new Set(assignments.flatMap(a => a.workerIds));
