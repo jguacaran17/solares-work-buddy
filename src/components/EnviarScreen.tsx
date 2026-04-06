@@ -492,16 +492,8 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines 
             Firmas
           </div>
           <div className="grid grid-cols-2 gap-4 px-3.5 py-4">
-            <div className="text-center">
-              <div className="border-b-2 border-foreground mb-1.5 h-[50px]"></div>
-              <div className="text-[10px] font-bold text-muted-foreground uppercase">Capataz</div>
-              <div className="text-[9px] text-muted-foreground">{projectInfo.foreman}</div>
-            </div>
-            <div className="text-center">
-              <div className="border-b-2 border-foreground mb-1.5 h-[50px]"></div>
-              <div className="text-[10px] font-bold text-muted-foreground uppercase">Jefe de Obra</div>
-              <div className="text-[9px] text-muted-foreground">Firma pendiente</div>
-            </div>
+            <SignatureCanvas label="Capataz" subtitle={projectInfo.foreman} />
+            <SignatureCanvas label="Jefe de Obra" subtitle="Firma pendiente" />
           </div>
         </div>
       </div>
