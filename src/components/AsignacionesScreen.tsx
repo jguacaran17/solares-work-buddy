@@ -282,7 +282,7 @@ const AsignacionesScreen = ({ workers, assignments, onUpdateAssignments, transfe
 
       {/* Unassigned */}
       <div className="sec-title mt-1">Operarios sin asignar</div>
-      <div className="glass-card rounded-[10px] p-2.5 mb-2.5">
+      <div className="glass-card p-2.5 mb-2.5">
         <div className="flex flex-wrap gap-1.5">
           {unassignedWorkers.length > 0 ? unassignedWorkers.map(w => {
             const ci = parseInt(w.id) % avatarColors.length;
