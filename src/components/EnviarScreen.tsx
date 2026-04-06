@@ -312,19 +312,25 @@ const EnviarScreen = ({ workers, assignments, hoursMap, productionMap, machines,
                     {data.workers.map((w) => {
                       const ts = TIPO_STYLES[w.tipo];
                       return (
-                        <div
-                          key={w.id}
-                          className="flex items-center gap-2 px-4 py-1.5"
-                          style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}
-                        >
-                          <span className="text-[10px] font-medium flex-1 truncate">{w.name}</span>
-                          <span
-                            className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase"
-                            style={{ background: ts.bg, color: ts.color }}
-                          >
-                            {ts.label}
-                          </span>
-                          <span className="text-[10px] font-mono font-bold w-[36px] text-right">{w.hours.toFixed(1)}h</span>
+                        <div key={w.id} style={{ borderTop: '1px solid hsl(var(--border))', marginLeft: 16 }}>
+                          <div className="flex items-center gap-2 px-4 py-1.5">
+                            <span className="text-[10px] font-medium flex-1 truncate">{w.name}</span>
+                            {transferredWorkerIds.has(w.id) ? (
+                              <span className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase" style={{ background: '#fee2e2', color: '#991b1b' }}>TRANSFERIDO</span>
+                            ) : (
+                              <span className="inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase" style={{ background: ts.bg, color: ts.color }}>{ts.label}</span>
+                            )}
+                            <span className="text-[10px] font-mono font-bold w-[36px] text-right">{w.hours.toFixed(1)}h</span>
+                          </div>
+                          {(() => {
+                            const transfer = approvedTransfers.find(t => t.workerId === w.id);
+                            if (!transfer) return null;
+                            return (
+                              <div className="px-4 pb-1.5 text-[9px] font-mono text-muted-foreground" style={{ marginLeft: 4 }}>
+                                Transferido · HH hasta traslado: {transfer.hoursBeforeTransfer}h → {transfer.toZone}
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })}
