@@ -57,11 +57,11 @@ const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isEditableDay, setIsEditableDay] = useState(true);
   const [transfers, setTransfers] = useState<TransferRequest[]>(mockTransferRequests);
-  const [outgoingRequests, setOutgoingRequests] = useState<{ id: string; workerName: string; toZone: string; toActivity: string; requestedAt: string; status: TransferStatus }[]>([
+  const [outgoingRequests, setOutgoingRequests] = useState<OutgoingRequest[]>([
     { id: 'out1', workerName: 'Pedro Ruiz', toZone: 'Zona B · Estructura', toActivity: 'Estructura', requestedAt: '08:45', status: 'pending' },
   ]);
 
-  const handleAddOutgoing = (req: { id: string; workerName: string; toZone: string; toActivity: string; requestedAt: string; status: TransferStatus }) => {
+  const handleAddOutgoing = (req: OutgoingRequest) => {
     setOutgoingRequests(prev => [req, ...prev]);
   };
 
