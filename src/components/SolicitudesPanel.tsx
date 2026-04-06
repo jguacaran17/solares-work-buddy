@@ -15,7 +15,7 @@ const statusStyles: Record<TransferStatus, { bg: string; color: string; label: s
   rejected: { bg: '#fee2e2', color: '#991b1b', label: 'Rechazado' },
 };
 
-const mockOutgoing: { id: string; workerName: string; toZone: string; toActivity: string; requestedAt: string; status: TransferStatus }[] = [
+const initialOutgoing: OutgoingRequest[] = [
   { id: 'out1', workerName: 'Pedro Ruiz', toZone: 'Zona B · Estructura', toActivity: 'Estructura', requestedAt: '08:45', status: 'pending' },
 ];
 
