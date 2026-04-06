@@ -2,9 +2,9 @@ import { useState } from "react";
 import { mockZones, Worker, FaltaMotivo, WorkerTipo } from "@/lib/mock-data";
 
 const tipoBadgeStyles: Record<WorkerTipo, { bg: string; color: string }> = {
-  DESP: { bg: '#fef3c7', color: '#92400e' },
-  LOCAL: { bg: '#ccfbf1', color: '#115e59' },
-  FIELD: { bg: '#dbeafe', color: '#1e3a5f' },
+  DESP: { bg: 'hsl(40,96%,89%)', color: 'hsl(28,67%,31%)' },
+  LOCAL: { bg: 'hsl(168,76%,90%)', color: 'hsl(173,60%,23%)' },
+  FIELD: { bg: 'hsl(214,95%,93%)', color: 'hsl(216,57%,24%)' },
 };
 
 const TipoBadge = ({ tipo }: { tipo: WorkerTipo }) => (
