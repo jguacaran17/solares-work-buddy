@@ -26,24 +26,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       style={{ background: "#0f1f3a" }}
     >
       <div className="w-full max-w-[340px] flex flex-col items-center">
-        {/* Maracof logo — prominent */}
-        <img src={maracofLogo} alt="Maracof" className="h-16 mb-5 object-contain" />
-
-        {/* Divider line */}
-        <div className="w-16 h-px mb-5" style={{ background: 'rgba(255,255,255,0.15)' }} />
-
-        {/* Adapta Build branding */}
-        <img src={adaptaLogo} alt="Adapta Logo" className="w-10 h-10 mb-2 opacity-70" />
-        <div className="text-[11px] mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-          Powered by
-        </div>
-        <div className="text-[16px] font-bold tracking-tight mb-1">
-          <span className="text-white">Adapta</span>
-          <span style={{ color: "#007C58" }}> Build</span>
-        </div>
+        {/* Maracof logo — large & prominent */}
+        <img src={maracofLogo} alt="Maracof" className="h-24 mb-3 object-contain" />
 
         {/* Subtitle */}
-        <div className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>
+        <div className="text-[14px] font-semibold mb-8" style={{ color: "rgba(255,255,255,0.6)" }}>
           ParteDigital · PSFV San Pedro
         </div>
 
@@ -97,8 +84,20 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           </button>
         </form>
 
-        <div className="mt-6 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-          © 2026 Adapta Service Construction
+        {/* Powered by Adapta Build — subtle platform credit */}
+        <div className="mt-8 flex flex-col items-center gap-1.5">
+          <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Powered by
+          </div>
+          <div className="flex items-center gap-1.5">
+            <img src={adaptaLogo} alt="Adapta" className="w-5 h-5 opacity-50" />
+            <span className="text-[12px] font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Adapta<span style={{ color: "rgba(0,124,88,0.6)" }}> Build</span>
+            </span>
+          </div>
+          <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>
+            © 2026 Adapta Service Construction
+          </div>
         </div>
       </div>
     </div>
