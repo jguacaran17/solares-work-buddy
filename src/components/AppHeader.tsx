@@ -104,6 +104,7 @@ const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelec
               <div className="text-[13px] font-semibold text-white">PSFV San Pedro</div>
               <div className="text-[11px] mt-px" style={{ color: 'hsl(var(--teal-pale))' }}>{sub}</div>
             </div>
+          </div>
           <button onClick={() => setShowHistory(true)} className="text-right active:opacity-70 transition-opacity">
             <div className="text-[11px] font-mono" style={{ color: 'hsl(var(--teal-pale))' }}>
               {currentFormatted}<br />
