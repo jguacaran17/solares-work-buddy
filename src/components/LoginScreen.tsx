@@ -1,5 +1,6 @@
 import { useState } from "react";
 import adaptaLogo from "@/assets/adapta-logo.png";
+import maracofLogo from "@/assets/logo_maracof.png";
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -25,11 +26,18 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       style={{ background: "#0f1f3a" }}
     >
       <div className="w-full max-w-[340px] flex flex-col items-center">
-        {/* Logo */}
-        <img src={adaptaLogo} alt="Adapta Logo" className="w-20 h-20 mb-4" />
+        {/* Maracof logo — prominent */}
+        <img src={maracofLogo} alt="Maracof" className="h-16 mb-5 object-contain" />
 
-        {/* Brand */}
-        <div className="text-[28px] font-bold tracking-tight mb-1">
+        {/* Divider line */}
+        <div className="w-16 h-px mb-5" style={{ background: 'rgba(255,255,255,0.15)' }} />
+
+        {/* Adapta Build branding */}
+        <img src={adaptaLogo} alt="Adapta Logo" className="w-10 h-10 mb-2 opacity-70" />
+        <div className="text-[11px] mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+          Powered by
+        </div>
+        <div className="text-[16px] font-bold tracking-tight mb-1">
           <span className="text-white">Adapta</span>
           <span style={{ color: "#007C58" }}> Build</span>
         </div>
