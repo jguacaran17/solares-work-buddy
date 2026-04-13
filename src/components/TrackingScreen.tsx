@@ -26,14 +26,14 @@ interface Vehicle {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  "En obra": "#2fb7a4",
+  "En obra": "#007C58",
   "En ruta": "#0f1f3a",
   "Libre": "#888888",
 };
 
 const TIPO_COLORS: Record<WorkerTipo, string> = {
   DESP: "#d97706",
-  LOCAL: "#2fb7a4",
+  LOCAL: "#007C58",
   FIELD: "#0f1f3a",
 };
 

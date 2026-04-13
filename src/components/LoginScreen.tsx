@@ -53,7 +53,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 border: "1px solid rgba(255,255,255,0.15)",
                 color: "#fff",
               }}
-              onFocus={e => e.target.style.borderColor = "#2fb7a4"}
+              onFocus={e => e.target.style.borderColor = "#007C58"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
             />
           </div>
@@ -69,7 +69,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 border: "1px solid rgba(255,255,255,0.15)",
                 color: "#fff",
               }}
-              onFocus={e => e.target.style.borderColor = "#2fb7a4"}
+              onFocus={e => e.target.style.borderColor = "#007C58"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
             />
           </div>
@@ -83,7 +83,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           <button
             type="submit"
             className="w-full py-3.5 rounded-lg text-[14px] font-bold border-none cursor-pointer transition-opacity hover:opacity-90"
-            style={{ background: "#2fb7a4", color: "#fff" }}
+            style={{ background: "#007C58", color: "#fff" }}
           >
             Iniciar sesión
           </button>
