@@ -31,7 +31,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         {/* Brand */}
         <div className="text-[28px] font-bold tracking-tight mb-1">
           <span className="text-white">Adapta</span>
-          <span style={{ color: "#2fb7a4" }}> Build</span>
+          <span style={{ color: "#007C58" }}> Build</span>
         </div>
 
         {/* Subtitle */}
