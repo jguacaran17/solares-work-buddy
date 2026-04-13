@@ -157,7 +157,7 @@ const RendimientosScreen = ({ workers, assignments, hoursMap, productionMap, mac
         isEmpty: d.prod === 0,
       }));
 
-      // Add today's data from parte
+      // Add today's data from parte (or fallback)
       let todayProd = 0;
       let todayHH = 0;
       assignments.forEach(a => {
@@ -169,14 +169,22 @@ const RendimientosScreen = ({ workers, assignments, hoursMap, productionMap, mac
         }
       });
 
+      // Use fallback if no real data from parte
+      if (todayProd === 0 && todayHH === 0 && TODAY_FALLBACK[g.activity]) {
+        const fb = TODAY_FALLBACK[g.activity];
+        todayProd = fb.prod;
+        todayHH = fb.hh;
+      }
+
       const todayRend = todayProd > 0 ? +(todayHH / todayProd).toFixed(2) : 0;
+      const todayEmpty = todayProd === 0 && todayHH === 0;
       days.push({
         date: todayLabel,
         prod: todayProd,
         hh: todayHH,
         rend: todayRend,
         estudio: g.estudio,
-        isEmpty: todayProd === 0 && todayHH === 0,
+        isEmpty: todayEmpty,
       });
 
       // Compute totals from non-empty days
