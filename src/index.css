@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 216 57% 15%;
 
-    --primary: 168 55% 42%;          /* #2fb7a4 */
+    --primary: 160 100% 24%;         /* #007C58 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 216 57% 15%;        /* #0f1f3a */
@@ -32,7 +32,7 @@
 
     --border: 216 15% 90%;
     --input: 216 15% 90%;
-    --ring: 168 55% 42%;
+    --ring: 160 100% 24%;
 
     --radius: 1rem;                  /* 16px */
 
@@ -48,16 +48,16 @@
     /* Brand tokens */
     --navy: 216 57% 15%;             /* #0f1f3a */
     --navy-light: 216 43% 20%;      /* #1a2d4a */
-    --teal: 168 55% 42%;            /* #2fb7a4 */
-    --teal-light: 168 63% 55%;     /* #3dd4bf */
-    --teal-pale: 168 60% 90%;      /* #d4f8f4 */
-    --teal-bg: 168 50% 96%;        /* #eefbf9 */
+    --teal: 160 100% 24%;           /* #007C58 */
+    --teal-light: 160 80% 32%;     /* #0a9966 */
+    --teal-pale: 160 60% 90%;      /* #d4f5e9 */
+    --teal-bg: 160 50% 96%;        /* #eefbf5 */
 
     /* Badge tokens */
     --badge-desp-bg: 40 96% 89%;
     --badge-desp-text: 28 67% 31%;
-    --badge-loc-bg: 168 76% 90%;
-    --badge-loc-text: 173 60% 23%;
+    --badge-loc-bg: 160 76% 90%;
+    --badge-loc-text: 160 80% 20%;
     --badge-fld-bg: 214 95% 93%;
     --badge-fld-text: 216 57% 24%;
 
@@ -79,12 +79,12 @@
 
     --sidebar-background: 216 57% 15%;
     --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 168 55% 42%;
+    --sidebar-primary: 160 100% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 10% 18%;
     --sidebar-accent-foreground: 0 0% 96%;
     --sidebar-border: 220 10% 25%;
-    --sidebar-ring: 168 55% 42%;
+    --sidebar-ring: 160 100% 24%;
   }
 }
 
@@ -225,11 +225,11 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 2px 8px rgba(47, 183, 164, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 124, 88, 0.3);
     transition: all 0.15s ease;
   }
 
-  .sbtn:active { background: hsl(168 55% 36%); transform: scale(0.98); }
+  .sbtn:active { background: hsl(160 100% 20%); transform: scale(0.98); }
 
   .toast-custom {
     position: fixed;
