@@ -192,7 +192,7 @@ const Index = () => {
       case 'solicitudes':
         return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} outgoingRequests={outgoingRequests} onAddOutgoing={handleAddOutgoing} />;
       case 'rendimientos':
-        return <RendimientosScreen />;
+        return <RendimientosScreen workers={workers} assignments={assignments} hoursMap={hoursMap} productionMap={productionMap} machines={machines} />;
       case 'historial':
         return <HistorialScreen />;
       default:

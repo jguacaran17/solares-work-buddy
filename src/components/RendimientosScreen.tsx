@@ -72,8 +72,8 @@ const RendimientosScreen = ({ workers, assignments, hoursMap, productionMap, mac
       .filter(m => m.category === 'maquinaria')
       .map(m => {
         const hh = new Array(6).fill(0);
-        hh[0] = m.hoursUsed || 0;
-        const status = (m.hoursUsed || 0) > 0 ? 'OK' : 'STOP';
+        hh[0] = m.hoursToday || 0;
+        const status = (m.hoursToday || 0) > 0 ? 'OK' : 'STOP';
         return { name: m.name, hh, status };
       });
   }, [machines]);
