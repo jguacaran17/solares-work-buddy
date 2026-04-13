@@ -373,59 +373,64 @@ const RendimientosScreen = ({ workers, assignments, hoursMap, productionMap, mac
               return (
                 <div key={g.activity} className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(var(--border))' }}>
                   <div className="py-2 px-3 font-bold text-white text-[12px]" style={{ background: BRAND }}>{g.activity}</div>
-                  <table className="w-full text-[11px] min-w-[440px]">
-                    <thead>
-                      <tr style={{ background: '#f0f0f0' }}>
-                        <th className="text-left py-1.5 px-2 font-bold">Fecha</th>
-                        <th className="text-center py-1.5 px-1.5 font-bold">PROD Ud</th>
-                        <th className="text-center py-1.5 px-1.5 font-bold">REND HH/Ud</th>
-                        <th className="text-center py-1.5 px-1.5 font-bold">ESTUDIO HH/Ud</th>
-                        <th className="text-center py-1.5 px-2 font-bold">DESVÍO HH/Ud</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {/* TOTAL row */}
-                      <tr style={{ background: '#E8F5E9', fontWeight: 700 }}>
-                        <td className="py-2 px-2">TOTAL</td>
-                        <td className="text-center py-2 px-1.5 font-mono">{g.totalProd}</td>
-                        <td className="text-center py-2 px-1.5 font-mono">{g.avgRend}</td>
-                        <td className="text-center py-2 px-1.5 font-mono">{g.estudio}</td>
-                        <td className="text-center py-2 px-2">
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold" style={desvioStyle(totalDesvio)}>
-                            {totalDesvio > 0 ? '+' : ''}{totalDesvio}
-                          </span>
-                        </td>
-                      </tr>
-                      {/* Day rows */}
-                      {g.days.map((d, i) => {
-                        if (d.isEmpty) {
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-[11px]" style={{ minWidth: 520 }}>
+                      <thead>
+                        <tr style={{ background: '#f0f0f0' }}>
+                          <th className="text-left py-1.5 px-2 font-bold whitespace-nowrap sticky left-0 z-10" style={{ background: '#f0f0f0' }}>Fecha</th>
+                          <th className="text-center py-1.5 px-2 font-bold whitespace-nowrap">PROD Ud</th>
+                          <th className="text-center py-1.5 px-2 font-bold whitespace-nowrap">REND HH/Ud</th>
+                          <th className="text-center py-1.5 px-2 font-bold whitespace-nowrap">ESTUDIO HH/Ud</th>
+                          <th className="text-center py-1.5 px-2 font-bold whitespace-nowrap">DESVÍO HH/Ud</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* TOTAL row */}
+                        <tr style={{ background: '#E8F5E9', fontWeight: 700 }}>
+                          <td className="py-2 px-2 sticky left-0 z-10" style={{ background: '#E8F5E9' }}>TOTAL</td>
+                          <td className="text-center py-2 px-2 font-mono">{g.totalProd}</td>
+                          <td className="text-center py-2 px-2 font-mono">{g.avgRend}</td>
+                          <td className="text-center py-2 px-2 font-mono">{g.estudio}</td>
+                          <td className="text-center py-2 px-2">
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap" style={desvioStyle(totalDesvio)}>
+                              {totalDesvio > 0 ? '+' : ''}{totalDesvio}
+                            </span>
+                          </td>
+                        </tr>
+                        {/* Day rows */}
+                        {g.days.map((d, i) => {
+                          const bgColor = i % 2 === 0 ? '#fff' : '#fafafa';
+                          if (d.isEmpty) {
+                            return (
+                              <tr key={d.date} style={{ background: bgColor }}>
+                                <td className="py-1.5 px-2 font-mono sticky left-0 z-10" style={{ background: bgColor }}>{d.date}</td>
+                                <td className="text-center py-1.5 px-2 font-mono text-muted-foreground">—</td>
+                                <td className="text-center py-1.5 px-2 font-mono text-muted-foreground">—</td>
+                                <td className="text-center py-1.5 px-2 font-mono text-muted-foreground">—</td>
+                                <td className="text-center py-1.5 px-2 font-mono text-muted-foreground">—</td>
+                              </tr>
+                            );
+                          }
+                          const desvio = +(d.rend - d.estudio).toFixed(2);
                           return (
-                            <tr key={d.date} style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                              <td className="py-1.5 px-2 font-mono">{d.date}</td>
-                              <td className="text-center py-1.5 px-1.5 font-mono text-muted-foreground">—</td>
-                              <td className="text-center py-1.5 px-1.5 font-mono text-muted-foreground">—</td>
-                              <td className="text-center py-1.5 px-1.5 font-mono text-muted-foreground">—</td>
-                              <td className="text-center py-1.5 px-2 font-mono text-muted-foreground">—</td>
+                            <tr key={d.date} style={{ background: bgColor }}>
+                              <td className="py-1.5 px-2 font-mono sticky left-0 z-10" style={{ background: bgColor }}>
+                                {d.date === todayLabel ? `${d.date} ★` : d.date}
+                              </td>
+                              <td className="text-center py-1.5 px-2 font-mono">{d.prod}</td>
+                              <td className="text-center py-1.5 px-2 font-mono">{d.rend}</td>
+                              <td className="text-center py-1.5 px-2 font-mono">{d.estudio}</td>
+                              <td className="text-center py-1.5 px-2">
+                                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap" style={desvioStyle(desvio)}>
+                                  {desvio > 0 ? '+' : ''}{desvio}
+                                </span>
+                              </td>
                             </tr>
                           );
-                        }
-                        const desvio = +(d.rend - d.estudio).toFixed(2);
-                        return (
-                          <tr key={d.date} style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                            <td className="py-1.5 px-2 font-mono">{d.date === todayLabel ? `${d.date} ★` : d.date}</td>
-                            <td className="text-center py-1.5 px-1.5 font-mono">{d.prod}</td>
-                            <td className="text-center py-1.5 px-1.5 font-mono">{d.rend}</td>
-                            <td className="text-center py-1.5 px-1.5 font-mono">{d.estudio}</td>
-                            <td className="text-center py-1.5 px-2">
-                              <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold" style={desvioStyle(desvio)}>
-                                {desvio > 0 ? '+' : ''}{desvio}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               );
             })}
