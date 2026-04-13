@@ -35,6 +35,11 @@ const ESTUDIO_MAP: Record<string, number> = {
 };
 
 // Historical baseline data from the client's Excel report
+// Today's fallback data when no real-time parte data exists
+const TODAY_FALLBACK: Record<string, { prod: number; hh: number; rend: number }> = {
+  'HINCADO': { prod: 3, hh: 64, rend: 21.33 },
+};
+
 const HIST_PRODUCCION = [
   {
     activity: 'HINCADO',
