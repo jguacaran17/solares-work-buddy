@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TransferRequest, TransferStatus } from "@/lib/mock-data";
+import maracofLogo from "@/assets/logo_maracof.png";
 import SolicitudesPanel from "@/components/SolicitudesPanel";
 import { format, subDays, isToday as isTodayFn } from "date-fns";
 import { es } from "date-fns/locale";
@@ -97,9 +98,12 @@ const AppHeader = ({ notifications, activeStep, headerSub, selectedDate, onSelec
 
         {/* Project box */}
         <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.06)' }}>
-          <div>
-            <div className="text-[13px] font-semibold text-white">PSFV San Pedro</div>
-            <div className="text-[11px] mt-px" style={{ color: 'hsl(var(--teal-pale))' }}>{sub}</div>
+          <div className="flex items-center gap-2">
+            <img src={maracofLogo} alt="Maracof" className="h-[22px] w-auto rounded-sm" />
+            <div>
+              <div className="text-[13px] font-semibold text-white">PSFV San Pedro</div>
+              <div className="text-[11px] mt-px" style={{ color: 'hsl(var(--teal-pale))' }}>{sub}</div>
+            </div>
           </div>
           <button onClick={() => setShowHistory(true)} className="text-right active:opacity-70 transition-opacity">
             <div className="text-[11px] font-mono" style={{ color: 'hsl(var(--teal-pale))' }}>

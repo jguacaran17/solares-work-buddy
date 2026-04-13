@@ -16,6 +16,7 @@ import BottomNav from "@/components/BottomNav";
 import SolicitudesPanel, { type OutgoingRequest } from "@/components/SolicitudesPanel";
 import HistorialScreen from "@/components/HistorialScreen";
 import LoginScreen from "@/components/LoginScreen";
+import RendimientosScreen from "@/components/RendimientosScreen";
 
 interface Assignment {
   activity: string;
@@ -34,6 +35,7 @@ const navLabels: Record<string, string> = {
   parte: 'Pepe Cabrerizo · Capataz',
   incidencias: 'Incidencias de maquinaria',
   tracking: 'Tracking GPS · PSFV San Pedro',
+  rendimientos: 'Rendimientos · PSFV San Pedro',
   solicitudes: 'Solicitudes de operarios',
   historial: 'Historial de partes',
 };
@@ -189,6 +191,8 @@ const Index = () => {
         return <TrackingScreen visible={bottomTab === 'tracking'} />;
       case 'solicitudes':
         return <SolicitudesPanel transfers={transfers} onUpdateStatus={handleUpdateTransferStatus} outgoingRequests={outgoingRequests} onAddOutgoing={handleAddOutgoing} />;
+      case 'rendimientos':
+        return <RendimientosScreen />;
       case 'historial':
         return <HistorialScreen />;
       default:
