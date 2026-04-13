@@ -31,7 +31,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         {/* Brand */}
         <div className="text-[28px] font-bold tracking-tight mb-1">
           <span className="text-white">Adapta</span>
-          <span style={{ color: "#2fb7a4" }}> Build</span>
+          <span style={{ color: "#007C58" }}> Build</span>
         </div>
 
         {/* Subtitle */}
@@ -53,7 +53,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 border: "1px solid rgba(255,255,255,0.15)",
                 color: "#fff",
               }}
-              onFocus={e => e.target.style.borderColor = "#2fb7a4"}
+              onFocus={e => e.target.style.borderColor = "#007C58"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
             />
           </div>
@@ -69,7 +69,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 border: "1px solid rgba(255,255,255,0.15)",
                 color: "#fff",
               }}
-              onFocus={e => e.target.style.borderColor = "#2fb7a4"}
+              onFocus={e => e.target.style.borderColor = "#007C58"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
             />
           </div>
@@ -83,7 +83,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           <button
             type="submit"
             className="w-full py-3.5 rounded-lg text-[14px] font-bold border-none cursor-pointer transition-opacity hover:opacity-90"
-            style={{ background: "#2fb7a4", color: "#fff" }}
+            style={{ background: "#007C58", color: "#fff" }}
           >
             Iniciar sesión
           </button>
